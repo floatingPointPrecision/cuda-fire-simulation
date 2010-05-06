@@ -1,0 +1,3 @@
+LIBRARY	"coarse-particle-engine"
+EXPORTS
+	TestHelloCUDA
