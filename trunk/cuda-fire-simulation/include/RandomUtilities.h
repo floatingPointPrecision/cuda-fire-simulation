@@ -26,9 +26,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 /**
-@file CoarseParticleVisualization.h
+@file RandomUtilities.h
 */
 
 #pragma once
+namespace cufire
+{
 
-int RunCoarseParticleVisualization(int argc, char* argv[]);
+float randomNormalizedFloat()
+{
+  return (float(rand()) / RAND_MAX);
+}
+
+float randomFloatInRange(float minVal, float maxVal)
+{
+  float range = maxVal - minVal;
+  return minVal + randomNormalizedFloat() * range;
+}
+
+}

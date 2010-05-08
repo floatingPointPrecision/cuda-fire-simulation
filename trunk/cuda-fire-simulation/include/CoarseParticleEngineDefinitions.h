@@ -26,9 +26,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 /**
-@file CoarseParticleVisualization.h
+@file CoarseParticleEngineDefinitions.h
+@brief Defines for the coarse-particle-engine project
 */
 
-#pragma once
 
-int RunCoarseParticleVisualization(int argc, char* argv[]);
+#define DLLEXPORT __declspec(dllexport) ///< Allows easier specification of what to export to the dll
+
+
+//#define P_POS 0 ///< position element of a Particle tuple containing 4 floats
+//#define P_X_VEL 1 ///< x velocuity of a Particle tuple
+//#define P_Y_VEL 2 ///< y velocity of a Particle tuple
+//#define P_Z_VEL 3 ///< z velocity of a Particle tuple
+//#define P_FUEL 4 ///< fuel element of a Particle tuple
+//#define P_RADIUS 5 ///< radius element of a Particle tuple
+//#define P_AGE 6 ///< age element of a Particle tuple
+//#define P_MASS 7 ///< mass element of a Particle tuple
+//#define P_IMPULSE 8 ///< impulse element of a Particle tuple
+
+#define MAX_NUMBER_COARSE_PARTICLES 4096 ///< maximum number of coarse particles
