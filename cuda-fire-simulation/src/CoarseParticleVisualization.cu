@@ -138,6 +138,12 @@ bool initGL(int argc, char* argv[])
   return true;
 }
 
+void timer(int value)
+{
+  display();
+  glutTimerFunc(1000/60.f,timer,value);
+}
+
 int RunCoarseParticleVisualization(int argc, char* argv[])
 {
   // First initialize OpenGL context, so we can properly set the GL for CUDA.
@@ -151,18 +157,20 @@ int RunCoarseParticleVisualization(int argc, char* argv[])
   // register callbacks
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
+  glutTimerFunc(1000/60.f, timer, 1);
 
   // add some random particles
   srand ( time(NULL) );
   pEngine = new CoarseParticleEngine();
   float2 xRange = make_float2(-5, 5);
   float2 yRange = make_float2(-5, 5);
-  float2 zRange = make_float2(-5, 5);
-  pEngine->addRandomParticle(xRange,yRange,zRange,1024);
+  float2 zRange = make_float2(0, 5);
+  pEngine->addRandomParticle(xRange,yRange,zRange,1<<17);
   pEngine->flushParticles();
 
 
   // start rendering mainloop
+
   glutMainLoop();
 
   return 0;

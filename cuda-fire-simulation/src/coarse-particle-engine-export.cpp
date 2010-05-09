@@ -1,5 +1,8 @@
-/*******************************************************************************
-Copyright (c) 2010, Steve Lesser
+/**
+@file coarse-particle-engine-export.cpp
+
+@note Copyright (c) 2010, Steve Lesser
+
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
@@ -23,25 +26,25 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
-
-/**
-@file CoarseParticleEngineDefinitions.h
-@brief Defines for the coarse-particle-engine project
 */
 
+#include "stdafx.h"
+#include "CoarseParticleEngine.h"
 
-#define DLLEXPORT __declspec(dllexport) ///< Allows easier specification of what to export to the dll
 
+#ifdef _MANAGED
+#pragma managed(push, off)
+#endif
 
-//#define P_POS 0 ///< position element of a Particle tuple containing 4 floats
-//#define P_X_VEL 1 ///< x velocuity of a Particle tuple
-//#define P_Y_VEL 2 ///< y velocity of a Particle tuple
-//#define P_Z_VEL 3 ///< z velocity of a Particle tuple
-//#define P_FUEL 4 ///< fuel element of a Particle tuple
-//#define P_RADIUS 5 ///< radius element of a Particle tuple
-//#define P_AGE 6 ///< age element of a Particle tuple
-//#define P_MASS 7 ///< mass element of a Particle tuple
-//#define P_IMPULSE 8 ///< impulse element of a Particle tuple
+BOOL APIENTRY DllMain( HMODULE hModule,
+                       DWORD  ul_reason_for_call,
+                       LPVOID lpReserved
+					 )
+{
+    return TRUE;
+}
 
-#define MAX_NUMBER_COARSE_PARTICLES 1<<18 ///< maximum number of coarse particles
+#ifdef _MANAGED
+#pragma managed(pop)
+#endif
+
