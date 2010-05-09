@@ -48,35 +48,43 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace cufire
 {
+  // typedefs
 
+  /**
+  * device pointer float4
+  */
+  typedef thrust::device_ptr<float4> DevPtrFloat4;
   /**
   * float4 iterator for device vectors.
   */
-  typedef thrust::device_vector<float4>::iterator DFloat4Itr;
+  typedef thrust::device_vector<float4>::iterator DevVecFloat4Itr;
   /**
   * float iterator for device vectors.
   */
-  typedef thrust::device_vector<float>::iterator DFloatItr;
+  typedef thrust::device_vector<float>::iterator DevVecFloatItr;
   /**
   * Particle iterator tuple. 
   * Tuple containing all the elements of a particle to better coalescing. Elements include:
   * (position.x, position.y, position.z, age), (fuel, radius, mass, impulse), velocity.x, velocity.y, velocity.z
   */
-  typedef thrust::tuple<DFloat4Itr,DFloatItr,DFloatItr,DFloatItr> ParticleItrTuple;
+  typedef thrust::tuple<DevPtrFloat4,DevVecFloat4Itr,DevVecFloatItr,DevVecFloatItr,DevVecFloatItr> ParticleItrTuple;
+  /**
+  * Particle tuple. 
+  * Tuple containing all the elements of a particle to better coalescing. Elements include:
+  * (position.x, position.y, position.z, age), velocity.x, velocity.y, velocity.z, fuel, radius, mass, impulse
+  */
+  typedef thrust::tuple<float4,float4,float,float,float> ParticleTuple;
   /**
   * Particle iterator.
   */
-  typedef thrust::zip_iterator<ParticleItrTuple> ParticleItr;
-  /**
-  * device pointer float4
-  */
-  typedef thrust::device_ptr<float4> DFloat4Ptr;
+  typedef thrust::zip_iterator<ParticleItrTuple> ParticleZipItr;
+
   /**
   *  Coarse Particle Engine. Manager for the coarse particle simulation of broad fuel movement.
   */
-
   class CoarseParticleEngine
-  {
+  {    
+
     // public methods
   public:
     /**
@@ -161,15 +169,15 @@ namespace cufire
     thrust::host_vector<float> m_hostZVelocities; ///< particle z velocities host copy
 
     GLuint m_positionsAgeVBO; ///< OpenGL vertex buffer object of the positionAge float4 array
-    DFloat4Ptr m_positionsAgeRaw; ///< temporary raw float4 pointer to OpenGL positionsAge VBO
+    DevPtrFloat4 m_positionsAgeRaw; ///< temporary raw float4 pointer to OpenGL positionsAge VBO
     thrust::device_vector<float4> m_devicePositionAge; ///< particle device copy of position x, y, z, age
     thrust::device_vector<float4> m_deviceFuelRadiusMassImpulse; ///< particle device copy of fuel, radius, mass, impulse
     thrust::device_vector<float> m_deviceXVelocities; ///< particle x velocities device copy
     thrust::device_vector<float> m_deviceYVelocities; ///< particle y velocities device copy
     thrust::device_vector<float> m_deviceZVelocities; ///< particle z velocities device copy
 
-    ParticleItr m_particleItrBegin; ///< beginning of particle zip_iterator
-    ParticleItr m_particleItrEnd; ///< end of particle zip_iterator
+    ParticleZipItr m_particleItrBegin; ///< beginning of particle zip_iterator
+    ParticleZipItr m_particleItrEnd; ///< end of particle zip_iterator
   };
 
 }
