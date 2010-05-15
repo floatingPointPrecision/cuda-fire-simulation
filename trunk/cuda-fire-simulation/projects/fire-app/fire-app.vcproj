@@ -73,7 +73,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cudart.lib cutil64D.lib glew64.lib glut64.lib coarse-particle-engine_d.lib"
+				AdditionalDependencies="cudart.lib cutil64D.lib glew64.lib glut64.lib coarse-particle-engine_d.lib xml-parser_d.lib"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;$(CUDA_LIB_PATH)&quot;;&quot;$(NVSDKCOMPUTE_ROOT)\C\common\lib&quot;;..\..\lib"
@@ -155,7 +155,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cudart.lib cutil64D.lib glew64.lib glut64.lib coarse-particle-engine.lib"
+				AdditionalDependencies="cudart.lib cutil64D.lib glew64.lib glut64.lib coarse-particle-engine.lib xml-parser.lib"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;$(CUDA_LIB_PATH)&quot;;&quot;$(NVSDKCOMPUTE_ROOT)\C\common\lib&quot;;..\..\lib"
@@ -375,6 +375,10 @@
 		</Filter>
 		<File
 			RelativePath="..\..\src\main.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ParticleSettings.xml"
 			>
 		</File>
 	</Files>
