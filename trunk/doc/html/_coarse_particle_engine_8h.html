@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>CUFIRE: C:/Users/steve/Programs/CUFIRE/cuda-fire-simulation/include/CoarseParticleEngine.h File Reference</title>
+<title>CUFIRE: CoarseParticleEngine.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javaScript" src="search/search.js"></script>
@@ -38,12 +38,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div class="tabs">
     <ul>
       <li><a href="files.html"><span>File&nbsp;List</span></a></li>
-      <li><a href="globals.html"><span>File&nbsp;Members</span></a></li>
     </ul>
   </div>
 </div>
 <div class="contents">
-<h1>C:/Users/steve/Programs/CUFIRE/cuda-fire-simulation/include/CoarseParticleEngine.h File Reference</h1>
+<h1>CoarseParticleEngine.h File Reference</h1>
 <p>Defines the CoarseParticleEngine class used for coarse particle simulation.  
 <a href="#_details">More...</a></p>
 <code>#include &lt;vector&gt;</code><br/>
@@ -70,26 +69,27 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr><td class="memItemLeft" align="right" valign="top">class &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html">cufire::CoarseParticleEngine</a></td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Coarse Particle Engine.  <a href="classcufire_1_1_coarse_particle_engine.html#_details">More...</a><br/></td></tr>
 <tr><td colspan="2"><h2>Typedefs</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aad0532a70636ebc34fcc0bf5dd4036ea"></a><!-- doxytag: member="CoarseParticleEngine.h::DFloat4Itr" ref="aad0532a70636ebc34fcc0bf5dd4036ea" args="" -->
-typedef thrust::device_vector<br class="typebreak"/>
-&lt; float4 &gt;::iterator&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecufire.html#aad0532a70636ebc34fcc0bf5dd4036ea">cufire::DFloat4Itr</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">float4 iterator for device vectors. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a135994d33c843472c47525febf98ae76"></a><!-- doxytag: member="CoarseParticleEngine.h::DFloatItr" ref="a135994d33c843472c47525febf98ae76" args="" -->
-typedef thrust::device_vector<br class="typebreak"/>
-&lt; float &gt;::iterator&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecufire.html#a135994d33c843472c47525febf98ae76">cufire::DFloatItr</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">float iterator for device vectors. <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">typedef thrust::device_ptr<br class="typebreak"/>
+&lt; float4 &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecufire.html#ad4d1d22c29fa7ee5c4bd8d5a7a66e937">cufire::DevPtrFloat4</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">device pointer float4  <a href="#ad4d1d22c29fa7ee5c4bd8d5a7a66e937"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">typedef thrust::device_vector<br class="typebreak"/>
+&lt; float4 &gt;::iterator&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecufire.html#a55c29b02ce44ab4262ad79e11ce4bf4a">cufire::DevVecFloat4Itr</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">float4 iterator for device vectors.  <a href="#a55c29b02ce44ab4262ad79e11ce4bf4a"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">typedef thrust::device_vector<br class="typebreak"/>
+&lt; float &gt;::iterator&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecufire.html#a54c6e662f457e39a801df9d6574484fe">cufire::DevVecFloatItr</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">float iterator for device vectors.  <a href="#a54c6e662f457e39a801df9d6574484fe"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">typedef thrust::tuple<br class="typebreak"/>
-&lt; DFloat4Itr, DFloatItr, <br class="typebreak"/>
-DFloatItr, DFloatItr &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecufire.html#a15c955bb53bb49c5f67e901b4b0d52ee">cufire::ParticleItrTuple</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Particle iterator tuple.  <a href="#a15c955bb53bb49c5f67e901b4b0d52ee"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a392cff6d7f644cab93a314334433580b"></a><!-- doxytag: member="CoarseParticleEngine.h::ParticleItr" ref="a392cff6d7f644cab93a314334433580b" args="" -->
-typedef thrust::zip_iterator<br class="typebreak"/>
-&lt; ParticleItrTuple &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecufire.html#a392cff6d7f644cab93a314334433580b">cufire::ParticleItr</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Particle iterator. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3b8db74c69c5d7930e8b587332e77b26"></a><!-- doxytag: member="CoarseParticleEngine.h::DFloat4Ptr" ref="a3b8db74c69c5d7930e8b587332e77b26" args="" -->
-typedef thrust::device_ptr<br class="typebreak"/>
-&lt; float4 &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecufire.html#a3b8db74c69c5d7930e8b587332e77b26">cufire::DFloat4Ptr</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">device pointer float4 <br/></td></tr>
+&lt; DevPtrFloat4, <br class="typebreak"/>
+DevVecFloat4Itr, <br class="typebreak"/>
+DevVecFloatItr, DevVecFloatItr, <br class="typebreak"/>
+DevVecFloatItr &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecufire.html#a4000cca1a09268d8b4c9f003816742aa">cufire::ParticleItrTuple</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Particle iterator tuple.  <a href="#a4000cca1a09268d8b4c9f003816742aa"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">typedef thrust::tuple&lt; float4, <br class="typebreak"/>
+float4, float, float, float &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecufire.html#ad40f1b45f2e6f6488a930f44e6eddc61">cufire::ParticleTuple</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Particle tuple.  <a href="#ad40f1b45f2e6f6488a930f44e6eddc61"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">typedef thrust::zip_iterator<br class="typebreak"/>
+&lt; ParticleItrTuple &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecufire.html#ad7202d774a9c06c85039e8484fc687c4">cufire::ParticleZipItr</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Particle iterator.  <a href="#ad7202d774a9c06c85039e8484fc687c4"></a><br/></td></tr>
 </table>
 <hr/><a name="_details"></a><h2>Detailed Description</h2>
 <p>Defines the CoarseParticleEngine class used for coarse particle simulation. </p>
@@ -99,7 +99,7 @@ typedef thrust::device_ptr<br class="typebreak"/>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&nbsp;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&nbsp;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&nbsp;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&nbsp;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&nbsp;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&nbsp;</span>Defines</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&nbsp;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&nbsp;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&nbsp;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&nbsp;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&nbsp;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -108,7 +108,7 @@ typedef thrust::device_ptr<br class="typebreak"/>
 </iframe>
 </div>
 
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Sat May 8 06:04:52 2010 for CUFIRE by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Sat May 15 05:13:03 2010 for CUFIRE by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

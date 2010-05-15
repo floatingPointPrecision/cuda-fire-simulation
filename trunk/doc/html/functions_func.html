@@ -64,13 +64,31 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a8cd64a848a9e2be36c816ebc3f040baf">cufire::CoarseParticleEngine</a>
 </li>
 <li>CoarseParticleEngine()
-: <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a9ecb3ec4cfd7c1b77408a5fabdc9d3ac">cufire::CoarseParticleEngine</a>
+: <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a53c1f8f8df2375ea744d5cd1ebed3c83">cufire::CoarseParticleEngine</a>
+</li>
+<li>Command()
+: <a class="el" href="classcufire_1_1_command.html#a3a0698bd96cb5975af02e799c5663dc0">cufire::Command</a>
 </li>
 <li>enforceDivergence()
 : <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a0736cb61c550d9cbb496da0cacb9e76f">cufire::CoarseParticleEngine</a>
 </li>
+<li>execute()
+: <a class="el" href="classcufire_1_1_command.html#acdcc414a6c90790b395613cb5282014f">cufire::Command</a>
+</li>
 <li>flushParticles()
 : <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a681e94f32aa176c3222006e9a26de9ea">cufire::CoarseParticleEngine</a>
+</li>
+<li>getFloat()
+: <a class="el" href="class_x_m_l_parser.html#a1a0f349350feb9bc7fb7665f4fa05214">XMLParser</a>
+</li>
+<li>getFloat2()
+: <a class="el" href="class_x_m_l_parser.html#a0a0b38b652ec05ff7d476c20819a3213">XMLParser</a>
+</li>
+<li>getFloat3()
+: <a class="el" href="class_x_m_l_parser.html#a197bce4fc71c6adf64f4cfccd44a5bac">XMLParser</a>
+</li>
+<li>getInt()
+: <a class="el" href="class_x_m_l_parser.html#ae2425e9b28692e8a8298f902ed8b41e5">XMLParser</a>
 </li>
 <li>initializeParticles()
 : <a class="el" href="classcufire_1_1_coarse_particle_engine.html#af9de67dd7aa671104e3ffd43448bf8d7">cufire::CoarseParticleEngine</a>
@@ -84,8 +102,23 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>resetParticles()
 : <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a5943021cca3daf8dce7e19328fb3b186">cufire::CoarseParticleEngine</a>
 </li>
+<li>resetRoot()
+: <a class="el" href="class_x_m_l_parser.html#a8ba49b67f2923577f8ff0689262f7cf6">XMLParser</a>
+</li>
+<li>setNewRoot()
+: <a class="el" href="class_x_m_l_parser.html#a41c2c6259ddebe59b8c0f960a3673963">XMLParser</a>
+</li>
+<li>XMLParser()
+: <a class="el" href="class_x_m_l_parser.html#a60004d4b50ef242bbd191a494fd750f1">XMLParser</a>
+</li>
 <li>~CoarseParticleEngine()
 : <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a99f135a985acb67a1301f78db3e637a2">cufire::CoarseParticleEngine</a>
+</li>
+<li>~Command()
+: <a class="el" href="classcufire_1_1_command.html#aa015119438a4cc430f92492d597f3230">cufire::Command</a>
+</li>
+<li>~XMLParser()
+: <a class="el" href="class_x_m_l_parser.html#af833ecdb0e07ead08dfda925b4af86ad">XMLParser</a>
 </li>
 </ul>
 </div>
@@ -94,7 +127,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&nbsp;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&nbsp;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&nbsp;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&nbsp;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&nbsp;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&nbsp;</span>Defines</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&nbsp;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&nbsp;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&nbsp;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&nbsp;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&nbsp;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -103,7 +136,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Sat May 8 06:04:52 2010 for CUFIRE by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Sat May 15 05:13:03 2010 for CUFIRE by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>
