@@ -88,15 +88,10 @@ namespace cufire
     // public methods
   public:
     /**
-    * default constructor. Does not initialize anything yet.
+    * constructor. Sets the maximum number of particles and initializes necessary vectors on host and device
+    * @param maxNumberParticles maximum number of particles in the system
     */
-    CoarseParticleEngine();
-    /**
-    * constructor. Initializes the particle system.
-    * @param numParticles number of particles in the system
-    * @param randomized flag to create random particles within a bounds to be set
-    */
-    CoarseParticleEngine(int numParticles, bool randomized = true);
+    CoarseParticleEngine(int maxNumberParticles);
     /**
     * A destructor.
     */
@@ -160,7 +155,8 @@ namespace cufire
     */
     void resetParticles();
 
-    unsigned int m_numParticles; ///< number of particles in the system.
+    unsigned int m_maxNumParticles; ///< max number of particles in the system.
+    unsigned int m_numParticles; ///< current number of particles in the system.
 
     thrust::host_vector<float4> m_hostPositionAge; ///< particle host copy of position x, y, z, age
     thrust::host_vector<float4> m_hostFuelRadiusMassImpulse; ///< particle host copy of fuel, radius, mass, impulse

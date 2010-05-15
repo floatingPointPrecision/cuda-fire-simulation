@@ -308,6 +308,18 @@
 				RelativePath=".\CoarseParticleEngine.cu"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\Command.cu"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Projection.cu"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\SolveNonDivergence.cu"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -323,7 +335,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Command.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Projection.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\RandomUtilities.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\SolveNonDivergence.h"
 				>
 			</File>
 		</Filter>

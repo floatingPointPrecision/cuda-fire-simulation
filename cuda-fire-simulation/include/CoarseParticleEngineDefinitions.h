@@ -31,7 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#define DLLEXPORT __declspec(dllexport) ///< Allows easier specification of what to export to the dll
+//#define DLLEXPORT __declspec(dllexport) ///< Allows easier specification of what to export to the dll
 
 
 //#define P_POS 0 ///< position element of a Particle tuple containing 4 floats
@@ -43,5 +43,3 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //#define P_AGE 6 ///< age element of a Particle tuple
 //#define P_MASS 7 ///< mass element of a Particle tuple
 //#define P_IMPULSE 8 ///< impulse element of a Particle tuple
-
-#define MAX_NUMBER_COARSE_PARTICLES 1e12 ///< maximum number of coarse particles
