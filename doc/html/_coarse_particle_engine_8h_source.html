@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>CUFIRE: C:/Users/steve/Programs/CUFIRE/cuda-fire-simulation/include/CoarseParticleEngine.h Source File</title>
+<title>CUFIRE: CoarseParticleEngine.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javaScript" src="search/search.js"></script>
@@ -38,10 +38,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div class="tabs">
     <ul>
       <li><a href="files.html"><span>File&nbsp;List</span></a></li>
-      <li><a href="globals.html"><span>File&nbsp;Members</span></a></li>
     </ul>
   </div>
-<h1>C:/Users/steve/Programs/CUFIRE/cuda-fire-simulation/include/CoarseParticleEngine.h</h1><a href="_coarse_particle_engine_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*******************************************************************************</span>
+<h1>CoarseParticleEngine.h</h1><a href="_coarse_particle_engine_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*******************************************************************************</span>
 <a name="l00002"></a>00002 <span class="comment">Copyright (c) 2010, Steve Lesser</span>
 <a name="l00003"></a>00003 <span class="comment">Redistribution and use in source and binary forms, with or without</span>
 <a name="l00004"></a>00004 <span class="comment">modification, are permitted provided that the following conditions are met:</span>
@@ -86,64 +85,68 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00048"></a>00048 
 <a name="l00049"></a>00049 <span class="keyword">namespace </span>cufire
 <a name="l00050"></a>00050 {
-<a name="l00051"></a>00051 
-<a name="l00055"></a>00055   <span class="keyword">typedef</span> thrust::device_vector&lt;float4&gt;::iterator DFloat4Itr;
-<a name="l00059"></a>00059   <span class="keyword">typedef</span> thrust::device_vector&lt;float&gt;::iterator DFloatItr;
-<a name="l00065"></a>00065   <span class="keyword">typedef</span> thrust::tuple&lt;DFloat4Itr,DFloatItr,DFloatItr,DFloatItr&gt; ParticleItrTuple;
-<a name="l00069"></a>00069   <span class="keyword">typedef</span> thrust::zip_iterator&lt;ParticleItrTuple&gt; ParticleItr;
-<a name="l00073"></a>00073   <span class="keyword">typedef</span> thrust::device_ptr&lt;float4&gt; DFloat4Ptr;
-<a name="l00078"></a>00078   <span class="keyword">class </span>CoarseParticleEngine
-<a name="l00079"></a>00079   {
-<a name="l00080"></a>00080     <span class="comment">// public methods</span>
-<a name="l00081"></a>00081   <span class="keyword">public</span>:
-<a name="l00085"></a>00085     <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a9ecb3ec4cfd7c1b77408a5fabdc9d3ac" title="default constructor.">CoarseParticleEngine</a>();
-<a name="l00091"></a>00091     <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a9ecb3ec4cfd7c1b77408a5fabdc9d3ac" title="default constructor.">CoarseParticleEngine</a>(<span class="keywordtype">int</span> numParticles, <span class="keywordtype">bool</span> randomized = <span class="keyword">true</span>);
-<a name="l00095"></a>00095     <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a99f135a985acb67a1301f78db3e637a2" title="A destructor.">~CoarseParticleEngine</a>();
-<a name="l00100"></a>00100     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a1559122cded8a682baeb0f946f9ec145" title="advances simulation.">advanceSimulation</a>(<span class="keywordtype">float</span> timestep);
-<a name="l00104"></a>00104     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a923b323001319f78bf43499abc27465d" title="renders particles.">render</a>();
-<a name="l00115"></a>00115     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a781dcfdeae1fe64e8e0ab3b3127fb586" title="adds particle.">addParticle</a>(float3 position, float3 velocity, <span class="keywordtype">float</span> fuel, <span class="keywordtype">float</span> radius, <span class="keywordtype">float</span> lifetime, <span class="keywordtype">float</span> mass, <span class="keywordtype">float</span> impulse);
-<a name="l00122"></a>00122     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a832ddb97a2dd16db53b26252f71e75ff" title="adds random particle.">addRandomParticle</a>(float2 xBounds, float2 yBounds, float2 zBounds, <span class="keywordtype">int</span> numParticles=1);
-<a name="l00127"></a>00127     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a681e94f32aa176c3222006e9a26de9ea" title="flushes particles to the GPU.">flushParticles</a>();
-<a name="l00128"></a>00128 
-<a name="l00129"></a>00129     <span class="comment">// protected methods</span>
-<a name="l00130"></a>00130   <span class="keyword">protected</span>:
-<a name="l00134"></a>00134     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#af9de67dd7aa671104e3ffd43448bf8d7" title="initializes particles on host and GPU.">initializeParticles</a>();
-<a name="l00138"></a>00138     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a8cd64a848a9e2be36c816ebc3f040baf" title="bins particle velocities.">binParticles</a>();
-<a name="l00142"></a>00142     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a0736cb61c550d9cbb496da0cacb9e76f" title="enforces non-divergent velocities.">enforceDivergence</a>();
-<a name="l00146"></a>00146     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#ae45558842e911bf6900d6c6727b622a7" title="projects velocities to 2D slices.">projectToSlices</a>();
-<a name="l00147"></a>00147 
-<a name="l00148"></a>00148     <span class="comment">// protected members</span>
-<a name="l00149"></a>00149   <span class="keyword">protected</span>:
-<a name="l00153"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a0baa3086687bf24f78e61cef590d2a80">00153</a>     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a5943021cca3daf8dce7e19328fb3b186" title="resets particles.">resetParticles</a>();
-<a name="l00154"></a>00154 
-<a name="l00155"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#adbd28a32d2a6d809692d6adf868e9fcc">00155</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a0baa3086687bf24f78e61cef590d2a80" title="number of particles in the system.">m_numParticles</a>; 
-<a name="l00156"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a501c34d44cdd87ee32a326fd4f35eb51">00156</a> 
-<a name="l00157"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#adc34ec969239cdb405d8f64a3bf8b513">00157</a>     thrust::host_vector&lt;float4&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#adbd28a32d2a6d809692d6adf868e9fcc" title="particle host copy of position x, y, z, age">m_hostPositionAge</a>; 
-<a name="l00158"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#ac7c7ed897e40507fbcceaa0c1bd6f0e1">00158</a>     thrust::host_vector&lt;float4&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a501c34d44cdd87ee32a326fd4f35eb51" title="particle host copy of fuel, radius, mass, impulse">m_hostFuelRadiusMassImpulse</a>; 
-<a name="l00159"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a245e15e14359ac3385e3bb10d435627b">00159</a>     thrust::host_vector&lt;float&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#adc34ec969239cdb405d8f64a3bf8b513" title="particle x velocities host copy">m_hostXVelocities</a>; 
-<a name="l00160"></a>00160     thrust::host_vector&lt;float&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#ac7c7ed897e40507fbcceaa0c1bd6f0e1" title="particle y velocities host copy">m_hostYVelocities</a>; 
-<a name="l00161"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a099f679753409b0348cc91cadc42b0ff">00161</a>     thrust::host_vector&lt;float&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a245e15e14359ac3385e3bb10d435627b" title="particle z velocities host copy">m_hostZVelocities</a>; 
-<a name="l00162"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a2218a3ee72239b7566c70bd76356c5aa">00162</a> 
-<a name="l00163"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a19a3d64d5e4be4be7101e7c752fcec6f">00163</a>     GLuint <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a099f679753409b0348cc91cadc42b0ff" title="OpenGL vertex buffer object of the positionAge float4 array.">m_positionsAgeVBO</a>; 
-<a name="l00164"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a10a83a484c9cd7411b01febd026299b3">00164</a>     DFloat4Ptr <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a2218a3ee72239b7566c70bd76356c5aa" title="temporary raw float4 pointer to OpenGL positionsAge VBO">m_positionsAgeRaw</a>; 
-<a name="l00165"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a7454d3f0809ca50efe041dc701f750f2">00165</a>     thrust::device_vector&lt;float4&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a19a3d64d5e4be4be7101e7c752fcec6f" title="particle device copy of position x, y, z, age">m_devicePositionAge</a>; 
-<a name="l00166"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a7821c58a0288f374fd5643132bb22d09">00166</a>     thrust::device_vector&lt;float4&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a10a83a484c9cd7411b01febd026299b3" title="particle device copy of fuel, radius, mass, impulse">m_deviceFuelRadiusMassImpulse</a>; 
-<a name="l00167"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#abe8c4310b57e1456e98cc5a0b238e888">00167</a>     thrust::device_vector&lt;float&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a7454d3f0809ca50efe041dc701f750f2" title="particle x velocities device copy">m_deviceXVelocities</a>; 
-<a name="l00168"></a>00168     thrust::device_vector&lt;float&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a7821c58a0288f374fd5643132bb22d09" title="particle y velocities device copy">m_deviceYVelocities</a>; 
-<a name="l00169"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a825d4338f97fd5486f4c8b135b329253">00169</a>     thrust::device_vector&lt;float&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#abe8c4310b57e1456e98cc5a0b238e888" title="particle z velocities device copy">m_deviceZVelocities</a>; 
-<a name="l00170"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a0fa63667be116cb4b4fa43c86b61f13c">00170</a> 
-<a name="l00171"></a>00171     ParticleItr <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a825d4338f97fd5486f4c8b135b329253" title="beginning of particle zip_iterator">m_particleItrBegin</a>; 
-<a name="l00172"></a>00172     ParticleItr <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a0fa63667be116cb4b4fa43c86b61f13c" title="end of particle zip_iterator">m_particleItrEnd</a>; 
-<a name="l00173"></a>00173   };
-<a name="l00174"></a>00174 
-<a name="l00175"></a>00175 }
+<a name="l00051"></a>00051   <span class="comment">// typedefs</span>
+<a name="l00052"></a>00052 
+<a name="l00056"></a>00056   <span class="keyword">typedef</span> thrust::device_ptr&lt;float4&gt; DevPtrFloat4;
+<a name="l00060"></a>00060   <span class="keyword">typedef</span> thrust::device_vector&lt;float4&gt;::iterator DevVecFloat4Itr;
+<a name="l00064"></a>00064   <span class="keyword">typedef</span> thrust::device_vector&lt;float&gt;::iterator DevVecFloatItr;
+<a name="l00070"></a>00070   <span class="keyword">typedef</span> thrust::tuple&lt;DevPtrFloat4,DevVecFloat4Itr,DevVecFloatItr,DevVecFloatItr,DevVecFloatItr&gt; ParticleItrTuple;
+<a name="l00076"></a>00076   <span class="keyword">typedef</span> thrust::tuple&lt;float4,float4,float,float,float&gt; ParticleTuple;
+<a name="l00080"></a>00080   <span class="keyword">typedef</span> thrust::zip_iterator&lt;ParticleItrTuple&gt; ParticleZipItr;
+<a name="l00081"></a>00081 
+<a name="l00085"></a>00085   <span class="keyword">class </span>CoarseParticleEngine
+<a name="l00086"></a>00086   {    
+<a name="l00087"></a>00087 
+<a name="l00088"></a>00088     <span class="comment">// public methods</span>
+<a name="l00089"></a>00089   <span class="keyword">public</span>:
+<a name="l00094"></a>00094     <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a53c1f8f8df2375ea744d5cd1ebed3c83" title="constructor.">CoarseParticleEngine</a>(<span class="keywordtype">int</span> maxNumberParticles);
+<a name="l00098"></a>00098     <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a99f135a985acb67a1301f78db3e637a2" title="A destructor.">~CoarseParticleEngine</a>();
+<a name="l00103"></a>00103     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a1559122cded8a682baeb0f946f9ec145" title="advances simulation.">advanceSimulation</a>(<span class="keywordtype">float</span> timestep);
+<a name="l00107"></a>00107     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a923b323001319f78bf43499abc27465d" title="renders particles.">render</a>();
+<a name="l00118"></a>00118     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a781dcfdeae1fe64e8e0ab3b3127fb586" title="adds particle.">addParticle</a>(float3 position, float3 velocity, <span class="keywordtype">float</span> fuel, <span class="keywordtype">float</span> radius, <span class="keywordtype">float</span> lifetime, <span class="keywordtype">float</span> mass, <span class="keywordtype">float</span> impulse);
+<a name="l00125"></a>00125     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a832ddb97a2dd16db53b26252f71e75ff" title="adds random particle.">addRandomParticle</a>(float2 xBounds, float2 yBounds, float2 zBounds, <span class="keywordtype">int</span> numParticles=1);
+<a name="l00130"></a>00130     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a681e94f32aa176c3222006e9a26de9ea" title="flushes particles to the GPU.">flushParticles</a>();
+<a name="l00131"></a>00131 
+<a name="l00132"></a>00132     <span class="comment">// protected methods</span>
+<a name="l00133"></a>00133   <span class="keyword">protected</span>:
+<a name="l00137"></a>00137     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#af9de67dd7aa671104e3ffd43448bf8d7" title="initializes particles on host and GPU.">initializeParticles</a>();
+<a name="l00141"></a>00141     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a8cd64a848a9e2be36c816ebc3f040baf" title="bins particle velocities.">binParticles</a>();
+<a name="l00145"></a>00145     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a0736cb61c550d9cbb496da0cacb9e76f" title="enforces non-divergent velocities.">enforceDivergence</a>();
+<a name="l00149"></a>00149     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#ae45558842e911bf6900d6c6727b622a7" title="projects velocities to 2D slices.">projectToSlices</a>();
+<a name="l00150"></a>00150 
+<a name="l00151"></a>00151     <span class="comment">// protected members</span>
+<a name="l00152"></a>00152   <span class="keyword">protected</span>:
+<a name="l00156"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a47c8767e8c716517ed3c872041575549">00156</a>     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a5943021cca3daf8dce7e19328fb3b186" title="resets particles.">resetParticles</a>();
+<a name="l00157"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a0baa3086687bf24f78e61cef590d2a80">00157</a> 
+<a name="l00158"></a>00158     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a47c8767e8c716517ed3c872041575549" title="max number of particles in the system.">m_maxNumParticles</a>; 
+<a name="l00159"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#adbd28a32d2a6d809692d6adf868e9fcc">00159</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a0baa3086687bf24f78e61cef590d2a80" title="current number of particles in the system.">m_numParticles</a>; 
+<a name="l00160"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a501c34d44cdd87ee32a326fd4f35eb51">00160</a> 
+<a name="l00161"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#adc34ec969239cdb405d8f64a3bf8b513">00161</a>     thrust::host_vector&lt;float4&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#adbd28a32d2a6d809692d6adf868e9fcc" title="particle host copy of position x, y, z, age">m_hostPositionAge</a>; 
+<a name="l00162"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#ac7c7ed897e40507fbcceaa0c1bd6f0e1">00162</a>     thrust::host_vector&lt;float4&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a501c34d44cdd87ee32a326fd4f35eb51" title="particle host copy of fuel, radius, mass, impulse">m_hostFuelRadiusMassImpulse</a>; 
+<a name="l00163"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a245e15e14359ac3385e3bb10d435627b">00163</a>     thrust::host_vector&lt;float&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#adc34ec969239cdb405d8f64a3bf8b513" title="particle x velocities host copy">m_hostXVelocities</a>; 
+<a name="l00164"></a>00164     thrust::host_vector&lt;float&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#ac7c7ed897e40507fbcceaa0c1bd6f0e1" title="particle y velocities host copy">m_hostYVelocities</a>; 
+<a name="l00165"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a099f679753409b0348cc91cadc42b0ff">00165</a>     thrust::host_vector&lt;float&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a245e15e14359ac3385e3bb10d435627b" title="particle z velocities host copy">m_hostZVelocities</a>; 
+<a name="l00166"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a5c3d357dd3ad492c902a05e3d20f1465">00166</a> 
+<a name="l00167"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a19a3d64d5e4be4be7101e7c752fcec6f">00167</a>     GLuint <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a099f679753409b0348cc91cadc42b0ff" title="OpenGL vertex buffer object of the positionAge float4 array.">m_positionsAgeVBO</a>; 
+<a name="l00168"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a10a83a484c9cd7411b01febd026299b3">00168</a>     DevPtrFloat4 <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a5c3d357dd3ad492c902a05e3d20f1465" title="temporary raw float4 pointer to OpenGL positionsAge VBO">m_positionsAgeRaw</a>; 
+<a name="l00169"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a7454d3f0809ca50efe041dc701f750f2">00169</a>     thrust::device_vector&lt;float4&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a19a3d64d5e4be4be7101e7c752fcec6f" title="particle device copy of position x, y, z, age">m_devicePositionAge</a>; 
+<a name="l00170"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a7821c58a0288f374fd5643132bb22d09">00170</a>     thrust::device_vector&lt;float4&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a10a83a484c9cd7411b01febd026299b3" title="particle device copy of fuel, radius, mass, impulse">m_deviceFuelRadiusMassImpulse</a>; 
+<a name="l00171"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#abe8c4310b57e1456e98cc5a0b238e888">00171</a>     thrust::device_vector&lt;float&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a7454d3f0809ca50efe041dc701f750f2" title="particle x velocities device copy">m_deviceXVelocities</a>; 
+<a name="l00172"></a>00172     thrust::device_vector&lt;float&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a7821c58a0288f374fd5643132bb22d09" title="particle y velocities device copy">m_deviceYVelocities</a>; 
+<a name="l00173"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#ab36e358b95d6a18974b1eba8bb0e2b85">00173</a>     thrust::device_vector&lt;float&gt; <a class="code" href="classcufire_1_1_coarse_particle_engine.html#abe8c4310b57e1456e98cc5a0b238e888" title="particle z velocities device copy">m_deviceZVelocities</a>; 
+<a name="l00174"></a><a class="code" href="classcufire_1_1_coarse_particle_engine.html#a96ce06fc79488c754688b002337a8885">00174</a> 
+<a name="l00175"></a>00175     ParticleZipItr <a class="code" href="classcufire_1_1_coarse_particle_engine.html#ab36e358b95d6a18974b1eba8bb0e2b85" title="beginning of particle zip_iterator">m_particleItrBegin</a>; 
+<a name="l00176"></a>00176     ParticleZipItr <a class="code" href="classcufire_1_1_coarse_particle_engine.html#a96ce06fc79488c754688b002337a8885" title="end of particle zip_iterator">m_particleItrEnd</a>; 
+<a name="l00177"></a>00177   };
+<a name="l00178"></a>00178 
+<a name="l00179"></a>00179 }
 </pre></div></div>
 <!--- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&nbsp;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&nbsp;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&nbsp;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&nbsp;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&nbsp;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&nbsp;</span>Defines</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&nbsp;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&nbsp;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&nbsp;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&nbsp;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&nbsp;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -152,7 +155,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Sat May 8 06:04:52 2010 for CUFIRE by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Sat May 15 05:13:03 2010 for CUFIRE by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

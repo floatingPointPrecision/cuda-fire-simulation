@@ -54,13 +54,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p><a href="classcufire_1_1_coarse_particle_engine-members.html">List of all members.</a></p>
 <table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a9ecb3ec4cfd7c1b77408a5fabdc9d3ac">CoarseParticleEngine</a> ()</td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">default constructor.  <a href="#a9ecb3ec4cfd7c1b77408a5fabdc9d3ac"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#aeb69655be40002220be080e992563804">CoarseParticleEngine</a> (int numParticles, bool randomized=true)</td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">constructor.  <a href="#aeb69655be40002220be080e992563804"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a99f135a985acb67a1301f78db3e637a2"></a><!-- doxytag: member="cufire::CoarseParticleEngine::~CoarseParticleEngine" ref="a99f135a985acb67a1301f78db3e637a2" args="()" -->
-&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a99f135a985acb67a1301f78db3e637a2">~CoarseParticleEngine</a> ()</td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">A destructor. <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a53c1f8f8df2375ea744d5cd1ebed3c83">CoarseParticleEngine</a> (int maxNumberParticles)</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">constructor.  <a href="#a53c1f8f8df2375ea744d5cd1ebed3c83"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a99f135a985acb67a1301f78db3e637a2">~CoarseParticleEngine</a> ()</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">A destructor.  <a href="#a99f135a985acb67a1301f78db3e637a2"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a1559122cded8a682baeb0f946f9ec145">advanceSimulation</a> (float timestep)</td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">advances simulation.  <a href="#a1559122cded8a682baeb0f946f9ec145"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a923b323001319f78bf43499abc27465d">render</a> ()</td></tr>
@@ -83,62 +80,76 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a5943021cca3daf8dce7e19328fb3b186">resetParticles</a> ()</td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">resets particles.  <a href="#a5943021cca3daf8dce7e19328fb3b186"></a><br/></td></tr>
 <tr><td colspan="2"><h2>Protected Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0baa3086687bf24f78e61cef590d2a80"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_numParticles" ref="a0baa3086687bf24f78e61cef590d2a80" args="" -->
-unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a0baa3086687bf24f78e61cef590d2a80">m_numParticles</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">number of particles in the system. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adbd28a32d2a6d809692d6adf868e9fcc"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_hostPositionAge" ref="adbd28a32d2a6d809692d6adf868e9fcc" args="" -->
-thrust::host_vector&lt; float4 &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#adbd28a32d2a6d809692d6adf868e9fcc">m_hostPositionAge</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle host copy of position x, y, z, age <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a501c34d44cdd87ee32a326fd4f35eb51"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_hostFuelRadiusMassImpulse" ref="a501c34d44cdd87ee32a326fd4f35eb51" args="" -->
-thrust::host_vector&lt; float4 &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a501c34d44cdd87ee32a326fd4f35eb51">m_hostFuelRadiusMassImpulse</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle host copy of fuel, radius, mass, impulse <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adc34ec969239cdb405d8f64a3bf8b513"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_hostXVelocities" ref="adc34ec969239cdb405d8f64a3bf8b513" args="" -->
-thrust::host_vector&lt; float &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#adc34ec969239cdb405d8f64a3bf8b513">m_hostXVelocities</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle x velocities host copy <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac7c7ed897e40507fbcceaa0c1bd6f0e1"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_hostYVelocities" ref="ac7c7ed897e40507fbcceaa0c1bd6f0e1" args="" -->
-thrust::host_vector&lt; float &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#ac7c7ed897e40507fbcceaa0c1bd6f0e1">m_hostYVelocities</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle y velocities host copy <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a245e15e14359ac3385e3bb10d435627b"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_hostZVelocities" ref="a245e15e14359ac3385e3bb10d435627b" args="" -->
-thrust::host_vector&lt; float &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a245e15e14359ac3385e3bb10d435627b">m_hostZVelocities</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle z velocities host copy <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a099f679753409b0348cc91cadc42b0ff"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_positionsAgeVBO" ref="a099f679753409b0348cc91cadc42b0ff" args="" -->
-GLuint&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a099f679753409b0348cc91cadc42b0ff">m_positionsAgeVBO</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">OpenGL vertex buffer object of the positionAge float4 array. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2218a3ee72239b7566c70bd76356c5aa"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_positionsAgeRaw" ref="a2218a3ee72239b7566c70bd76356c5aa" args="" -->
-DFloat4Ptr&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a2218a3ee72239b7566c70bd76356c5aa">m_positionsAgeRaw</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">temporary raw float4 pointer to OpenGL positionsAge VBO <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a19a3d64d5e4be4be7101e7c752fcec6f"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_devicePositionAge" ref="a19a3d64d5e4be4be7101e7c752fcec6f" args="" -->
-thrust::device_vector&lt; float4 &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a19a3d64d5e4be4be7101e7c752fcec6f">m_devicePositionAge</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle device copy of position x, y, z, age <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a10a83a484c9cd7411b01febd026299b3"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_deviceFuelRadiusMassImpulse" ref="a10a83a484c9cd7411b01febd026299b3" args="" -->
-thrust::device_vector&lt; float4 &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a10a83a484c9cd7411b01febd026299b3">m_deviceFuelRadiusMassImpulse</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle device copy of fuel, radius, mass, impulse <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7454d3f0809ca50efe041dc701f750f2"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_deviceXVelocities" ref="a7454d3f0809ca50efe041dc701f750f2" args="" -->
-thrust::device_vector&lt; float &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a7454d3f0809ca50efe041dc701f750f2">m_deviceXVelocities</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle x velocities device copy <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7821c58a0288f374fd5643132bb22d09"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_deviceYVelocities" ref="a7821c58a0288f374fd5643132bb22d09" args="" -->
-thrust::device_vector&lt; float &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a7821c58a0288f374fd5643132bb22d09">m_deviceYVelocities</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle y velocities device copy <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abe8c4310b57e1456e98cc5a0b238e888"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_deviceZVelocities" ref="abe8c4310b57e1456e98cc5a0b238e888" args="" -->
-thrust::device_vector&lt; float &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#abe8c4310b57e1456e98cc5a0b238e888">m_deviceZVelocities</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle z velocities device copy <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a825d4338f97fd5486f4c8b135b329253"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_particleItrBegin" ref="a825d4338f97fd5486f4c8b135b329253" args="" -->
-ParticleItr&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a825d4338f97fd5486f4c8b135b329253">m_particleItrBegin</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">beginning of particle zip_iterator <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0fa63667be116cb4b4fa43c86b61f13c"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_particleItrEnd" ref="a0fa63667be116cb4b4fa43c86b61f13c" args="" -->
-ParticleItr&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a0fa63667be116cb4b4fa43c86b61f13c">m_particleItrEnd</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">end of particle zip_iterator <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a47c8767e8c716517ed3c872041575549">m_maxNumParticles</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">max number of particles in the system.  <a href="#a47c8767e8c716517ed3c872041575549"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a0baa3086687bf24f78e61cef590d2a80">m_numParticles</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">current number of particles in the system.  <a href="#a0baa3086687bf24f78e61cef590d2a80"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">thrust::host_vector&lt; float4 &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#adbd28a32d2a6d809692d6adf868e9fcc">m_hostPositionAge</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle host copy of position x, y, z, age  <a href="#adbd28a32d2a6d809692d6adf868e9fcc"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">thrust::host_vector&lt; float4 &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a501c34d44cdd87ee32a326fd4f35eb51">m_hostFuelRadiusMassImpulse</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle host copy of fuel, radius, mass, impulse  <a href="#a501c34d44cdd87ee32a326fd4f35eb51"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">thrust::host_vector&lt; float &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#adc34ec969239cdb405d8f64a3bf8b513">m_hostXVelocities</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle x velocities host copy  <a href="#adc34ec969239cdb405d8f64a3bf8b513"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">thrust::host_vector&lt; float &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#ac7c7ed897e40507fbcceaa0c1bd6f0e1">m_hostYVelocities</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle y velocities host copy  <a href="#ac7c7ed897e40507fbcceaa0c1bd6f0e1"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">thrust::host_vector&lt; float &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a245e15e14359ac3385e3bb10d435627b">m_hostZVelocities</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle z velocities host copy  <a href="#a245e15e14359ac3385e3bb10d435627b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">GLuint&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a099f679753409b0348cc91cadc42b0ff">m_positionsAgeVBO</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">OpenGL vertex buffer object of the positionAge float4 array.  <a href="#a099f679753409b0348cc91cadc42b0ff"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">DevPtrFloat4&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a5c3d357dd3ad492c902a05e3d20f1465">m_positionsAgeRaw</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">temporary raw float4 pointer to OpenGL positionsAge VBO  <a href="#a5c3d357dd3ad492c902a05e3d20f1465"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">thrust::device_vector&lt; float4 &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a19a3d64d5e4be4be7101e7c752fcec6f">m_devicePositionAge</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle device copy of position x, y, z, age  <a href="#a19a3d64d5e4be4be7101e7c752fcec6f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">thrust::device_vector&lt; float4 &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a10a83a484c9cd7411b01febd026299b3">m_deviceFuelRadiusMassImpulse</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle device copy of fuel, radius, mass, impulse  <a href="#a10a83a484c9cd7411b01febd026299b3"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">thrust::device_vector&lt; float &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a7454d3f0809ca50efe041dc701f750f2">m_deviceXVelocities</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle x velocities device copy  <a href="#a7454d3f0809ca50efe041dc701f750f2"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">thrust::device_vector&lt; float &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a7821c58a0288f374fd5643132bb22d09">m_deviceYVelocities</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle y velocities device copy  <a href="#a7821c58a0288f374fd5643132bb22d09"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">thrust::device_vector&lt; float &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#abe8c4310b57e1456e98cc5a0b238e888">m_deviceZVelocities</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle z velocities device copy  <a href="#abe8c4310b57e1456e98cc5a0b238e888"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">ParticleZipItr&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#ab36e358b95d6a18974b1eba8bb0e2b85">m_particleItrBegin</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">beginning of particle zip_iterator  <a href="#ab36e358b95d6a18974b1eba8bb0e2b85"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">ParticleZipItr&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a96ce06fc79488c754688b002337a8885">m_particleItrEnd</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">end of particle zip_iterator  <a href="#a96ce06fc79488c754688b002337a8885"></a><br/></td></tr>
 </table>
 <hr/><a name="_details"></a><h2>Detailed Description</h2>
 <p>Coarse Particle Engine. </p>
 <p>Manager for the coarse particle simulation of broad fuel movement. </p>
 <hr/><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a9ecb3ec4cfd7c1b77408a5fabdc9d3ac"></a><!-- doxytag: member="cufire::CoarseParticleEngine::CoarseParticleEngine" ref="a9ecb3ec4cfd7c1b77408a5fabdc9d3ac" args="()" -->
+<a class="anchor" id="a53c1f8f8df2375ea744d5cd1ebed3c83"></a><!-- doxytag: member="cufire::CoarseParticleEngine::CoarseParticleEngine" ref="a53c1f8f8df2375ea744d5cd1ebed3c83" args="(int maxNumberParticles)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">cufire::CoarseParticleEngine::CoarseParticleEngine </td>
+          <td>(</td>
+          <td class="paramtype">int&nbsp;</td>
+          <td class="paramname"> <em>maxNumberParticles</em></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>constructor. </p>
+<p>Sets the maximum number of particles and initializes necessary vectors on host and device </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>maxNumberParticles</em>&nbsp;</td><td>maximum number of particles in the system </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a99f135a985acb67a1301f78db3e637a2"></a><!-- doxytag: member="cufire::CoarseParticleEngine::~CoarseParticleEngine" ref="a99f135a985acb67a1301f78db3e637a2" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">cufire::CoarseParticleEngine::~CoarseParticleEngine </td>
           <td>(</td>
           <td class="paramname"></td>
           <td>&nbsp;)&nbsp;</td>
@@ -148,45 +159,7 @@ ParticleItr&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 </div>
 <div class="memdoc">
 
-<p>default constructor. </p>
-<p>Does not initialize anything yet. </p>
-
-</div>
-</div>
-<a class="anchor" id="aeb69655be40002220be080e992563804"></a><!-- doxytag: member="cufire::CoarseParticleEngine::CoarseParticleEngine" ref="aeb69655be40002220be080e992563804" args="(int numParticles, bool randomized=true)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">cufire::CoarseParticleEngine::CoarseParticleEngine </td>
-          <td>(</td>
-          <td class="paramtype">int&nbsp;</td>
-          <td class="paramname"> <em>numParticles</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&nbsp;</td>
-          <td class="paramname"> <em>randomized</em> = <code>true</code></td><td>&nbsp;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td><td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>constructor. </p>
-<p>Initializes the particle system. </p>
-<dl><dt><b>Parameters:</b></dt><dd>
-  <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>numParticles</em>&nbsp;</td><td>number of particles in the system </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>randomized</em>&nbsp;</td><td>flag to create random particles within a bounds to be set </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>A destructor. </p>
 
 </div>
 </div>
@@ -480,8 +453,249 @@ ParticleItr&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 
 </div>
 </div>
+<hr/><h2>Member Data Documentation</h2>
+<a class="anchor" id="a10a83a484c9cd7411b01febd026299b3"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_deviceFuelRadiusMassImpulse" ref="a10a83a484c9cd7411b01febd026299b3" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">thrust::device_vector&lt;float4&gt; <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a10a83a484c9cd7411b01febd026299b3">cufire::CoarseParticleEngine::m_deviceFuelRadiusMassImpulse</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>particle device copy of fuel, radius, mass, impulse </p>
+
+</div>
+</div>
+<a class="anchor" id="a19a3d64d5e4be4be7101e7c752fcec6f"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_devicePositionAge" ref="a19a3d64d5e4be4be7101e7c752fcec6f" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">thrust::device_vector&lt;float4&gt; <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a19a3d64d5e4be4be7101e7c752fcec6f">cufire::CoarseParticleEngine::m_devicePositionAge</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>particle device copy of position x, y, z, age </p>
+
+</div>
+</div>
+<a class="anchor" id="a7454d3f0809ca50efe041dc701f750f2"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_deviceXVelocities" ref="a7454d3f0809ca50efe041dc701f750f2" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">thrust::device_vector&lt;float&gt; <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a7454d3f0809ca50efe041dc701f750f2">cufire::CoarseParticleEngine::m_deviceXVelocities</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>particle x velocities device copy </p>
+
+</div>
+</div>
+<a class="anchor" id="a7821c58a0288f374fd5643132bb22d09"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_deviceYVelocities" ref="a7821c58a0288f374fd5643132bb22d09" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">thrust::device_vector&lt;float&gt; <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a7821c58a0288f374fd5643132bb22d09">cufire::CoarseParticleEngine::m_deviceYVelocities</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>particle y velocities device copy </p>
+
+</div>
+</div>
+<a class="anchor" id="abe8c4310b57e1456e98cc5a0b238e888"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_deviceZVelocities" ref="abe8c4310b57e1456e98cc5a0b238e888" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">thrust::device_vector&lt;float&gt; <a class="el" href="classcufire_1_1_coarse_particle_engine.html#abe8c4310b57e1456e98cc5a0b238e888">cufire::CoarseParticleEngine::m_deviceZVelocities</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>particle z velocities device copy </p>
+
+</div>
+</div>
+<a class="anchor" id="a501c34d44cdd87ee32a326fd4f35eb51"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_hostFuelRadiusMassImpulse" ref="a501c34d44cdd87ee32a326fd4f35eb51" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">thrust::host_vector&lt;float4&gt; <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a501c34d44cdd87ee32a326fd4f35eb51">cufire::CoarseParticleEngine::m_hostFuelRadiusMassImpulse</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>particle host copy of fuel, radius, mass, impulse </p>
+
+</div>
+</div>
+<a class="anchor" id="adbd28a32d2a6d809692d6adf868e9fcc"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_hostPositionAge" ref="adbd28a32d2a6d809692d6adf868e9fcc" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">thrust::host_vector&lt;float4&gt; <a class="el" href="classcufire_1_1_coarse_particle_engine.html#adbd28a32d2a6d809692d6adf868e9fcc">cufire::CoarseParticleEngine::m_hostPositionAge</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>particle host copy of position x, y, z, age </p>
+
+</div>
+</div>
+<a class="anchor" id="adc34ec969239cdb405d8f64a3bf8b513"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_hostXVelocities" ref="adc34ec969239cdb405d8f64a3bf8b513" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">thrust::host_vector&lt;float&gt; <a class="el" href="classcufire_1_1_coarse_particle_engine.html#adc34ec969239cdb405d8f64a3bf8b513">cufire::CoarseParticleEngine::m_hostXVelocities</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>particle x velocities host copy </p>
+
+</div>
+</div>
+<a class="anchor" id="ac7c7ed897e40507fbcceaa0c1bd6f0e1"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_hostYVelocities" ref="ac7c7ed897e40507fbcceaa0c1bd6f0e1" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">thrust::host_vector&lt;float&gt; <a class="el" href="classcufire_1_1_coarse_particle_engine.html#ac7c7ed897e40507fbcceaa0c1bd6f0e1">cufire::CoarseParticleEngine::m_hostYVelocities</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>particle y velocities host copy </p>
+
+</div>
+</div>
+<a class="anchor" id="a245e15e14359ac3385e3bb10d435627b"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_hostZVelocities" ref="a245e15e14359ac3385e3bb10d435627b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">thrust::host_vector&lt;float&gt; <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a245e15e14359ac3385e3bb10d435627b">cufire::CoarseParticleEngine::m_hostZVelocities</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>particle z velocities host copy </p>
+
+</div>
+</div>
+<a class="anchor" id="a47c8767e8c716517ed3c872041575549"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_maxNumParticles" ref="a47c8767e8c716517ed3c872041575549" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a47c8767e8c716517ed3c872041575549">cufire::CoarseParticleEngine::m_maxNumParticles</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>max number of particles in the system. </p>
+
+</div>
+</div>
+<a class="anchor" id="a0baa3086687bf24f78e61cef590d2a80"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_numParticles" ref="a0baa3086687bf24f78e61cef590d2a80" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a0baa3086687bf24f78e61cef590d2a80">cufire::CoarseParticleEngine::m_numParticles</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>current number of particles in the system. </p>
+
+</div>
+</div>
+<a class="anchor" id="ab36e358b95d6a18974b1eba8bb0e2b85"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_particleItrBegin" ref="ab36e358b95d6a18974b1eba8bb0e2b85" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ParticleZipItr <a class="el" href="classcufire_1_1_coarse_particle_engine.html#ab36e358b95d6a18974b1eba8bb0e2b85">cufire::CoarseParticleEngine::m_particleItrBegin</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>beginning of particle zip_iterator </p>
+
+</div>
+</div>
+<a class="anchor" id="a96ce06fc79488c754688b002337a8885"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_particleItrEnd" ref="a96ce06fc79488c754688b002337a8885" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ParticleZipItr <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a96ce06fc79488c754688b002337a8885">cufire::CoarseParticleEngine::m_particleItrEnd</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>end of particle zip_iterator </p>
+
+</div>
+</div>
+<a class="anchor" id="a5c3d357dd3ad492c902a05e3d20f1465"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_positionsAgeRaw" ref="a5c3d357dd3ad492c902a05e3d20f1465" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">DevPtrFloat4 <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a5c3d357dd3ad492c902a05e3d20f1465">cufire::CoarseParticleEngine::m_positionsAgeRaw</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>temporary raw float4 pointer to OpenGL positionsAge VBO </p>
+
+</div>
+</div>
+<a class="anchor" id="a099f679753409b0348cc91cadc42b0ff"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_positionsAgeVBO" ref="a099f679753409b0348cc91cadc42b0ff" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">GLuint <a class="el" href="classcufire_1_1_coarse_particle_engine.html#a099f679753409b0348cc91cadc42b0ff">cufire::CoarseParticleEngine::m_positionsAgeVBO</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>OpenGL vertex buffer object of the positionAge float4 array. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>C:/Users/steve/Programs/CUFIRE/cuda-fire-simulation/include/<a class="el" href="_coarse_particle_engine_8h_source.html">CoarseParticleEngine.h</a></li>
+<li><a class="el" href="_coarse_particle_engine_8h_source.html">CoarseParticleEngine.h</a></li>
 </ul>
 </div>
 <!--- window showing the filter options -->
@@ -489,7 +703,7 @@ ParticleItr&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&nbsp;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&nbsp;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&nbsp;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&nbsp;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&nbsp;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&nbsp;</span>Defines</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&nbsp;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&nbsp;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&nbsp;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&nbsp;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&nbsp;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -498,7 +712,7 @@ ParticleItr&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 </iframe>
 </div>
 
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Sat May 8 06:04:52 2010 for CUFIRE by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Sat May 15 05:13:03 2010 for CUFIRE by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>
