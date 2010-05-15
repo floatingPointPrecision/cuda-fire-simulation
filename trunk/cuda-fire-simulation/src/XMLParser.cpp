@@ -31,22 +31,92 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "XMLParser.h"
 
-using namespace cufire;
-
 XMLParser::XMLParser(const char* fileName)
-: m_fileName(fileName), m_startingNode("/")
+: m_fileName(fileName), m_root(0)
 {
   m_document = TiXmlDocument(fileName);
   m_document.LoadFile();
-}
-
-XMLParser::XMLParser(const char* fileName, const char* startingNode)
-: m_fileName(fileName), m_startingNode(startingNode)
-{
-  m_document = TiXmlDocument(fileName);
-  m_document.LoadFile();
+  m_root = m_document.RootElement();
 }
     
 XMLParser::~XMLParser()
 {
 }
+
+bool XMLParser::resetRoot()
+{
+  m_root = m_document.RootElement();
+  return true;
+}
+
+bool XMLParser::setNewRoot(std::string rootName)
+{
+  if (m_root == 0)
+    return false;
+  TiXmlNode* temp = m_root;
+  m_root = m_root->FirstChild(rootName.c_str());
+  if (m_root==0)
+  {
+    m_root = temp;
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+
+bool XMLParser::getInt(std::string attributeName, int* result)
+{
+  if (m_root == 0)
+    return false;
+  TiXmlElement* currentAttribute = m_root->FirstChild(attributeName.c_str())->ToElement();
+  if (currentAttribute)
+  {
+    *result = (int) atoi(currentAttribute->GetText());
+    return true;
+  }
+  return false;
+}
+
+bool XMLParser::getFloat(std::string attributeName, float* result)
+{
+  if (m_root == 0)
+    return false;
+  TiXmlElement* currentAttribute = m_root->FirstChild(attributeName.c_str())->ToElement();
+  if (currentAttribute)
+  {
+    *result = (float) atof(currentAttribute->GetText());
+    return true;
+  }
+  return false;
+}
+
+ bool XMLParser::getFloat2(std::string attributeName, float result[2])
+ {
+   if (m_root == 0)
+    return false;
+  TiXmlElement* currentAttribute = m_root->FirstChild(attributeName.c_str())->ToElement();
+  if (currentAttribute)
+  {
+    result[0] = (float)atof(currentAttribute->FirstChild("x")->ToElement()->GetText());
+    result[1] = (float)atof(currentAttribute->FirstChild("y")->ToElement()->GetText());
+    return true;
+  }
+  return false;
+ }
+
+ bool XMLParser::getFloat3(std::string attributeName, float result[3])
+ {
+   if (m_root == 0)
+    return false;
+  TiXmlElement* currentAttribute = m_root->FirstChild(attributeName.c_str())->ToElement();
+  if (currentAttribute)
+  {
+    result[0] = (float)atof(currentAttribute->FirstChild("x")->ToElement()->GetText());
+    result[1] = (float)atof(currentAttribute->FirstChild("y")->ToElement()->GetText());
+    result[2] = (float)atof(currentAttribute->FirstChild("z")->ToElement()->GetText());
+    return true;
+  }
+  return false;
+ }

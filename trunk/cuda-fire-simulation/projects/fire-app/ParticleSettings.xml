@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- Settings for MyApp -->
-  <xRange>
-    <lowerBound>-3.0</lowerBound>
-    <upperBound>0.0</upperBound>
-  </xRange>
-  <yRange>
-    <lowerBound>-2.0</lowerBound>
-    <upperBound>2.0</upperBound>
-  </yRange>
-  <zRange>
-    <lowerBound>0.0</lowerBound>
-    <upperBound>3.0</upperBound>
-  </zRange>
+  <startingBoundingBox>
+    <xRange>
+      <x>-3.0</x>
+      <y>-1.0</y>
+    </xRange>
+    <yRange>
+      <x>-2.0</x>
+      <y>-1.0</y>
+    </yRange>
+    <zRange>
+      <x>0.0</x>
+      <y>3.0</y>
+    </zRange>
+  </startingBoundingBox>
+  <maxNumberParticles>65536</maxNumberParticles>
+  <numStartingParticles>4096</numStartingParticles>
+
 </root>

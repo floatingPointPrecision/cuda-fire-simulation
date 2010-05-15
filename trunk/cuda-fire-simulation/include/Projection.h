@@ -26,22 +26,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 /**
-@file RandomUtilities.h
+@file Projection.h
 */
 
 #pragma once
-namespace cufire
-{
-
-float randomNormalizedFloat()
-{
-  return max((float(rand()) / RAND_MAX),0.0000001f);
-}
-
-float randomFloatInRange(float minVal, float maxVal)
-{
-  float range = maxVal - minVal;
-  return minVal + randomNormalizedFloat() * range;
-}
-
-}

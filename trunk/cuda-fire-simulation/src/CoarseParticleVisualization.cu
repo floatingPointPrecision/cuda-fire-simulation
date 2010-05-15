@@ -161,14 +161,29 @@ int RunCoarseParticleVisualization(int argc, char* argv[])
   glutTimerFunc(1000/60.f, timer, 1);
 
   // add some random particles
+  // first get bounding box area for random particles
   srand ( time(NULL) );
-  // load XML file for bounds
-  //XMLParser settingsFile("ParticleSettings.xml");
-  pEngine = new CoarseParticleEngine();
-  float2 xRange = make_float2(-3, -1);
-  float2 yRange = make_float2(-2, -1);
-  float2 zRange = make_float2(2, 3);
-  pEngine->addRandomParticle(xRange,yRange,zRange,512);
+  XMLParser settingsFile("ParticleSettings.xml");
+  settingsFile.setNewRoot("startingBoundingBox");
+  float range[2];
+  // x range
+  settingsFile.getFloat2("xRange",range);
+  float2 xRange = make_float2(range[0],range[1]);
+  // y range
+  settingsFile.getFloat2("yRange",range);
+  float2 yRange = make_float2(range[0],range[1]);
+  // z range
+  settingsFile.getFloat2("zRange",range);
+  float2 zRange = make_float2(range[0],range[1]);
+  settingsFile.resetRoot();
+  // get number of starting particles and max number of particles
+  int numStartingParticles;
+  settingsFile.getInt("numStartingParticles",&numStartingParticles);
+  int maxNumParticles;
+  settingsFile.getInt("maxNumberParticles",&maxNumParticles);
+  // create particle engine
+  pEngine = new CoarseParticleEngine(maxNumParticles);
+  pEngine->addRandomParticle(xRange,yRange,zRange,numStartingParticles);
   pEngine->flushParticles();
 
 

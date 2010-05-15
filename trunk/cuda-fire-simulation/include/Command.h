@@ -26,22 +26,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 /**
-@file RandomUtilities.h
+@file Command.h
 */
 
 #pragma once
+
 namespace cufire
 {
+  /**
+  *  Command interface used to specify a particular step in a larger algorithm.
+  */
+  class Command
+  {    
 
-float randomNormalizedFloat()
-{
-  return max((float(rand()) / RAND_MAX),0.0000001f);
-}
-
-float randomFloatInRange(float minVal, float maxVal)
-{
-  float range = maxVal - minVal;
-  return minVal + randomNormalizedFloat() * range;
-}
-
+    // public methods
+  public:
+    /**
+    * constructor. Initializes the command
+    */
+    Command(){};
+    /**
+    * A destructor.
+    */
+    virtual ~Command(){};
+    /**
+    * executes the command
+    */
+    virtual void execute()=0;
+  };
 }

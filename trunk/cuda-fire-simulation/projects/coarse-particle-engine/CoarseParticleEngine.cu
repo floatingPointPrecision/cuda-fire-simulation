@@ -49,18 +49,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace cufire;
 
-CoarseParticleEngine::CoarseParticleEngine()
+CoarseParticleEngine::CoarseParticleEngine(int maxNumberParticles)
+: m_maxNumParticles(maxNumberParticles)
 {
   initializeParticles();
   resetParticles();
-}
-
-CoarseParticleEngine::CoarseParticleEngine(int numParticles, bool randomized)
-{
-  initializeParticles();
-  resetParticles();
-  m_numParticles = numParticles;
-  //TODO: add new particles
 }
 
 CoarseParticleEngine::~CoarseParticleEngine()
@@ -150,39 +143,39 @@ void CoarseParticleEngine::resetParticles()
 void CoarseParticleEngine::initializeParticles()
 {
   // initialize host particle vectors
-  m_hostPositionAge = thrust::host_vector<float4>(MAX_NUMBER_COARSE_PARTICLES);
-  m_hostFuelRadiusMassImpulse = thrust::host_vector<float4>(MAX_NUMBER_COARSE_PARTICLES);
-  m_hostXVelocities = thrust::host_vector<float>(MAX_NUMBER_COARSE_PARTICLES);
-  m_hostYVelocities = thrust::host_vector<float>(MAX_NUMBER_COARSE_PARTICLES);
-  m_hostZVelocities = thrust::host_vector<float>(MAX_NUMBER_COARSE_PARTICLES);
+  m_hostPositionAge = thrust::host_vector<float4>(m_maxNumParticles);
+  m_hostFuelRadiusMassImpulse = thrust::host_vector<float4>(m_maxNumParticles);
+  m_hostXVelocities = thrust::host_vector<float>(m_maxNumParticles);
+  m_hostYVelocities = thrust::host_vector<float>(m_maxNumParticles);
+  m_hostZVelocities = thrust::host_vector<float>(m_maxNumParticles);
   
   // initialize device particle vectors
-  m_deviceFuelRadiusMassImpulse = thrust::device_vector<float4>(MAX_NUMBER_COARSE_PARTICLES);
-  m_deviceXVelocities = thrust::device_vector<float>(MAX_NUMBER_COARSE_PARTICLES);
-  m_deviceYVelocities = thrust::device_vector<float>(MAX_NUMBER_COARSE_PARTICLES);
-  m_deviceZVelocities = thrust::device_vector<float>(MAX_NUMBER_COARSE_PARTICLES);
+  m_deviceFuelRadiusMassImpulse = thrust::device_vector<float4>(m_maxNumParticles);
+  m_deviceXVelocities = thrust::device_vector<float>(m_maxNumParticles);
+  m_deviceYVelocities = thrust::device_vector<float>(m_maxNumParticles);
+  m_deviceZVelocities = thrust::device_vector<float>(m_maxNumParticles);
   // Create buffer object for position array and register it with CUDA
   glGenBuffers(1, &m_positionsAgeVBO);
   glBindBuffer(GL_ARRAY_BUFFER, m_positionsAgeVBO);
-  unsigned int size = MAX_NUMBER_COARSE_PARTICLES * sizeof(float4);
+  unsigned int size = m_maxNumParticles * sizeof(float4);
   glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   cudaGLRegisterBufferObject(m_positionsAgeVBO);
 
-  // create random number generator
-  // create a minstd_rand object to act as our source of randomness
-  thrust::minstd_rand rng;
-  // create a uniform_real_distribution to produce floats from [-7,13)
-  thrust::uniform_real_distribution<float> dist(-1.f,1.f);
-  for (int i = 0; i < 16; i++)
-    std::cout << "random number: " << dist(rng) << std::endl;
+  //// create random number generator
+  //// create a minstd_rand object to act as our source of randomness
+  //thrust::minstd_rand rng;
+  //// create a uniform_real_distribution to produce floats from [-7,13)
+  //thrust::uniform_real_distribution<float> dist(-1.f,1.f);
+  //for (int i = 0; i < 16; i++)
+  //  std::cout << "random number: " << dist(rng) << std::endl;
 
 }
 
 void CoarseParticleEngine::addParticle(float3 position, float3 velocity, float fuel, 
                                        float radius, float lifetime, float mass, float impulse)
 {
-  if (m_numParticles >= MAX_NUMBER_COARSE_PARTICLES)
+  if (m_numParticles >= m_maxNumParticles)
     return;
 
   m_hostPositionAge[m_numParticles] = make_float4(position.x,position.y,position.z,lifetime);
