@@ -26,22 +26,42 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 /**
-@file CoarseParticleEngineDefinitions.h
-@brief Defines for the coarse-particle-engine project
+@file XMLParser.h
 */
 
+#pragma once
 
-#define DLLEXPORT __declspec(dllexport) ///< Allows easier specification of what to export to the dll
+#include <string>
+#include "tinyxml/tinyxml.h"
 
+namespace cufire
+{
+  /**
+    * simple parser for reading in XML files and nodes
+    */
+  class XMLParser
+  {
+  public:
+    /**
+    * default constructor, does not load any files
+    */
+    XMLParser() {}
+    /**
+    * basic constructor, starts at the root node of the file
+    */
+    XMLParser(const char* fileName);
+    /**
+    * basic constructor, starts at node given by the name startingNode
+    */
+    XMLParser(const char* fileName, const char* startingNode);
+    /**
+    * destructor
+    */
+    ~XMLParser();
 
-//#define P_POS 0 ///< position element of a Particle tuple containing 4 floats
-//#define P_X_VEL 1 ///< x velocuity of a Particle tuple
-//#define P_Y_VEL 2 ///< y velocity of a Particle tuple
-//#define P_Z_VEL 3 ///< z velocity of a Particle tuple
-//#define P_FUEL 4 ///< fuel element of a Particle tuple
-//#define P_RADIUS 5 ///< radius element of a Particle tuple
-//#define P_AGE 6 ///< age element of a Particle tuple
-//#define P_MASS 7 ///< mass element of a Particle tuple
-//#define P_IMPULSE 8 ///< impulse element of a Particle tuple
-
-#define MAX_NUMBER_COARSE_PARTICLES 1e12 ///< maximum number of coarse particles
+  private:
+    std::string m_fileName;
+    std::string m_startingNode;
+    TiXmlDocument m_document;
+  };
+}

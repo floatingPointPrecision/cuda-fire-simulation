@@ -36,6 +36,7 @@
 				Name="CUDA Build Rule"
 				Include="$(CUDA_INC_PATH);$(NVSDKCOMPUTE_ROOT)\C\common\inc;..\..\include"
 				Debug="true"
+				Arch="12"
 				Defines=""
 				Optimization="0"
 				RuntimeChecks="3"
@@ -306,34 +307,6 @@
 			<File
 				RelativePath=".\CoarseParticleEngine.cu"
 				>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="CUDA Build Rule"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="CUDA Build Rule"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="EmuDebug|x64"
-					>
-					<Tool
-						Name="CUDA Build Rule"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="EmuRelease|x64"
-					>
-					<Tool
-						Name="CUDA Build Rule"
-					/>
-				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter

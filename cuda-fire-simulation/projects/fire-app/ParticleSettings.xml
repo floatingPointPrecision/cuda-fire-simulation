@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- Settings for MyApp -->
+  <xRange>
+    <lowerBound>-3.0</lowerBound>
+    <upperBound>0.0</upperBound>
+  </xRange>
+  <yRange>
+    <lowerBound>-2.0</lowerBound>
+    <upperBound>2.0</upperBound>
+  </yRange>
+  <zRange>
+    <lowerBound>0.0</lowerBound>
+    <upperBound>3.0</upperBound>
+  </zRange>
+</root>

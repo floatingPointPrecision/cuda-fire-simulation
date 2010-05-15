@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cutil_gl_inline.h>
 
 // includes, CUFIRE
+#include "XMLParser.h"
 #include "CoarseParticleEngine.h"
 #include "CoarseParticleVisualization.h"
 
@@ -161,11 +162,13 @@ int RunCoarseParticleVisualization(int argc, char* argv[])
 
   // add some random particles
   srand ( time(NULL) );
+  // load XML file for bounds
+  //XMLParser settingsFile("ParticleSettings.xml");
   pEngine = new CoarseParticleEngine();
-  float2 xRange = make_float2(-5, 5);
-  float2 yRange = make_float2(-5, 5);
-  float2 zRange = make_float2(0, 5);
-  pEngine->addRandomParticle(xRange,yRange,zRange,1<<17);
+  float2 xRange = make_float2(-3, -1);
+  float2 yRange = make_float2(-2, -1);
+  float2 zRange = make_float2(2, 3);
+  pEngine->addRandomParticle(xRange,yRange,zRange,512);
   pEngine->flushParticles();
 
 
