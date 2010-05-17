@@ -15,6 +15,6 @@
     </zRange>
   </startingBoundingBox>
   <maxNumberParticles>65536</maxNumberParticles>
-  <numStartingParticles>4096</numStartingParticles>
+  <numStartingParticles>16000</numStartingParticles>
 
 </root>

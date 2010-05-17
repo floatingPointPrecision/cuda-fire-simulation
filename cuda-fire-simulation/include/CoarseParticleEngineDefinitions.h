@@ -29,17 +29,62 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @file CoarseParticleEngineDefinitions.h
 @brief Defines for the coarse-particle-engine project
 */
+#pragma once
+
+namespace cufire
+{
+  // typedefs
+  /**
+  * device pointer float4
+  */
+  typedef thrust::device_ptr<float4> DevPtrFloat4;
+  /**
+  * float4 iterator for device vectors.
+  */
+  typedef thrust::device_vector<float4>::iterator DevVecFloat4Itr;
+  /**
+  * float iterator for device vectors.
+  */
+  typedef thrust::device_vector<float>::iterator DevVecFloatItr;
+  /**
+  * Particle iterator tuple. 
+  * Tuple containing all the elements of a particle to better coalescing. Elements include:
+  * (position.x, position.y, position.z, age), (fuel, radius, mass, impulse), velocity.x, velocity.y, velocity.z
+  */
+  typedef thrust::tuple<DevPtrFloat4,DevVecFloat4Itr,DevVecFloatItr,DevVecFloatItr,DevVecFloatItr> ParticleItrTuple;
+  /**
+  * Struct of the iterators which make up a particle.
+  * Struct contains all the iterators of a particle to better coalescing. Elements include:
+  * (position.x, position.y, position.z, age), (fuel, radius, mass, impulse), velocity.x, velocity.y, velocity.z
+  */
+  struct ParticleItrStruct
+  {
+    float4* posAge; ///< (position.x, position.y, position.z, age)
+    DevVecFloat4Itr atts; ///< (fuel, radius, mass, impulse)
+    DevVecFloatItr velX; ///< velocity.x
+    DevVecFloatItr velY; ///< velocity.y
+    DevVecFloatItr velZ; ///< velocity.z
+  };
+  /**
+  * Particle tuple. 
+  * Tuple containing all the elements of a particle to better coalescing. Elements include:
+  * (position.x, position.y, position.z, age), velocity.x, velocity.y, velocity.z, fuel, radius, mass, impulse
+  */
+  typedef thrust::tuple<float4,float4,float,float,float> ParticleTuple;
+  /**
+  * Particle iterator.
+  */
+  typedef thrust::zip_iterator<ParticleItrTuple> ParticleZipItr;
 
 
-//#define DLLEXPORT __declspec(dllexport) ///< Allows easier specification of what to export to the dll
+  //#define P_POS 0 ///< position element of a Particle tuple containing 4 floats
+  //#define P_X_VEL 1 ///< x velocuity of a Particle tuple
+  //#define P_Y_VEL 2 ///< y velocity of a Particle tuple
+  //#define P_Z_VEL 3 ///< z velocity of a Particle tuple
+  //#define P_FUEL 4 ///< fuel element of a Particle tuple
+  //#define P_RADIUS 5 ///< radius element of a Particle tuple
+  //#define P_AGE 6 ///< age element of a Particle tuple
+  //#define P_MASS 7 ///< mass element of a Particle tuple
+  //#define P_IMPULSE 8 ///< impulse element of a Particle tuple
 
-
-//#define P_POS 0 ///< position element of a Particle tuple containing 4 floats
-//#define P_X_VEL 1 ///< x velocuity of a Particle tuple
-//#define P_Y_VEL 2 ///< y velocity of a Particle tuple
-//#define P_Z_VEL 3 ///< z velocity of a Particle tuple
-//#define P_FUEL 4 ///< fuel element of a Particle tuple
-//#define P_RADIUS 5 ///< radius element of a Particle tuple
-//#define P_AGE 6 ///< age element of a Particle tuple
-//#define P_MASS 7 ///< mass element of a Particle tuple
-//#define P_IMPULSE 8 ///< impulse element of a Particle tuple
+}

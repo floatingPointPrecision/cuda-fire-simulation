@@ -30,3 +30,89 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #pragma once
+
+// includes, CUDA
+// includes, CUDA
+#include "thrust/device_vector.h"
+#include "thrust/host_vector.h"
+#include "thrust/device_ptr.h"
+#include "thrust/iterator/zip_iterator.h"
+
+// includes, cufire
+// (forward declarations)
+#include "CoarseParticleEngineDefinitions.h"
+#include "Command.h"
+
+using namespace cufire;
+
+namespace cufire
+{
+  /**
+  *  Projection class, used for taking a 3D grid of particles and projecting them onto a view-oriented 2D area
+  */
+  class Projection
+    : public Command
+  {    
+    // public methods
+  public:
+    /**
+    * constructor. Initializes the Projection object
+    */
+    Projection(float3 gridCenter, float3 gridDimensions, float projectionDepth, int2 slicePixelDimensions);
+    /**
+    * A destructor.
+    */
+    virtual ~Projection(){};
+    /**
+    * executes the command
+    */
+    virtual void execute()=0;
+    /**
+    * Set the starting iterator for the particles and the number of particles
+    */
+    void setParticles(ParticleItrStruct particlesBegin, int numParticles) {m_particlesBegin = particlesBegin;m_numParticles = numParticles;} 
+
+    // protected members
+  protected:
+    float3 m_gridCenter;
+    float3 m_gridDims;
+    float m_projectionDepth;
+    int2 m_slicePixelDims;
+    float4* m_outputSlice;
+    int m_numParticles;
+
+    ParticleItrStruct m_particlesBegin;
+  };
+
+  /**
+  *  OrthographicProjection class, used for taking a 3D grid of particles and projecting them orthographically onto a view-oriented 2D area.
+  *  Assumes the frustum front and back are perpendicular to the z-axis (so don't move the camera).
+  */
+  class OrthographicProjection
+    : public Projection
+  {
+    // public methods
+  public:
+    /**
+    * constructor. Initializes the OrthographicProjection class which is a Projection
+    */
+    OrthographicProjection(float3 gridCenter, float3 gridDimensions, float projectionDepth, int2 slicePixelDimensions, float2 sliceWorldDimensions);
+    /**
+    * destructor, does nothing
+    */
+    ~OrthographicProjection(){}
+    /**
+    * executes the command
+    */
+    void execute();
+    /**
+    * Sets the z-intercept for the next slice to project
+    */
+    void setSliceInformation(float zIntercept, float4* outputSlice);
+
+    // protected members
+  protected:
+    float m_ZIntercept;
+    float2 m_sliceWorldDims; 
+  };
+}
