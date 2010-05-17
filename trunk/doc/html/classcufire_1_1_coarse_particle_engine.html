@@ -38,6 +38,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div class="tabs">
     <ul>
       <li><a href="annotated.html"><span>Class&nbsp;List</span></a></li>
+      <li><a href="hierarchy.html"><span>Class&nbsp;Hierarchy</span></a></li>
       <li><a href="functions.html"><span>Class&nbsp;Members</span></a></li>
     </ul>
   </div>
@@ -68,6 +69,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">adds random particle.  <a href="#a832ddb97a2dd16db53b26252f71e75ff"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a681e94f32aa176c3222006e9a26de9ea">flushParticles</a> ()</td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">flushes particles to the GPU.  <a href="#a681e94f32aa176c3222006e9a26de9ea"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcufire_1_1_particle_itr_struct.html">ParticleItrStruct</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a0f5a4a00585d5fea5e35844ce9045271">getParticleBegins</a> ()</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">returns a struct filled with the begin iterators of all the particle attribute device vectors  <a href="#a0f5a4a00585d5fea5e35844ce9045271"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcufire_1_1_particle_itr_struct.html">ParticleItrStruct</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#adde2c892af9c3b139ee073347faddbd1">getParticleEnds</a> ()</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">returns a struct filled with the end iterators of all the particle attribute device vectors  <a href="#adde2c892af9c3b139ee073347faddbd1"></a><br/></td></tr>
 <tr><td colspan="2"><h2>Protected Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#af9de67dd7aa671104e3ffd43448bf8d7">initializeParticles</a> ()</td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">initializes particles on host and GPU.  <a href="#af9de67dd7aa671104e3ffd43448bf8d7"></a><br/></td></tr>
@@ -84,6 +89,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">max number of particles in the system.  <a href="#a47c8767e8c716517ed3c872041575549"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a0baa3086687bf24f78e61cef590d2a80">m_numParticles</a></td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">current number of particles in the system.  <a href="#a0baa3086687bf24f78e61cef590d2a80"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab680c684537a1023111cb6d7a888ca57"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_currentTime" ref="ab680c684537a1023111cb6d7a888ca57" args="" -->
+float&nbsp;</td><td class="memItemRight" valign="bottom"><b>m_currentTime</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">thrust::host_vector&lt; float4 &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#adbd28a32d2a6d809692d6adf868e9fcc">m_hostPositionAge</a></td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle host copy of position x, y, z, age  <a href="#adbd28a32d2a6d809692d6adf868e9fcc"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">thrust::host_vector&lt; float4 &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a501c34d44cdd87ee32a326fd4f35eb51">m_hostFuelRadiusMassImpulse</a></td></tr>
@@ -108,6 +115,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle y velocities device copy  <a href="#a7821c58a0288f374fd5643132bb22d09"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">thrust::device_vector&lt; float &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#abe8c4310b57e1456e98cc5a0b238e888">m_deviceZVelocities</a></td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">particle z velocities device copy  <a href="#abe8c4310b57e1456e98cc5a0b238e888"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcufire_1_1_particle_itr_struct.html">ParticleItrStruct</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#ad222efe8078b9667a86448effb918de1">m_particleStructItrBegin</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">beginning of particle tuple of iterators  <a href="#ad222efe8078b9667a86448effb918de1"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcufire_1_1_particle_itr_struct.html">ParticleItrStruct</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#ab0237b7de183786b4429d456d77a63fc">m_particleStructItrEnd</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">end of particle tuple of iterators  <a href="#ab0237b7de183786b4429d456d77a63fc"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">ParticleZipItr&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#ab36e358b95d6a18974b1eba8bb0e2b85">m_particleItrBegin</a></td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">beginning of particle zip_iterator  <a href="#ab36e358b95d6a18974b1eba8bb0e2b85"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">ParticleZipItr&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classcufire_1_1_coarse_particle_engine.html#a96ce06fc79488c754688b002337a8885">m_particleItrEnd</a></td></tr>
@@ -370,6 +381,44 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <p>flushes particles to the GPU. </p>
 <p>Transfers all local particles to the GPU, used to group large transfers together and allow incremental addition of particles </p>
+
+</div>
+</div>
+<a class="anchor" id="a0f5a4a00585d5fea5e35844ce9045271"></a><!-- doxytag: member="cufire::CoarseParticleEngine::getParticleBegins" ref="a0f5a4a00585d5fea5e35844ce9045271" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcufire_1_1_particle_itr_struct.html">ParticleItrStruct</a> cufire::CoarseParticleEngine::getParticleBegins </td>
+          <td>(</td>
+          <td class="paramname"></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td><code> [inline]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>returns a struct filled with the begin iterators of all the particle attribute device vectors </p>
+
+</div>
+</div>
+<a class="anchor" id="adde2c892af9c3b139ee073347faddbd1"></a><!-- doxytag: member="cufire::CoarseParticleEngine::getParticleEnds" ref="adde2c892af9c3b139ee073347faddbd1" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcufire_1_1_particle_itr_struct.html">ParticleItrStruct</a> cufire::CoarseParticleEngine::getParticleEnds </td>
+          <td>(</td>
+          <td class="paramname"></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td><code> [inline]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>returns a struct filled with the end iterators of all the particle attribute device vectors </p>
 
 </div>
 </div>
@@ -664,6 +713,36 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 </div>
 </div>
+<a class="anchor" id="ad222efe8078b9667a86448effb918de1"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_particleStructItrBegin" ref="ad222efe8078b9667a86448effb918de1" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcufire_1_1_particle_itr_struct.html">ParticleItrStruct</a> <a class="el" href="classcufire_1_1_coarse_particle_engine.html#ad222efe8078b9667a86448effb918de1">cufire::CoarseParticleEngine::m_particleStructItrBegin</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>beginning of particle tuple of iterators </p>
+
+</div>
+</div>
+<a class="anchor" id="ab0237b7de183786b4429d456d77a63fc"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_particleStructItrEnd" ref="ab0237b7de183786b4429d456d77a63fc" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcufire_1_1_particle_itr_struct.html">ParticleItrStruct</a> <a class="el" href="classcufire_1_1_coarse_particle_engine.html#ab0237b7de183786b4429d456d77a63fc">cufire::CoarseParticleEngine::m_particleStructItrEnd</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>end of particle tuple of iterators </p>
+
+</div>
+</div>
 <a class="anchor" id="a5c3d357dd3ad492c902a05e3d20f1465"></a><!-- doxytag: member="cufire::CoarseParticleEngine::m_positionsAgeRaw" ref="a5c3d357dd3ad492c902a05e3d20f1465" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -712,7 +791,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Sat May 15 05:13:03 2010 for CUFIRE by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon May 17 11:58:34 2010 for CUFIRE by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

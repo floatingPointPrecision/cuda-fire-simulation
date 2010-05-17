@@ -68,6 +68,61 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00026"></a>00026 <span class="comment">*******************************************************************************/</span>
 <a name="l00027"></a>00027 
 <a name="l00032"></a>00032 <span class="preprocessor">#pragma once</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="comment">// includes, CUDA</span>
+<a name="l00035"></a>00035 <span class="comment">// includes, CUDA</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &quot;thrust/device_vector.h&quot;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;thrust/host_vector.h&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;thrust/device_ptr.h&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;thrust/iterator/zip_iterator.h&quot;</span>
+<a name="l00040"></a>00040 
+<a name="l00041"></a>00041 <span class="comment">// includes, cufire</span>
+<a name="l00042"></a>00042 <span class="comment">// (forward declarations)</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="_coarse_particle_engine_definitions_8h.html" title="Defines for the coarse-particle-engine project.">CoarseParticleEngineDefinitions.h</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="_command_8h.html">Command.h</a>&quot;</span>
+<a name="l00045"></a>00045 
+<a name="l00046"></a>00046 <span class="keyword">using namespace </span>cufire;
+<a name="l00047"></a>00047 
+<a name="l00048"></a>00048 <span class="keyword">namespace </span>cufire
+<a name="l00049"></a>00049 {
+<a name="l00053"></a><a class="code" href="classcufire_1_1_projection.html">00053</a>   <span class="keyword">class </span><a class="code" href="classcufire_1_1_projection.html" title="Projection class, used for taking a 3D grid of particles and projecting them onto...">Projection</a>
+<a name="l00054"></a>00054     : <span class="keyword">public</span> <a class="code" href="classcufire_1_1_command.html" title="Command interface used to specify a particular step in a larger algorithm.">Command</a>
+<a name="l00055"></a>00055   {    
+<a name="l00056"></a>00056     <span class="comment">// public methods</span>
+<a name="l00057"></a>00057   <span class="keyword">public</span>:
+<a name="l00061"></a>00061     <a class="code" href="classcufire_1_1_projection.html#a0206b7577864d702c0b0d126f01ff1ab" title="constructor.">Projection</a>(float3 gridCenter, float3 gridDimensions, <span class="keywordtype">float</span> projectionDepth, int2 slicePixelDimensions);
+<a name="l00065"></a><a class="code" href="classcufire_1_1_projection.html#a2def0a481737dcebd148fab1f57f2abe">00065</a>     <span class="keyword">virtual</span> <a class="code" href="classcufire_1_1_projection.html#a2def0a481737dcebd148fab1f57f2abe" title="A destructor.">~Projection</a>(){};
+<a name="l00069"></a>00069     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_projection.html#a4c43b42b9fcb4495b424e64a7094e3af" title="executes the command">execute</a>()=0;
+<a name="l00073"></a><a class="code" href="classcufire_1_1_projection.html#a99eaaa5f0c1190489c429d5d47a36475">00073</a>     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_projection.html#a99eaaa5f0c1190489c429d5d47a36475" title="Set the starting iterator for the particles and the number of particles.">setParticles</a>(<a class="code" href="structcufire_1_1_particle_itr_struct.html" title="Struct of the iterators which make up a particle.">ParticleItrStruct</a> particlesBegin, <span class="keywordtype">int</span> numParticles) {m_particlesBegin = particlesBegin;m_numParticles = numParticles;} 
+<a name="l00074"></a>00074 
+<a name="l00075"></a>00075     <span class="comment">// protected members</span>
+<a name="l00076"></a>00076   <span class="keyword">protected</span>:
+<a name="l00077"></a>00077     float3 m_gridCenter;
+<a name="l00078"></a>00078     float3 m_gridDims;
+<a name="l00079"></a>00079     <span class="keywordtype">float</span> m_projectionDepth;
+<a name="l00080"></a>00080     int2 m_slicePixelDims;
+<a name="l00081"></a>00081     float4* m_outputSlice;
+<a name="l00082"></a>00082     <span class="keywordtype">int</span> m_numParticles;
+<a name="l00083"></a>00083 
+<a name="l00084"></a>00084     <a class="code" href="structcufire_1_1_particle_itr_struct.html" title="Struct of the iterators which make up a particle.">ParticleItrStruct</a> m_particlesBegin;
+<a name="l00085"></a>00085   };
+<a name="l00086"></a>00086 
+<a name="l00091"></a><a class="code" href="classcufire_1_1_orthographic_projection.html">00091</a>   <span class="keyword">class </span><a class="code" href="classcufire_1_1_orthographic_projection.html" title="OrthographicProjection class, used for taking a 3D grid of particles and projecting...">OrthographicProjection</a>
+<a name="l00092"></a>00092     : <span class="keyword">public</span> <a class="code" href="classcufire_1_1_projection.html" title="Projection class, used for taking a 3D grid of particles and projecting them onto...">Projection</a>
+<a name="l00093"></a>00093   {
+<a name="l00094"></a>00094     <span class="comment">// public methods</span>
+<a name="l00095"></a>00095   <span class="keyword">public</span>:
+<a name="l00099"></a>00099     <a class="code" href="classcufire_1_1_orthographic_projection.html#a38b7fec90f26db73e3afd96cc55f9090" title="constructor.">OrthographicProjection</a>(float3 gridCenter, float3 gridDimensions, <span class="keywordtype">float</span> projectionDepth, int2 slicePixelDimensions, float2 sliceWorldDimensions);
+<a name="l00103"></a><a class="code" href="classcufire_1_1_orthographic_projection.html#a4eee9ea457c6afb514bd7bd5b2f824d9">00103</a>     <a class="code" href="classcufire_1_1_orthographic_projection.html#a4eee9ea457c6afb514bd7bd5b2f824d9" title="destructor, does nothing">~OrthographicProjection</a>(){}
+<a name="l00107"></a>00107     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_orthographic_projection.html#a74e4164433338aaeb764267bdb7981d3" title="executes the command">execute</a>();
+<a name="l00111"></a>00111     <span class="keywordtype">void</span> <a class="code" href="classcufire_1_1_orthographic_projection.html#ac2df20b846884b1ac952acf1772f57b0" title="Sets the z-intercept for the next slice to project.">setSliceInformation</a>(<span class="keywordtype">float</span> zIntercept, float4* outputSlice);
+<a name="l00112"></a>00112 
+<a name="l00113"></a>00113     <span class="comment">// protected members</span>
+<a name="l00114"></a>00114   <span class="keyword">protected</span>:
+<a name="l00115"></a>00115     <span class="keywordtype">float</span> m_ZIntercept;
+<a name="l00116"></a>00116     float2 m_sliceWorldDims; 
+<a name="l00117"></a>00117   };
+<a name="l00118"></a>00118 }
 </pre></div></div>
 <!--- window showing the filter options -->
 <div id="MSearchSelectWindow"
@@ -83,7 +138,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Sat May 15 05:13:03 2010 for CUFIRE by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon May 17 11:58:34 2010 for CUFIRE by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>
