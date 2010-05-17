@@ -30,3 +30,74 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Projection.h"
+
+////////////////// PROJECTION //////////////////////
+
+Projection::Projection(float3 gridCenter, float3 gridDimensions, float projectionDepth, int2 slicePixelDimensions)
+: m_gridCenter(gridCenter), m_gridDims(gridDimensions), m_projectionDepth(projectionDepth), m_slicePixelDims(slicePixelDimensions), m_numParticles(0), m_outputSlice(0)
+{
+}
+
+//////////// ORTHOGRAPHIC PROJECTION //////////////////////
+
+OrthographicProjection::OrthographicProjection(float3 gridCenter, float3 gridDimensions, float projectionDepth, int2 slicePixelDimensions, float2 sliceWorldDimensions)
+: Projection(gridCenter,gridDimensions,projectionDepth,slicePixelDimensions), m_ZIntercept(-1.f), m_sliceWorldDims(sliceWorldDimensions)
+{
+}
+
+void OrthographicProjection::setSliceInformation(float zIntercept, float4* outputSlice)
+{
+  m_ZIntercept = zIntercept;
+  m_outputSlice = outputSlice;
+}
+
+__device__ int worldToPixelIndex(float4 position, float2 xyLowerBound, float2 xyUpperBound, int2 imageDims)
+{
+  int pixelIndex;
+  if (position.x < xyLowerBound.x || position.x > xyUpperBound.x ||
+      position.y < xyLowerBound.y || position.y > xyUpperBound.y)
+    pixelIndex = -1;
+  else
+  {
+    float xRatio = (position.x - xyLowerBound.x) / (xyUpperBound.x-xyLowerBound.x);
+    float yRatio = 1.f + (position.y - xyUpperBound.y) / (xyUpperBound.y-xyLowerBound.y);
+    int xVal = xRatio * imageDims.x;
+    int yVal = yRatio * imageDims.y;
+    pixelIndex = yVal*imageDims.x+xVal;
+  }
+  return pixelIndex;
+
+} 
+__global__ void orthProjection(ParticleItrStruct particles, float4* output, float zIntercept, float sliceDepth, 
+                               int numParticles, float2 xyLowerBound, float2 xyUpperBound, int2 imageDims)
+{
+  int index = blockDim.x * blockIdx.x + threadIdx.x;
+  if (index >= numParticles)
+    return;
+  float4 positionAge = particles.posAge[index];
+  int pixelIndex = worldToPixelIndex(positionAge,xyLowerBound,xyUpperBound,imageDims);
+  float projectionDistance = fabs(positionAge.z - zIntercept);
+  projectionDistance /= sliceDepth;
+  projectionDistance = max(1.f - projectionDistance, 0.f);
+  if (pixelIndex == -1 || projectionDistance == 0)
+    return;
+  projectionDistance *= 255.f;
+  output[pixelIndex] = make_float4(projectionDistance,projectionDistance,projectionDistance,0);
+}
+
+void OrthographicProjection::execute()
+{
+  if (m_outputSlice == 0)
+    exit(1);
+  int blockSize = 512;
+  int gridSize = (m_numParticles + blockSize - 1) / blockSize;
+  float2 xyLowerBound = make_float2(m_gridCenter.x - m_gridDims.x/2.f, m_gridCenter.y - m_gridDims.y/2.f);
+  float2 xyUpperBound = make_float2(m_gridCenter.x + m_gridDims.x/2.f, m_gridCenter.y + m_gridDims.y/2.f);
+  orthProjection<<<gridSize,blockSize>>>(m_particlesBegin,m_outputSlice,m_ZIntercept,m_projectionDepth,
+                                         m_numParticles,xyLowerBound,xyUpperBound,m_slicePixelDims);
+}
+
+
+
+
+

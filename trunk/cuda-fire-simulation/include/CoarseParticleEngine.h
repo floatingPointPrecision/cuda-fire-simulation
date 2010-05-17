@@ -45,39 +45,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // includes, CUFIRE
 #include "CoarseParticleEngineDefinitions.h"
+#include "Command.h"
+//#include "Projection.h"
 
 namespace cufire
 {
-  // typedefs
-
-  /**
-  * device pointer float4
-  */
-  typedef thrust::device_ptr<float4> DevPtrFloat4;
-  /**
-  * float4 iterator for device vectors.
-  */
-  typedef thrust::device_vector<float4>::iterator DevVecFloat4Itr;
-  /**
-  * float iterator for device vectors.
-  */
-  typedef thrust::device_vector<float>::iterator DevVecFloatItr;
-  /**
-  * Particle iterator tuple. 
-  * Tuple containing all the elements of a particle to better coalescing. Elements include:
-  * (position.x, position.y, position.z, age), (fuel, radius, mass, impulse), velocity.x, velocity.y, velocity.z
-  */
-  typedef thrust::tuple<DevPtrFloat4,DevVecFloat4Itr,DevVecFloatItr,DevVecFloatItr,DevVecFloatItr> ParticleItrTuple;
-  /**
-  * Particle tuple. 
-  * Tuple containing all the elements of a particle to better coalescing. Elements include:
-  * (position.x, position.y, position.z, age), velocity.x, velocity.y, velocity.z, fuel, radius, mass, impulse
-  */
-  typedef thrust::tuple<float4,float4,float,float,float> ParticleTuple;
-  /**
-  * Particle iterator.
-  */
-  typedef thrust::zip_iterator<ParticleItrTuple> ParticleZipItr;
 
   /**
   *  Coarse Particle Engine. Manager for the coarse particle simulation of broad fuel movement.
@@ -128,6 +100,16 @@ namespace cufire
     * incremental addition of particles
     */
     void flushParticles();
+    /**
+    * returns a struct filled with the begin iterators of all the particle attribute device vectors
+    */
+    ParticleItrStruct getParticleBegins() {return m_particleStructItrBegin;}
+    /**
+    * returns a struct filled with the end iterators of all the particle attribute device vectors
+    */
+    ParticleItrStruct getParticleEnds() {return m_particleStructItrEnd;}
+
+
 
     // protected methods
   protected:
@@ -148,6 +130,8 @@ namespace cufire
     */
     void projectToSlices();
 
+
+
     // protected members
   protected:
     /**
@@ -157,6 +141,7 @@ namespace cufire
 
     unsigned int m_maxNumParticles; ///< max number of particles in the system.
     unsigned int m_numParticles; ///< current number of particles in the system.
+    float m_currentTime;
 
     thrust::host_vector<float4> m_hostPositionAge; ///< particle host copy of position x, y, z, age
     thrust::host_vector<float4> m_hostFuelRadiusMassImpulse; ///< particle host copy of fuel, radius, mass, impulse
@@ -172,6 +157,8 @@ namespace cufire
     thrust::device_vector<float> m_deviceYVelocities; ///< particle y velocities device copy
     thrust::device_vector<float> m_deviceZVelocities; ///< particle z velocities device copy
 
+    ParticleItrStruct m_particleStructItrBegin; ///< beginning of particle tuple of iterators
+    ParticleItrStruct m_particleStructItrEnd; ///< end of particle tuple of iterators
     ParticleZipItr m_particleItrBegin; ///< beginning of particle zip_iterator
     ParticleZipItr m_particleItrEnd; ///< end of particle zip_iterator
   };

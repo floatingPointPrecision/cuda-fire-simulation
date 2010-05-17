@@ -46,22 +46,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // includes, CUFIRE
 #include "RandomUtilities.h"
+#include "Projection.h"
+#include "Bitmap.hpp"
 
 using namespace cufire;
 
-CoarseParticleEngine::CoarseParticleEngine(int maxNumberParticles)
-: m_maxNumParticles(maxNumberParticles)
-{
-  initializeParticles();
-  resetParticles();
-}
-
-CoarseParticleEngine::~CoarseParticleEngine()
-{
-  cudaGLUnregisterBufferObject(m_positionsAgeVBO);
-  glDeleteBuffers(1, &m_positionsAgeVBO);
-}
-
+////////////////// CUDA CODE ////////////////////
 __host__ __device__ 
 ParticleTuple MakeParticleTuple(float4 positionAge, float4 fuelRadMassImpulse, float xVel, float yVel, float zVel)
 {
@@ -97,14 +87,66 @@ struct UpdateParticlePosition : public thrust::unary_function<ParticleTuple,Part
   float dT;
 };
 
+////////////////// HOST CODE ////////////////////
+CoarseParticleEngine::CoarseParticleEngine(int maxNumberParticles)
+: m_maxNumParticles(maxNumberParticles), m_currentTime(0.f)
+{
+  initializeParticles();
+  resetParticles();
+}
+
+CoarseParticleEngine::~CoarseParticleEngine()
+{
+  cudaGLUnregisterBufferObject(m_positionsAgeVBO);
+  glDeleteBuffers(1, &m_positionsAgeVBO);
+}
+
 void CoarseParticleEngine::advanceSimulation(float timestep)
 {
+  m_currentTime += timestep;
   float4* glPosPointer;
   cudaGLMapBufferObject((void**)&glPosPointer, m_positionsAgeVBO);
   DevPtrFloat4 rawDevicePositionPtr(glPosPointer);
-
+  // create hypothetical new velocities from artist-defined forces
   thrust::transform(m_particleItrBegin, m_particleItrBegin + m_numParticles, m_particleItrBegin, UpdateParticlePosition(1/60.f));
+  // bin particles into grids for non-divergence calculation
 
+  // solve for non-divergence
+
+  // add non-divergence term back to hypothetical new velocities
+
+  // update particle position according to new velocities
+
+  // perform projection
+  float3 gridCenter = make_float3(0,0,0);
+  float3 gridDims = make_float3(8,8,8);
+  float projectionDepth = 0.5;
+  int2 slicePixelDims = make_int2(300,300);
+  float2 sliceWorldDims = make_float2(8,8);
+  int numSliceBytes = sizeof(float4)*slicePixelDims.x*slicePixelDims.y;
+  float4* d_sliceOutput;
+  float4* h_sliceOutput = (float4*) malloc(numSliceBytes);
+  cudaMalloc((void**)&d_sliceOutput, numSliceBytes);
+  cudaMemset(d_sliceOutput,0, numSliceBytes);
+  OrthographicProjection proj(gridCenter,gridDims,projectionDepth,slicePixelDims,sliceWorldDims);
+  proj.setSliceInformation(3.f, d_sliceOutput);
+  proj.setParticles(m_particleStructItrBegin,m_numParticles);
+  proj.execute();
+  // copy output as image
+  cudaMemcpy(h_sliceOutput, d_sliceOutput, numSliceBytes, cudaMemcpyDeviceToHost);
+  BitmapWriter newBitmap(slicePixelDims.x,slicePixelDims.y);
+  int x,y,width=slicePixelDims.x,height=slicePixelDims.y;
+  for(x=0;x<width;++x)
+  {
+    for(y=0;y<height;++y)
+    {
+      float4 currentPixel = h_sliceOutput[y*width+x];
+      newBitmap.setValue(x,y,char(currentPixel.x),char(currentPixel.y),char(currentPixel.z));
+    }
+  }
+  newBitmap.flush("outputBitmap.bmp");
+  cudaFree(d_sliceOutput);
+  free(h_sliceOutput);
   cudaGLUnmapBufferObject(m_positionsAgeVBO);
 }
 
@@ -217,6 +259,19 @@ void CoarseParticleEngine::flushParticles()
   m_deviceXVelocities = m_hostXVelocities;
   m_deviceYVelocities = m_hostYVelocities;
   m_deviceZVelocities = m_hostZVelocities;
+
+  // update particle iterator struct (for passing around)
+  m_particleStructItrBegin.posAge = glPositionAges;
+  m_particleStructItrBegin.atts = m_deviceFuelRadiusMassImpulse.begin();
+  m_particleStructItrBegin.velX = m_deviceXVelocities.begin();
+  m_particleStructItrBegin.velY = m_deviceYVelocities.begin();
+  m_particleStructItrBegin.velZ = m_deviceZVelocities.begin();
+
+  m_particleStructItrEnd.posAge = glPositionAges + m_numParticles;
+  m_particleStructItrEnd.atts = m_deviceFuelRadiusMassImpulse.begin() + m_numParticles;
+  m_particleStructItrEnd.velX = m_deviceXVelocities.begin() + m_numParticles;
+  m_particleStructItrEnd.velY = m_deviceYVelocities.begin() + m_numParticles;
+  m_particleStructItrEnd.velZ = m_deviceZVelocities.begin() + m_numParticles;
 
   // update zip_iterators
   m_particleItrBegin = thrust::make_zip_iterator(make_tuple(m_positionsAgeRaw,
