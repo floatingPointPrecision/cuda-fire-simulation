@@ -77,7 +77,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;$(CUDA_LIB_PATH)&quot;;&quot;$(NVSDKCOMPUTE_ROOT)\C\common\lib&quot;;..\..\lib"
-				IgnoreDefaultLibraryNames="MSVCRTD"
+				IgnoreDefaultLibraryNames="MSVCPRTD;libcmtd"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="17"

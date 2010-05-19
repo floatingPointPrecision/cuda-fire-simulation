@@ -56,7 +56,7 @@
 				AdditionalOptions="-D_SCL_SECURE_NO_WARNINGS"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include;&quot;$(CUDA_INC_PATH)&quot;"
-				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;COARSEPARTICLEENGINE_EXPORTS;NOMINMAX;D_SCL_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="_DEBUG;_WINDOWS;_USRDLL;COARSEPARTICLEENGINE_EXPORTS;NOMINMAX;OCU_SM13"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -75,7 +75,10 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="ocustorage_d.lib ocuutil_d.lib ocuequation_d.lib"
 				OutputFile="$(OutDir)\$(ProjectName)_d.lib"
+				AdditionalLibraryDirectories="..\..\lib"
+				IgnoreDefaultLibraryNames=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -324,6 +327,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\sample_cu.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\SolveNonDivergence.cu"
 				>
 			</File>
@@ -350,7 +357,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\projectTest.h"
+				>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\..\include\RandomUtilities.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\sample_cu.h"
 				>
 			</File>
 			<File
