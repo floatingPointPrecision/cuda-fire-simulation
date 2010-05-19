@@ -28,12 +28,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
 @file CoarseParticleEngine.cu
 */
-#include "CoarseParticleEngine.h"
 
 // includes, system
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <GL/glew.h>
 
 // includes, CUDA
 #include <cutil_inline.h>
@@ -45,9 +44,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <thrust/random/uniform_real_distribution.h>
 
 // includes, CUFIRE
+#include "CoarseParticleEngine.h"
 #include "RandomUtilities.h"
 #include "Projection.h"
 #include "Bitmap.hpp"
+#include "projectTest.h"
 
 using namespace cufire;
 
@@ -147,6 +148,11 @@ void CoarseParticleEngine::advanceSimulation(float timestep)
   newBitmap.flush("outputBitmap.bmp");
   cudaFree(d_sliceOutput);
   free(h_sliceOutput);
+
+  // test ns solver
+  ProjectTest newTest;
+  newTest.run();
+
   cudaGLUnmapBufferObject(m_positionsAgeVBO);
 }
 
