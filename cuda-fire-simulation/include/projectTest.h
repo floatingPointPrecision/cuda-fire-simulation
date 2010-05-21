@@ -1,17 +1,16 @@
 #pragma once
 
 #include "stdafx.h"
-#include <vector>
-
 #include "sample_cu.h"
+#include "ocuequation/eqn_incompressns3d.h"
+
+#include "ocustorage/grid1d.h"
 #include "ocustorage/grid3dboundary.h"
-#include "ocuequation/sol_project3d.h"
+#include "ocustorage/grid3dsample.h"
+#include "ocuequation/eqn_incompressns3d.h"
+#include "ocuutil/timer.h"
 
 using namespace ocu;
-
-#ifndef M_PI
-#define M_PI (3.1415926535)
-#endif
 
 class ProjectTest 
   : public UnitTest
@@ -19,193 +18,122 @@ class ProjectTest
 public:
   ProjectTest() : UnitTest("ProjectTest") {}
 
-  void run_test(int nx, int ny, int nz, float hx, float hy, float hz, 
-    BoundaryCondition xpos, BoundaryCondition xneg, BoundaryCondition ypos, BoundaryCondition yneg, BoundaryCondition zpos, BoundaryCondition zneg)
+  void allocate_particles(Grid1DHostF &hposx, Grid1DHostF &hposy, Grid1DHostF &hposz, Grid1DHostF &hvx, Grid1DHostF &hvy, Grid1DHostF &hvz,
+    Grid1DDeviceF &posx, Grid1DDeviceF &posy, Grid1DDeviceF &posz, Grid1DDeviceF &vx, Grid1DDeviceF &vy, Grid1DDeviceF &vz, 
+    int nparts, float xsize, float ysize, float zsize)
   {
+    hposx.init(nparts,0);
+    hposy.init(nparts,0);
+    hposz.init(nparts,0);
+    hvx.init(nparts,0);
+    hvy.init(nparts,0);
+    hvz.init(nparts,0);
 
-    std::vector<Grid3DDimension> dimensions(3);
-    dimensions[0].init(nx+1,ny,nz,1,1,1);
-    dimensions[1].init(nx,ny+1,nz,1,1,1);
-    dimensions[2].init(nx,ny,nz+1,1,1,1);  
-    Grid3DDimension::pad_for_congruence(dimensions);
+    posx.init(nparts,0);
+    posy.init(nparts,0);
+    posz.init(nparts,0);
+    vx.init(nparts,0);
+    vy.init(nparts,0);
+    vz.init(nparts,0);
 
-    Grid3DDeviceF u, v, w;
-    Grid3DHostF hu, hv, hw;
-
-    u.init_congruent(dimensions[0]);
-    v.init_congruent(dimensions[1]);
-    w.init_congruent(dimensions[2]);
-    hu.init_congruent(dimensions[0],true);
-    hv.init_congruent(dimensions[1],true);
-    hw.init_congruent(dimensions[2],true);
-    /*
-    Grid3DDeviceF u, v, w;
-    Grid3DHostF hu, hv, hw;
-
-    u.init(nx+1, ny, nz, 1, 1, 1, 0, 1, 1);
-    v.init(nx, ny+1, nz, 1, 1, 1, 1, 0, 1);
-    w.init(nx, ny, nz+1, 1, 1, 1, 1, 1, 0);
-    hu.init(nx+1, ny, nz, 1, 1, 1, true, 0, 1, 1);
-    hv.init(nx, ny+1, nz, 1, 1, 1, true, 1, 0, 1);
-    hw.init(nx, ny, nz+1, 1, 1, 1, true, 1, 1, 0);
-    */
-    int i,j,k;
-    for (i=0; i < nx; i++) {
-      for (j=0; j < ny; j++) {
-        for (k=0; k < nz; k++) {
-          hu.at(i,j,k) = sin(((float)k) / nz * 4 * M_PI) + sin(((float)j) / ny * 4 * M_PI);
-          hv.at(i,j,k) = sin(((float)k) / nz * 8 * M_PI) + sin(((float)i) / nx * 6 * M_PI);
-          hw.at(i,j,k) = cos(((float)j) / ny * 8 * M_PI) + sin(((float)k) / nz * 6 * M_PI);
-        }
-      }
+    for (int p=0; p < nparts; p++) {
+      hposx.at(p) = ((((double)rand()) / RAND_MAX) * xsize);
+      hposy.at(p) = ((((double)rand()) / RAND_MAX) * ysize);
+      hposz.at(p) = ((((double)rand()) / RAND_MAX) * zsize);
     }
 
-
-
-    UNITTEST_ASSERT_TRUE(u.copy_all_data(hu));
-    UNITTEST_ASSERT_TRUE(v.copy_all_data(hv));
-    UNITTEST_ASSERT_TRUE(w.copy_all_data(hw));
-
-    Sol_ProjectDivergence3DDeviceF project;
-    project.bc.xpos = xpos;
-    project.bc.xneg = xneg;
-    project.bc.ypos = ypos;
-    project.bc.yneg = yneg;
-    project.bc.zpos = zpos;
-    project.bc.zneg = zneg;
-
-    apply_3d_mac_boundary_conditions_level1(u,v,w,project.bc, hx, hy, hz);
-
-    UNITTEST_ASSERT_TRUE(project.initialize_storage(nx, ny, nz, hx, hy, hz, &u, &v, &w));
-
-    Grid3DHostF h_div;
-
-
-    float max_div_dev;
-    UNITTEST_ASSERT_TRUE(project.solve_divergence_only());
-    UNITTEST_ASSERT_TRUE(project.divergence.reduce_maxabs(max_div_dev));
-    printf("before max divergence = %f\n", max_div_dev);
-
-
-    // only do this test if everything is periodic
-    if (xpos.type == BC_PERIODIC && xneg.type == BC_PERIODIC && ypos.type == BC_PERIODIC && yneg.type == BC_PERIODIC && zpos.type == BC_PERIODIC && zneg.type == BC_PERIODIC) {
-      float max_div_host = 0;
-      for (i=0; i < nx; i++) {
-        for (j=0; j < ny; j++) {
-          for (k=0; k < nz; k++) {
-            float div = hu.at((i+1)%nx,j,k) - hu.at(i,j,k) + 
-              hv.at(i,(j+1)%ny,k) - hv.at(i,j,k) + 
-              hw.at(i,j,(k+1)%nz) - hw.at(i,j,k);
-            if (fabs(div) > max_div_host) max_div_host = fabs(div);
-          }
-        }
-      }
-      UNITTEST_ASSERT_EQUAL_FLOAT(max_div_dev, max_div_host, 1e-6);
-    }
-
-
-    UNITTEST_ASSERT_TRUE(project.solve(2e-4));
-
-    UNITTEST_ASSERT_TRUE(project.solve_divergence_only());
-    float max_div_after;
-    UNITTEST_ASSERT_TRUE(project.divergence.reduce_maxabs(max_div_after));
-    printf("after max divergence = %f\n", max_div_after);
-
-    Grid3DHostF hd;
-    hd.init(project.divergence.nx(), project.divergence.ny(), project.divergence.nz(), project.divergence.gx(), project.divergence.gy(), project.divergence.gz(), true,
-      project.divergence.paddingx(), project.divergence.paddingy(), project.divergence.paddingz());
-
-    hd.copy_all_data(project.divergence);
-    for (i=0; i < nx; i++) 
-      for (j=0; j < ny; j++) 
-        for (k=0; k < nz; k++) {
-          if (fabs(hd.at(i,j,k)) > .001) {
-            printf("%d %d %d: %f\n", i,j,k, hd.at(i,j,k));
-          }
-        }
-
-
-
-        UNITTEST_ASSERT_EQUAL_FLOAT(max_div_after, 0, 2e-4);
-
+    posx.copy_all_data(hposx);
+    posy.copy_all_data(hposy);
+    posz.copy_all_data(hposz);
   }
 
 
-  void run() {
+  void run()
+  {
+    Eqn_IncompressibleNS3DParamsF params;
+    Eqn_IncompressibleNS3DF eqn;
+
     int nx = 128;
-    int ny = 64;
-    int nz = 64;
+    int ny = 128;
+    int nz = 128;
 
-    float hx = .5;
-    float hy = .5;
-    float hz = 1;
+    params.init_grids(nx, ny, nz);
+    params.hx = 1;
+    params.hy = 1;
+    params.hz = 1;
 
-    BoundaryCondition xpos, xneg, ypos, yneg, zpos, zneg;
-    xpos.type = BC_PERIODIC;
-    xneg.type = BC_PERIODIC;
-    ypos.type = BC_PERIODIC;
-    yneg.type = BC_PERIODIC;
-    zpos.type = BC_PERIODIC;
-    zneg.type = BC_PERIODIC;
+    BoundaryCondition closed;
+    closed.type = BC_FORCED_INFLOW_VARIABLE_SLIP;
+    params.flow_bc = BoundaryConditionSet(closed);
 
-    run_test(nx, ny, nz, hx, hy, hz, xpos, xneg, ypos, yneg, zpos, zneg);
+    BoundaryCondition neumann;
+    neumann.type = BC_NEUMANN;
+    params.temp_bc = BoundaryConditionSet(neumann);
 
-    xpos.type = BC_FORCED_INFLOW_VARIABLE_SLIP;
-    xpos.value = .2;
-    xneg.type = BC_FORCED_INFLOW_VARIABLE_SLIP;
-    xneg.value = .2;
-    ypos.type = BC_PERIODIC;
-    yneg.type = BC_PERIODIC;
-    zpos.type = BC_PERIODIC;
-    zneg.type = BC_PERIODIC;
+    int i,j,k;
+    params.init_u.clear_zero();
+    params.init_v.clear_zero();
+    params.init_w.clear_zero();
 
-    run_test(nx, ny, nz, hx, hy, hz, xpos, xneg, ypos, yneg, zpos, zneg);
-    xpos.type = BC_PERIODIC;
-    xneg.type = BC_PERIODIC;
-    ypos.type = BC_FORCED_INFLOW_VARIABLE_SLIP;
-    ypos.value = 0;
-    yneg.type = BC_FORCED_INFLOW_VARIABLE_SLIP;
-    yneg.value = 0;
-    zpos.type = BC_PERIODIC;
-    zneg.type = BC_PERIODIC;
+    for (i=0; i < nx; i++)
+    {
+      for (j=0; j < ny; j++)
+      {
+        for (k=0; k < nz; k++) {
+          params.init_temp.at(i,j,k) = (i < nx / 2) ? -1 : 1;
+        }
+      }
+    }
+    params.max_divergence = 1e-4;
 
-    run_test(nx, ny, nz, hx, hy, hz, xpos, xneg, ypos, yneg, zpos, zneg);
+    UNITTEST_ASSERT_TRUE(eqn.set_parameters(params));
 
+    Grid1DHostF hposx, hposy, hposz;
+    Grid1DHostF hvx, hvy, hvz;
+    Grid1DDeviceF posx, posy, posz;
+    Grid1DDeviceF vx, vy, vz;
 
-    xpos.type = BC_PERIODIC;
-    xneg.type = BC_PERIODIC;
-    ypos.type = BC_PERIODIC;
-    yneg.type = BC_PERIODIC;
-    zpos.type = BC_FORCED_INFLOW_VARIABLE_SLIP;
-    zpos.value = 0;
-    zneg.type = BC_FORCED_INFLOW_VARIABLE_SLIP;
-    zneg.value = 0;
+    int nparts = 1000;
+    allocate_particles(hposx, hposy, hposz, hvx, hvy, hvz, posx, posy, posz, vx, vy, vz, nparts, nx, ny, nz);
 
-    run_test(nx, ny, nz, hx, hy, hz, xpos, xneg, ypos, yneg, zpos, zneg);
+    double dt = .1;
 
-    xpos.type = BC_FORCED_INFLOW_VARIABLE_SLIP;
-    xpos.value = 0;
-    xneg.type = BC_FORCED_INFLOW_VARIABLE_SLIP;
-    xneg.value = 0;
-    ypos.type = BC_FORCED_INFLOW_VARIABLE_SLIP;
-    ypos.value = 0;
-    yneg.type = BC_FORCED_INFLOW_VARIABLE_SLIP;
-    yneg.value = 0;
-    zpos.type = BC_FORCED_INFLOW_VARIABLE_SLIP;
-    zpos.value = 0;
-    zneg.type = BC_FORCED_INFLOW_VARIABLE_SLIP;
-    zneg.value = 0;
+    FILE *file = fopen("fluidsim.prt", "wb");
 
-    run_test(nx, ny, nz, hx, hy, hz, xpos, xneg, ypos, yneg, zpos, zneg);
+    CPUTimer timer;
 
-    nx = 128;
-    ny = 128;
-    nz = 96;
+    timer.start();
+    for (int t=0; t < 10; t++) {
+      printf("Frame %d\n", t);
+      UNITTEST_ASSERT_TRUE(eqn.advance(dt));
+      // trace points
 
-    hx = .5;
-    hy = .5;
-    hz = .5;
-    run_test(nx, ny, nz, hx, hy, hz, xpos, xneg, ypos, yneg, zpos, zneg);
+      sample_points_mac_grid_3d(vx, vy, vz, posx, posy, posz, eqn.get_u(), eqn.get_v(), eqn.get_w(), params.flow_bc, 1,1,1);
+
+      hvx.copy_all_data(vx); hvy.copy_all_data(vy); hvz.copy_all_data(vz);
+
+      fwrite(&nparts, sizeof(int), 1, file);
+      for (int p=0; p < hvx.nx(); p++) {
+
+        // forward Euler
+        hposx.at(p) += hvx.at(p) * dt;
+        hposy.at(p) += hvy.at(p) * dt;
+        hposz.at(p) += hvz.at(p) * dt;
+
+        // add to file
+        fwrite(&hposx.at(p), sizeof(float), 1, file);
+        fwrite(&hposy.at(p), sizeof(float), 1, file);
+        fwrite(&hposz.at(p), sizeof(float), 1, file);
+      }
+      // copy positions back to device
+      posx.copy_all_data(hposx); posy.copy_all_data(hposy); posz.copy_all_data(hposz);
+
+    }
+
+    timer.stop();
+    printf("Elapsed: %f, or %f fps\n", timer.elapsed_sec(), 100 / timer.elapsed_sec());
+
+    fclose(file);
   }
 
 };
