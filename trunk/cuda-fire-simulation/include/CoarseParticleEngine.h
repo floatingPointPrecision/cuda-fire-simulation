@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes, CUFIRE
 #include "CoarseParticleEngineDefinitions.h"
 #include "Command.h"
+#include "3DNavierStokes.h"
 //#include "Projection.h"
 
 namespace cufire
@@ -63,7 +64,7 @@ namespace cufire
     * constructor. Sets the maximum number of particles and initializes necessary vectors on host and device
     * @param maxNumberParticles maximum number of particles in the system
     */
-    CoarseParticleEngine(int maxNumberParticles);
+    CoarseParticleEngine(int maxNumberParticles, float2 xBBox, float2 yBBox, float2 zBBox);
     /**
     * A destructor.
     */
@@ -105,10 +106,12 @@ namespace cufire
     */
     ParticleItrStruct getParticleBegins() {return m_particleStructItrBegin;}
     /**
-    * returns a struct filled with the end iterators of all the particle attribute device vectors
+    * returns the number of particles
     */
-    ParticleItrStruct getParticleEnds() {return m_particleStructItrEnd;}
+    int getNumParticles() {return m_numParticles;}
 
+    void enableCUDAVbo();
+    void disableCUDAVbo();
 
 
     // protected methods
@@ -130,8 +133,6 @@ namespace cufire
     */
     void projectToSlices();
 
-
-
     // protected members
   protected:
     /**
@@ -142,8 +143,28 @@ namespace cufire
     unsigned int m_maxNumParticles; ///< max number of particles in the system.
     unsigned int m_numParticles; ///< current number of particles in the system.
     float m_currentTime;
+    float2 m_xBBox; ///< x range of simulation
+    float2 m_yBBox; ///< y range of simulation
+    float2 m_zBBox; ///< z range of simulation
+    NavierStokes3D* m_nsSolver;
+    bool m_firstTime;
 
-    thrust::host_vector<float4> m_hostPositionAge; ///< particle host copy of position x, y, z, age
+    float4* m_hostPositionAge; ///< particle host copy of position x, y, z, age
+    float4* m_hostFuelRadiusMassImpulse; ///< particle host copy of fuel, radius, mass, impulse
+    float* m_hostXVelocities; ///< particle x velocities host copy
+    float* m_hostYVelocities; ///< particle y velocities host copy
+    float* m_hostZVelocities; ///< particle z velocities host copy
+
+    GLuint m_positionsAgeVBO; ///< OpenGL vertex buffer object of the positionAge float4 array
+    float4* m_devicePositionAge; ///< particle device copy of position x, y, z, age
+    float4* m_deviceFuelRadiusMassImpulse; ///< particle device copy of fuel, radius, mass, impulse
+    float* m_deviceXVelocities; ///< particle x velocities device copy
+    float* m_deviceYVelocities; ///< particle y velocities device copy
+    float* m_deviceZVelocities; ///< particle z velocities device copy
+
+    ParticleItrStruct m_particleStructItrBegin; ///< beginning of particle tuple of iterators
+
+    /*thrust::host_vector<float4> m_hostPositionAge; ///< particle host copy of position x, y, z, age
     thrust::host_vector<float4> m_hostFuelRadiusMassImpulse; ///< particle host copy of fuel, radius, mass, impulse
     thrust::host_vector<float> m_hostXVelocities; ///< particle x velocities host copy
     thrust::host_vector<float> m_hostYVelocities; ///< particle y velocities host copy
@@ -160,7 +181,9 @@ namespace cufire
     ParticleItrStruct m_particleStructItrBegin; ///< beginning of particle tuple of iterators
     ParticleItrStruct m_particleStructItrEnd; ///< end of particle tuple of iterators
     ParticleZipItr m_particleItrBegin; ///< beginning of particle zip_iterator
-    ParticleZipItr m_particleItrEnd; ///< end of particle zip_iterator
+    ParticleZipItr m_particleItrEnd; ///< end of particle zip_iterator*/
+
+    //NavierStokes3D m_ns3DSolver;
   };
 
 }

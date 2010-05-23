@@ -60,7 +60,7 @@
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -315,6 +315,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\src\3DNavierStokes.cu"
+				>
+			</File>
+			<File
 				RelativePath=".\CoarseParticleEngine.cu"
 				>
 			</File>
@@ -326,20 +330,23 @@
 				RelativePath="..\..\src\Projection.cu"
 				>
 			</File>
-			<File
-				RelativePath="..\..\src\sample_cu.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\SolveNonDivergence.cu"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\include\3DNavierStokes.h"
+				>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
 			<File
 				RelativePath="..\..\include\CoarseParticleEngine.h"
 				>
@@ -357,26 +364,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\projectTest.h"
-				>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\..\include\RandomUtilities.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\sample_cu.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\SolveNonDivergence.h"
 				>
 			</File>
 		</Filter>

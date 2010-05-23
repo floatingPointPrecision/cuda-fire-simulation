@@ -67,7 +67,7 @@ public:
     nx = ny = nz = 0;
     hx = hy = hz = 0;
     cfl_factor = 1;
-    gravity = -9.8;
+    gravity = -9.8f;
     bouyancy = 1;
     time_step = TS_FORWARD_EULER;
     vertical_direction = DIR_YPOS;
