@@ -73,11 +73,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cudart.lib cutil64D.lib glew64.lib glut64.lib coarse-particle-engine_d.lib xml-parser_d.lib"
+				AdditionalDependencies="cudart.lib cutil64D.lib glew64.lib glut64.lib coarse-particle-engine_d.lib xml-parser_d.lib image-writer_d.lib"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;$(CUDA_LIB_PATH)&quot;;&quot;$(NVSDKCOMPUTE_ROOT)\C\common\lib&quot;;..\..\lib"
-				IgnoreDefaultLibraryNames="MSVCPRTD;libcmtd"
+				IgnoreDefaultLibraryNames="msvcprtd;libcmtd;libcmt"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="17"

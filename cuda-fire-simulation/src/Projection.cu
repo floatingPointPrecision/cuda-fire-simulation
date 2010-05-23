@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Projection.h"
+#include <cutil_math.h>
 
 ////////////////// PROJECTION //////////////////////
 
@@ -49,6 +50,13 @@ void OrthographicProjection::setSliceInformation(float zIntercept, float4* outpu
 {
   m_ZIntercept = zIntercept;
   m_outputSlice = outputSlice;
+}
+
+#define M_E 2.7182818284590452f
+__device__ float particleWeight(float projectionDistance, float sliceSpacing)
+{
+  float exponent = (-projectionDistance*projectionDistance)/(16*sliceSpacing*sliceSpacing);
+  return powf(M_E,exponent);
 }
 
 __device__ int worldToPixelIndex(float4 position, float2 xyLowerBound, float2 xyUpperBound, int2 imageDims)
@@ -75,14 +83,20 @@ __global__ void orthProjection(ParticleItrStruct particles, float4* output, floa
   if (index >= numParticles)
     return;
   float4 positionAge = particles.posAge[index];
-  int pixelIndex = worldToPixelIndex(positionAge,xyLowerBound,xyUpperBound,imageDims);
-  float projectionDistance = fabs(positionAge.z - zIntercept);
-  projectionDistance /= sliceDepth;
-  projectionDistance = max(1.f - projectionDistance, 0.f);
-  if (pixelIndex == -1 || projectionDistance == 0)
-    return;
-  projectionDistance *= 255.f;
-  output[pixelIndex] = make_float4(projectionDistance,projectionDistance,projectionDistance,0);
+  float4 particleVelocity = make_float4(particles.velX[index],particles.velY[index],particles.velZ[index],0);
+  for (int i = 0; i < 10; i++)
+  {
+    int pixelIndex = worldToPixelIndex(positionAge,xyLowerBound,xyUpperBound,imageDims);
+    float projectionDistance = fabs(positionAge.z - zIntercept);
+    float projectionWeight = particleWeight(projectionDistance, sliceDepth);
+    if (pixelIndex == -1)
+      continue;
+    projectionWeight *= 255.f;
+    float4 oldPixelValue = output[pixelIndex];
+    oldPixelValue += make_float4(projectionWeight,projectionWeight,projectionWeight,0);
+    output[pixelIndex] = oldPixelValue;
+    positionAge += particleVelocity*10;
+  }
 }
 
 void OrthographicProjection::execute()

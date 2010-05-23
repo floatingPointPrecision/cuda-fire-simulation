@@ -47,57 +47,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CoarseParticleEngine.h"
 #include "RandomUtilities.h"
 #include "Projection.h"
-#include "Bitmap.hpp"
-#include "projectTest.h"
 
 using namespace cufire;
 
-////////////////// CUDA CODE ////////////////////
-__host__ __device__ 
-ParticleTuple MakeParticleTuple(float4 positionAge, float4 fuelRadMassImpulse, float xVel, float yVel, float zVel)
-{
-  return thrust::make_tuple<float4,float4,float,float,float>(positionAge,fuelRadMassImpulse,xVel,yVel,zVel);
-}
-
-/**
-  * update position
-  * Updates the particle position
-  */
-struct UpdateParticlePosition : public thrust::unary_function<ParticleTuple,ParticleTuple>
-{
-  UpdateParticlePosition(float timeStep)
-    : dT(timeStep)
-  {}
-
-  __host__ __device__
-    ParticleTuple operator()(const ParticleTuple& a) const
-  {
-    float4 posAge = thrust::get<0>(a);
-    float4 fuelRadMassImpulse = thrust::get<1>(a);
-    float velX = thrust::get<2>(a);
-    float velY = thrust::get<3>(a);
-    float velZ = thrust::get<4>(a);
-    posAge.x += velX * dT;
-    posAge.y += velY * dT;
-    posAge.z += velZ * dT;
-    posAge.w -= dT;
-    return MakeParticleTuple(posAge,
-                             fuelRadMassImpulse,
-                             velX,velY,velZ);
-  }
-  float dT;
-};
-
 ////////////////// HOST CODE ////////////////////
-CoarseParticleEngine::CoarseParticleEngine(int maxNumberParticles)
-: m_maxNumParticles(maxNumberParticles), m_currentTime(0.f)
+CoarseParticleEngine::CoarseParticleEngine(int maxNumberParticles, float2 xBBox, float2 yBBox, float2 zBBox)
+: m_maxNumParticles(maxNumberParticles), m_currentTime(0.f), m_xBBox(xBBox), m_yBBox(yBBox), m_zBBox(zBBox)
 {
   initializeParticles();
+  m_firstTime = true;
   resetParticles();
 }
 
 CoarseParticleEngine::~CoarseParticleEngine()
 {
+  delete m_nsSolver;
   cudaGLUnregisterBufferObject(m_positionsAgeVBO);
   glDeleteBuffers(1, &m_positionsAgeVBO);
 }
@@ -105,61 +69,42 @@ CoarseParticleEngine::~CoarseParticleEngine()
 void CoarseParticleEngine::advanceSimulation(float timestep)
 {
   m_currentTime += timestep;
-  float4* glPosPointer;
-  cudaGLMapBufferObject((void**)&glPosPointer, m_positionsAgeVBO);
-  DevPtrFloat4 rawDevicePositionPtr(glPosPointer);
-  // create hypothetical new velocities from artist-defined forces
-  thrust::transform(m_particleItrBegin, m_particleItrBegin + m_numParticles, m_particleItrBegin, UpdateParticlePosition(1/60.f));
-  // bin particles into grids for non-divergence calculation
 
-  // solve for non-divergence
-
-  // add non-divergence term back to hypothetical new velocities
-
-  // update particle position according to new velocities
-
-  // perform projection
-  float3 gridCenter = make_float3(0,0,0);
-  float3 gridDims = make_float3(8,8,8);
-  float projectionDepth = 0.5;
-  int2 slicePixelDims = make_int2(300,300);
-  float2 sliceWorldDims = make_float2(8,8);
-  int numSliceBytes = sizeof(float4)*slicePixelDims.x*slicePixelDims.y;
-  float4* d_sliceOutput;
-  float4* h_sliceOutput = (float4*) malloc(numSliceBytes);
-  cudaMalloc((void**)&d_sliceOutput, numSliceBytes);
-  cudaMemset(d_sliceOutput,0, numSliceBytes);
-  OrthographicProjection proj(gridCenter,gridDims,projectionDepth,slicePixelDims,sliceWorldDims);
-  proj.setSliceInformation(3.f, d_sliceOutput);
-  proj.setParticles(m_particleStructItrBegin,m_numParticles);
-  proj.execute();
-  // copy output as image
-  cudaMemcpy(h_sliceOutput, d_sliceOutput, numSliceBytes, cudaMemcpyDeviceToHost);
-  BitmapWriter newBitmap(slicePixelDims.x,slicePixelDims.y);
-  int x,y,width=slicePixelDims.x,height=slicePixelDims.y;
-  for(x=0;x<width;++x)
+  if (m_firstTime)
   {
-    for(y=0;y<height;++y)
-    {
-      float4 currentPixel = h_sliceOutput[y*width+x];
-      newBitmap.setValue(x,y,char(currentPixel.x),char(currentPixel.y),char(currentPixel.z));
-    }
+    m_nsSolver = new NavierStokes3D;
+    m_nsSolver->setGridDimensions(64,64,64);
+    m_nsSolver->setParticles(m_hostPositionAge,m_hostXVelocities,m_hostYVelocities,m_hostZVelocities,m_numParticles);
+    m_firstTime = false;
   }
-  newBitmap.flush("outputBitmap.bmp");
-  cudaFree(d_sliceOutput);
-  free(h_sliceOutput);
-
   // test ns solver
-  ProjectTest newTest;
-  newTest.run();
+  // copy from device to host
+  CPUTimer timer;
+  timer.start();
+  cudaMemcpy(m_hostPositionAge,m_devicePositionAge,sizeof(float4)*m_numParticles,cudaMemcpyDeviceToHost);
+  cudaMemcpy(m_hostXVelocities,m_deviceXVelocities,sizeof(float)*m_numParticles,cudaMemcpyDeviceToHost);
+  cudaMemcpy(m_hostYVelocities,m_deviceYVelocities,sizeof(float)*m_numParticles,cudaMemcpyDeviceToHost);
+  cudaMemcpy(m_hostZVelocities,m_deviceZVelocities,sizeof(float)*m_numParticles,cudaMemcpyDeviceToHost);
+  // run solver
+  CPUTimer timer2;
+  timer2.start();
+  m_nsSolver->run();
+  timer2.stop();
+  printf("3D NS solver: %f\n", timer2.elapsed_sec());
+  // copy back to device
+  cudaMemcpy(m_devicePositionAge,m_hostPositionAge,sizeof(float4)*m_numParticles,cudaMemcpyHostToDevice);
+  cudaMemcpy(m_deviceXVelocities,m_hostXVelocities,sizeof(float)*m_numParticles,cudaMemcpyHostToDevice);
+  cudaMemcpy(m_deviceYVelocities,m_hostYVelocities,sizeof(float)*m_numParticles,cudaMemcpyHostToDevice);
+  cudaMemcpy(m_deviceZVelocities,m_hostZVelocities,sizeof(float)*m_numParticles,cudaMemcpyHostToDevice);
 
-  cudaGLUnmapBufferObject(m_positionsAgeVBO);
+  timer.stop();
+  printf("3D NS complete: %f\n", timer.elapsed_sec());
 }
 
 static GLfloat quad[3] = { 1.0, 0.0, 1/60.0 };
 void CoarseParticleEngine::render()
 {
-  glColor3f(1,0,0);
+  glColor3f(1,1,1);
   glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, quad);
   glPointSize(8.0);
   glBindBuffer(GL_ARRAY_BUFFER, m_positionsAgeVBO);
@@ -191,17 +136,18 @@ void CoarseParticleEngine::resetParticles()
 void CoarseParticleEngine::initializeParticles()
 {
   // initialize host particle vectors
-  m_hostPositionAge = thrust::host_vector<float4>(m_maxNumParticles);
-  m_hostFuelRadiusMassImpulse = thrust::host_vector<float4>(m_maxNumParticles);
-  m_hostXVelocities = thrust::host_vector<float>(m_maxNumParticles);
-  m_hostYVelocities = thrust::host_vector<float>(m_maxNumParticles);
-  m_hostZVelocities = thrust::host_vector<float>(m_maxNumParticles);
+  m_hostPositionAge = (float4*) malloc(sizeof(float4)*m_maxNumParticles);
+  m_hostFuelRadiusMassImpulse = (float4*) malloc(sizeof(float4)*m_maxNumParticles);
+  m_hostXVelocities = (float*) malloc(sizeof(float)*m_maxNumParticles);
+  m_hostYVelocities = (float*) malloc(sizeof(float)*m_maxNumParticles);
+  m_hostZVelocities = (float*) malloc(sizeof(float)*m_maxNumParticles);
   
   // initialize device particle vectors
-  m_deviceFuelRadiusMassImpulse = thrust::device_vector<float4>(m_maxNumParticles);
-  m_deviceXVelocities = thrust::device_vector<float>(m_maxNumParticles);
-  m_deviceYVelocities = thrust::device_vector<float>(m_maxNumParticles);
-  m_deviceZVelocities = thrust::device_vector<float>(m_maxNumParticles);
+  cudaMalloc((void**)&m_deviceFuelRadiusMassImpulse,sizeof(float4)*m_maxNumParticles);
+  cudaMalloc((void**)&m_deviceXVelocities,sizeof(float)*m_maxNumParticles);
+  cudaMalloc((void**)&m_deviceYVelocities,sizeof(float)*m_maxNumParticles);
+  cudaMalloc((void**)&m_deviceZVelocities,sizeof(float)*m_maxNumParticles);
+
   // Create buffer object for position array and register it with CUDA
   glGenBuffers(1, &m_positionsAgeVBO);
   glBindBuffer(GL_ARRAY_BUFFER, m_positionsAgeVBO);
@@ -209,15 +155,19 @@ void CoarseParticleEngine::initializeParticles()
   glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   cudaGLRegisterBufferObject(m_positionsAgeVBO);
+  enableCUDAVbo();
 
-  //// create random number generator
-  //// create a minstd_rand object to act as our source of randomness
-  //thrust::minstd_rand rng;
-  //// create a uniform_real_distribution to produce floats from [-7,13)
-  //thrust::uniform_real_distribution<float> dist(-1.f,1.f);
-  //for (int i = 0; i < 16; i++)
-  //  std::cout << "random number: " << dist(rng) << std::endl;
+  // update particle iterator struct (for passing around)
+  m_particleStructItrBegin.posAge = m_devicePositionAge;
+  m_particleStructItrBegin.atts = m_deviceFuelRadiusMassImpulse;
+  m_particleStructItrBegin.velX = m_deviceXVelocities;
+  m_particleStructItrBegin.velY = m_deviceYVelocities;
+  m_particleStructItrBegin.velZ = m_deviceZVelocities;
 
+  //m_nsSolver->setGridDimensions(64,64,64);
+  //m_nsSolver->setParticles(m_hostPositionAge,m_hostXVelocities,m_hostYVelocities,m_hostZVelocities,m_numParticles);
+
+  disableCUDAVbo();
 }
 
 void CoarseParticleEngine::addParticle(float3 position, float3 velocity, float fuel, 
@@ -231,22 +181,20 @@ void CoarseParticleEngine::addParticle(float3 position, float3 velocity, float f
   m_hostXVelocities[m_numParticles] = velocity.x;
   m_hostYVelocities[m_numParticles] = velocity.y;
   m_hostZVelocities[m_numParticles] = velocity.z;
-  
-  //std::cout << "particle added: position (" << position.x << "," << position.y << "," << position.z <<
-  //          ")" << std::endl;
   m_numParticles++;
 }
 
 void CoarseParticleEngine::addRandomParticle(float2 xBounds, float2 yBounds, float2 zBounds, int numParticles)
 {
+  float velMultiplier = .001f;
   for (int i = 0; i < numParticles; i++)
   {
     float3 newPosition = make_float3(randomFloatInRange(xBounds.x, xBounds.y), 
                                      randomFloatInRange(yBounds.x, yBounds.y), 
                                      randomFloatInRange(zBounds.x, zBounds.y));
-    float3 newVelocity = make_float3(randomFloatInRange(-1.f,1.f),
-                                     randomFloatInRange(-1.f,1.f),
-                                     randomFloatInRange(-1.f,1.f));
+    float3 newVelocity = make_float3(randomFloatInRange(0.f,10.f)*velMultiplier,
+                                     randomFloatInRange(-1.f,1.f)*velMultiplier,
+                                     randomFloatInRange(-1.f,1.f)*velMultiplier);
     addParticle(newPosition, newVelocity, randomNormalizedFloat(), 
                 randomNormalizedFloat(), randomNormalizedFloat(), 
                 randomNormalizedFloat(), randomNormalizedFloat());
@@ -255,46 +203,25 @@ void CoarseParticleEngine::addRandomParticle(float2 xBounds, float2 yBounds, flo
 
 void CoarseParticleEngine::flushParticles()
 {
-  // get OpenGL position pointer and convert to device_ptr
-  float4* glPositionAges;
-  cudaGLMapBufferObject((void**)&glPositionAges, m_positionsAgeVBO);
-  DevPtrFloat4 m_positionsAgeRaw(glPositionAges);
+  // get OpenGL position pointer and convert to CUDA pointer
+  enableCUDAVbo();
 
   // make sure device vectors match host vectors
-  m_deviceFuelRadiusMassImpulse = m_hostFuelRadiusMassImpulse;
-  m_deviceXVelocities = m_hostXVelocities;
-  m_deviceYVelocities = m_hostYVelocities;
-  m_deviceZVelocities = m_hostZVelocities;
+  cudaMemcpy(m_devicePositionAge,m_hostPositionAge,sizeof(float4)*m_numParticles,cudaMemcpyHostToDevice);
+  cudaMemcpy(m_deviceFuelRadiusMassImpulse,m_hostFuelRadiusMassImpulse,sizeof(float4)*m_numParticles,cudaMemcpyHostToDevice);
+  cudaMemcpy(m_deviceXVelocities,m_hostXVelocities,sizeof(float)*m_numParticles,cudaMemcpyHostToDevice);
+  cudaMemcpy(m_deviceYVelocities,m_hostYVelocities,sizeof(float)*m_numParticles,cudaMemcpyHostToDevice);
+  cudaMemcpy(m_deviceZVelocities,m_hostZVelocities,sizeof(float)*m_numParticles,cudaMemcpyHostToDevice);
 
-  // update particle iterator struct (for passing around)
-  m_particleStructItrBegin.posAge = glPositionAges;
-  m_particleStructItrBegin.atts = m_deviceFuelRadiusMassImpulse.begin();
-  m_particleStructItrBegin.velX = m_deviceXVelocities.begin();
-  m_particleStructItrBegin.velY = m_deviceYVelocities.begin();
-  m_particleStructItrBegin.velZ = m_deviceZVelocities.begin();
+  disableCUDAVbo();
+}
 
-  m_particleStructItrEnd.posAge = glPositionAges + m_numParticles;
-  m_particleStructItrEnd.atts = m_deviceFuelRadiusMassImpulse.begin() + m_numParticles;
-  m_particleStructItrEnd.velX = m_deviceXVelocities.begin() + m_numParticles;
-  m_particleStructItrEnd.velY = m_deviceYVelocities.begin() + m_numParticles;
-  m_particleStructItrEnd.velZ = m_deviceZVelocities.begin() + m_numParticles;
-
-  // update zip_iterators
-  m_particleItrBegin = thrust::make_zip_iterator(make_tuple(m_positionsAgeRaw,
-    m_deviceFuelRadiusMassImpulse.begin(),
-    m_deviceXVelocities.begin(),
-    m_deviceYVelocities.begin(),
-    m_deviceZVelocities.begin()));
-  m_particleItrEnd = thrust::make_zip_iterator(make_tuple(m_positionsAgeRaw + m_numParticles,
-    m_deviceFuelRadiusMassImpulse.begin() + m_numParticles,
-    m_deviceXVelocities.begin() + m_numParticles,
-    m_deviceYVelocities.begin() + m_numParticles,
-    m_deviceZVelocities.begin() + m_numParticles));
-
-  // incredibly slow, need to figure out how to work with device_vector from OpenGL vbo
-  thrust::copy(m_hostPositionAge.begin(), m_hostPositionAge.begin()+m_numParticles,m_positionsAgeRaw);
-  //for (int i = 0; i < m_numParticles; i++)
-  //  m_positionsAgeRaw[i] = m_hostPositionAge[i];
-
+void CoarseParticleEngine::enableCUDAVbo()
+{
+  cudaGLMapBufferObject((void**)&m_devicePositionAge, m_positionsAgeVBO);
+}
+ 
+void CoarseParticleEngine::disableCUDAVbo()
+{
   cudaGLUnmapBufferObject(m_positionsAgeVBO);
 }

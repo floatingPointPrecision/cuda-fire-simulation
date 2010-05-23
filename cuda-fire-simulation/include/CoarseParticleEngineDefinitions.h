@@ -35,24 +35,6 @@ namespace cufire
 {
   // typedefs
   /**
-  * device pointer float4
-  */
-  typedef thrust::device_ptr<float4> DevPtrFloat4;
-  /**
-  * float4 iterator for device vectors.
-  */
-  typedef thrust::device_vector<float4>::iterator DevVecFloat4Itr;
-  /**
-  * float iterator for device vectors.
-  */
-  typedef thrust::device_vector<float>::iterator DevVecFloatItr;
-  /**
-  * Particle iterator tuple. 
-  * Tuple containing all the elements of a particle to better coalescing. Elements include:
-  * (position.x, position.y, position.z, age), (fuel, radius, mass, impulse), velocity.x, velocity.y, velocity.z
-  */
-  typedef thrust::tuple<DevPtrFloat4,DevVecFloat4Itr,DevVecFloatItr,DevVecFloatItr,DevVecFloatItr> ParticleItrTuple;
-  /**
   * Struct of the iterators which make up a particle.
   * Struct contains all the iterators of a particle to better coalescing. Elements include:
   * (position.x, position.y, position.z, age), (fuel, radius, mass, impulse), velocity.x, velocity.y, velocity.z
@@ -60,21 +42,11 @@ namespace cufire
   struct ParticleItrStruct
   {
     float4* posAge; ///< (position.x, position.y, position.z, age)
-    DevVecFloat4Itr atts; ///< (fuel, radius, mass, impulse)
-    DevVecFloatItr velX; ///< velocity.x
-    DevVecFloatItr velY; ///< velocity.y
-    DevVecFloatItr velZ; ///< velocity.z
+    float4* atts; ///< (fuel, radius, mass, impulse)
+    float* velX; ///< velocity.x
+    float* velY; ///< velocity.y
+    float* velZ; ///< velocity.z
   };
-  /**
-  * Particle tuple. 
-  * Tuple containing all the elements of a particle to better coalescing. Elements include:
-  * (position.x, position.y, position.z, age), velocity.x, velocity.y, velocity.z, fuel, radius, mass, impulse
-  */
-  typedef thrust::tuple<float4,float4,float,float,float> ParticleTuple;
-  /**
-  * Particle iterator.
-  */
-  typedef thrust::zip_iterator<ParticleItrTuple> ParticleZipItr;
 
 
   //#define P_POS 0 ///< position element of a Particle tuple containing 4 floats

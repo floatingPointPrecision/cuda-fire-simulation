@@ -1,20 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <startingBoundingBox>
+  <startingParticleRange>
     <xRange>
-      <x>-3.0</x>
-      <y>-1.0</y>
+      <x>16.0</x>
+      <y>48.0</y>
     </xRange>
     <yRange>
-      <x>-2.0</x>
-      <y>-1.0</y>
+      <x>16.0</x>
+      <y>48.0</y>
+    </yRange>
+    <zRange>
+      <x>16.0</x>
+      <y>48.0</y>
+    </zRange>
+  </startingParticleRange>
+  <boundingBox>
+    <xRange>
+      <x>0.0</x>
+      <y>64.0</y>
+    </xRange>
+    <yRange>
+      <x>0.0</x>
+      <y>64.0</y>
     </yRange>
     <zRange>
       <x>0.0</x>
-      <y>3.0</y>
+      <y>64.0</y>
     </zRange>
-  </startingBoundingBox>
+  </boundingBox>
   <maxNumberParticles>65536</maxNumberParticles>
-  <numStartingParticles>16000</numStartingParticles>
+  <numStartingParticles>40000</numStartingParticles>
+  <timestep>0.16</timestep>
 
 </root>
