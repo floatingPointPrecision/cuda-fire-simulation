@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <coarseVisualization>1</coarseVisualization>
+  <startingParticleRange>
+    <xRange>
+      <x>20.0</x>
+      <y>44.0</y>
+    </xRange>
+    <yRange>
+      <x>4.0</x>
+      <y>20.0</y>
+    </yRange>
+    <zRange>
+      <x>30.0</x>
+      <y>34.0</y>
+    </zRange>
+  </startingParticleRange>
+  <boundingBox>
+    <xRange>
+      <x>0.0</x>
+      <y>64.0</y>
+    </xRange>
+    <yRange>
+      <x>0.0</x>
+      <y>64.0</y>
+    </yRange>
+    <zRange>
+      <x>0.0</x>
+      <y>64.0</y>
+    </zRange>
+  </boundingBox>
+  <cameraDistance>100</cameraDistance>
+  <imageSize>512</imageSize>
+  <maxNumberParticles>65536</maxNumberParticles>
+  <numStartingParticles>40000</numStartingParticles>
+  <timestep>0.016</timestep>
+  <projectionJitterAmount>10</projectionJitterAmount>
+
+</root>
