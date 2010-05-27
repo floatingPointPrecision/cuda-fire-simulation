@@ -179,12 +179,12 @@ void IncompressibleCustomSolver::add_external_forces(double dt)
     blocksInY, 1.0f / (float)blocksInY);
   coefficient = 20.f;
   addXForce<<<Dg, Db>>>(u, coefficient,m_simplexNoiseField, noiseSize,
-  _temp.xstride(), _temp.ystride(), _temp.stride(DIR_XAXIS_FLAG), nx(), ny(), nz(), 
-  blocksInY, 1.0f / (float)blocksInY);
+    _temp.xstride(), _temp.ystride(), _temp.stride(DIR_XAXIS_FLAG), nx(), ny(), nz(), 
+    blocksInY, 1.0f / (float)blocksInY);
   coefficient = 20.f;
   addZForce<<<Dg, Db>>>(w, coefficient,m_simplexNoiseField, noiseSize,
-  _temp.xstride(), _temp.ystride(), _temp.stride(DIR_ZAXIS_FLAG), nx(), ny(), nz(), 
-  blocksInY, 1.0f / (float)blocksInY);
+    _temp.xstride(), _temp.ystride(), _temp.stride(DIR_ZAXIS_FLAG), nx(), ny(), nz(), 
+    blocksInY, 1.0f / (float)blocksInY);
 
 }
 // custom update method
@@ -192,7 +192,7 @@ bool IncompressibleCustomSolver::advance_one_step(double dt)
 {
   clear_error();
   num_steps++;
-  m_currentTime += dt;
+  m_currentTime += float(dt);
 
   // update dudt
   check_ok(_advection_solver.solve()); // updates dudt, dvdt, dwdt, overwrites whatever is there
@@ -203,41 +203,33 @@ bool IncompressibleCustomSolver::advance_one_step(double dt)
     check_ok(_w_diffusion.solve()); // dwdt += \nu \nabla^2 w
   }
 
-  m_simplexNoise.updateNoise(m_simplexNoiseField, 0.0f, m_currentTime, 0.1, m_simplexNoiseFieldSize*m_simplexNoiseFieldSize, m_simplexNoiseFieldSize);
+  //static float addingUserForcesSum = 0.f;
+  //CPUTimer addingUserForcesTimer;
+  //cudaThreadSynchronize();
+  //addingUserForcesTimer.start();
+  m_simplexNoise.updateNoise(m_simplexNoiseField, 0.0f, m_currentTime, 0.1f, m_simplexNoiseFieldSize*m_simplexNoiseFieldSize, m_simplexNoiseFieldSize);
   // eventually this will be replaced with a grid-wide operation.
   add_external_forces(dt);
-
-  float ab_coeff = -dt*dt / (2 * _lastdt);
-
   // advance u,v,w
-  if (_time_step == TS_ADAMS_BASHFORD2 && _lastdt > 0) {
-    check_ok(_u.linear_combination((float)1.0, _u, (float)(dt - ab_coeff), _deriv_udt));
-    check_ok(_u.linear_combination((float)1.0, _u, (float)ab_coeff, _last_deriv_udt));
+  check_ok(_u.linear_combination((float)1.0, _u, (float)dt, _deriv_udt));
+  check_ok(_v.linear_combination((float)1.0, _v, (float)dt, _deriv_vdt)); 
+  check_ok(_w.linear_combination((float)1.0, _w, (float)dt, _deriv_wdt));
 
-    check_ok(_v.linear_combination((float)1.0, _v, (float)(dt - ab_coeff), _deriv_vdt));
-    check_ok(_v.linear_combination((float)1.0, _v, (float)ab_coeff, _last_deriv_vdt));
+  //cudaThreadSynchronize();
+  //addingUserForcesTimer.stop();
+  //addingUserForcesSum += addingUserForcesTimer.elapsed_sec();
+  //printf("user added forces: %f\n",addingUserForcesSum / (m_currentTime/dt));
 
-    check_ok(_w.linear_combination((float)1.0, _w, (float)(dt - ab_coeff), _deriv_wdt));
-    check_ok(_w.linear_combination((float)1.0, _w, (float)ab_coeff, _last_deriv_wdt));
-
-  }
-  else {
-    check_ok(_u.linear_combination((float)1.0, _u, (float)dt, _deriv_udt));
-    check_ok(_v.linear_combination((float)1.0, _v, (float)dt, _deriv_vdt)); 
-    check_ok(_w.linear_combination((float)1.0, _w, (float)dt, _deriv_wdt));
-  }
-
-  // copy state for AB2
-  if (_time_step == TS_ADAMS_BASHFORD2) {
-    _lastdt = dt;
-    _last_deriv_tempdt.copy_all_data(_deriv_tempdt);
-    _last_deriv_udt.copy_all_data(_deriv_udt);
-    _last_deriv_vdt.copy_all_data(_deriv_vdt);
-    _last_deriv_wdt.copy_all_data(_deriv_wdt);
-  }
-
+  //static float projection3DSum = 0.f;
+  //CPUTimer projection3DTimer;
+  //cudaThreadSynchronize();
+  //projection3DTimer.start();
   // enforce incompressibility - this enforces bc's before and after projection
   check_ok(_projection_solver.solve(_max_divergence));
+  //cudaThreadSynchronize();
+  //projection3DTimer.stop();
+  //projection3DSum += projection3DTimer.elapsed_sec();
+  //printf("average projection OpenCurrent: %f\n",projection3DSum / (m_currentTime/dt));
 
   return !any_error();
 
@@ -294,6 +286,7 @@ void NavierStokes3D::allocate_particles(Grid1DHostF &hposx, Grid1DHostF &hposy, 
 NavierStokes3D::NavierStokes3D()
 {
   firstRun = true;
+  m_currentTime = 0.f;
 }
 
 void NavierStokes3D::setupParams()
@@ -316,7 +309,7 @@ void NavierStokes3D::setupParams()
     for (j=0; j < ny; j++)
     {
       for (k=0; k < nz; k++) {
-        float temp = fabs(0.2*nz-k) / (0.2*nz) * 1.f;
+        float temp = fabs(0.2f*nz-k) / (0.2f*nz) * 1.f;
         params.init_temp.at(i,j,k) = (i < nx/2) ? -temp : temp;
       }
     }
@@ -330,16 +323,17 @@ void NavierStokes3D::setupParams()
   allocate_particles(hposx, hposy, hposz, hvx, hvy, hvz, posx, posy, posz, vx, vy, vz, nx, ny, nz);  
 }
 
+#include <iostream>
+#include <fstream>
+
 void NavierStokes3D::run(double dt)
 {
+  m_currentTime += float(dt);
   if (firstRun)
   {
     setupParams();
     firstRun = false;
   }
-
-  CPUTimer timer;
-  timer.start();
 
   for (int i = 0; i < 1; i++)
   {
@@ -354,9 +348,9 @@ void NavierStokes3D::run(double dt)
     for (int p=0; p < hvx.nx(); p++) {
       float3 curVel = make_float3(hvx.at(p),hvy.at(p),hvz.at(p));
       // forward Euler
-      hposx.at(p) += curVel.x * dt;
-      hposy.at(p) += curVel.y * dt;
-      hposz.at(p) += curVel.z * dt;
+      hposx.at(p) += curVel.x * float(dt);
+      hposy.at(p) += curVel.y * float(dt);
+      hposz.at(p) += curVel.z * float(dt);
     }
     // copy positions back to device
     posx.copy_all_data(hposx); posy.copy_all_data(hposy); posz.copy_all_data(hposz);
@@ -374,9 +368,6 @@ void NavierStokes3D::run(double dt)
     m_yVel[p] = currentVelocity.y;
     m_zVel[p] = currentVelocity.z;
   }
-
-  timer.stop();
-  printf("Elapsed: %f, or %f fps\n", timer.elapsed_sec(), 100 / timer.elapsed_sec());
 }
 
 void NavierStokes3D::calculateVelocities(float dt)

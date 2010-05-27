@@ -80,6 +80,7 @@ private:
   float* m_yVel;
   float* m_zVel;
   int m_numParticles;
+  float m_currentTime;
 
   int nx;
   int ny;

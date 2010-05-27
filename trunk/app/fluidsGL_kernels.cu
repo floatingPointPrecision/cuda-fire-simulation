@@ -51,14 +51,32 @@ void deleteTexture(void) {
 
 // CUDA FIRE KERNELS:
 
-__global__ void replaceWithInvertedVField(float2* vField, float2* newVField, int dim, int num_particles)
+__global__ void addVelocityContribution(float2* vField, float2* newVField, int dim, int num_particles, bool replace)
 {
   int index = blockDim.x * blockIdx.x + threadIdx.x;
-  //int verticalInverseIndex = blockDim.x * (dim-blockIdx.x-1) + (dim-threadIdx.x-1);
   if (index > num_particles)
     return;
-  vField[index] = newVField[index];
+  float2 velocity = newVField[index];
+  if (!replace)
+    velocity += vField[index];
+  else
+    velocity += (vField[index]*0.001f);
+  vField[index] = velocity;
+}
 
+__global__ void clampVelocities(float2* vField, float maxLength, int numElements)
+{
+  int index = blockDim.x*blockIdx.x+threadIdx.x;
+  if (index >= numElements)
+    return;
+  float2 velocity = vField[index];
+  float length = sqrtf(velocity.x*velocity.x + velocity.y*velocity.y);
+  if (length != 0)
+  {
+    velocity /= length;
+    velocity *= min(maxLength, length);
+  }
+  vField[index] = velocity;
 }
 
 __global__ void dissipateDenistyKernel(float* densityField, float dissipationFactor, float dt, int fieldSize)
@@ -91,10 +109,9 @@ __global__ void coolTemperatureKernel(float* temperatureField,float coolingCoeff
   temperatureField[index] = temperature;
 }
 
-__global__ void addMassFromSlice(float* densityField, float* mass, float densityFactor, int fieldSize, int dim)
+__global__ void addMassFromSlice(float* densityField, float* mass, float densityFactor, int fieldSize)
 {
-  int index = blockDim.x*blockIdx.x+threadIdx.x;//blockDim.x * (dim-blockIdx.x-1) + (dim-threadIdx.x-1);
-  //int massIndex = blockDim.x * (dim-blockIdx.x-1) + (dim-threadIdx.x-1);
+  int index = blockDim.x*blockIdx.x+threadIdx.x;
   if (index >= fieldSize)
     return;
   float density = densityField[index];
@@ -103,16 +120,25 @@ __global__ void addMassFromSlice(float* densityField, float* mass, float density
   densityField[index] = density;
 }
 
-__global__ void addFuelFromSlice(float* fuelField,float* fuel,float combustionTemperature, int fieldSize, int dim)
+__global__ void addFuelFromSlice(float* fuelField,float* fuel,float combustionTemperature, int fieldSize)
 {
-  int index = blockDim.x*blockIdx.x+threadIdx.x;//blockDim.x * (dim-blockIdx.x-1) + (dim-threadIdx.x-1);
-  //int massIndex = blockDim.x * (dim-blockIdx.x-1) + (dim-threadIdx.x-1);
+  int index = blockDim.x*blockIdx.x+threadIdx.x;
   if (index >= fieldSize)
     return;
   float temperature = fuelField[index];
   float fuelContribution = min(fuel[index],1.f);
   temperature = max(temperature, combustionTemperature * fuelContribution);
   fuelField[index] = temperature;
+}
+
+__global__ void addTemperatureFromFuel(float* temperatureField,float* fuelField,float combustionTemperature,int numElements)
+{
+  int index = blockDim.x*blockIdx.x+threadIdx.x;
+  if (index >= numElements)
+    return;
+  float temp = temperatureField[index];
+  float fuel = min(fuelField[index], 1.f);
+  temperatureField[index] = 1400.f;//max(temp, fuel*combustionTemperature);
 }
 
 // inclusive clamp
@@ -159,6 +185,79 @@ __global__ void semiLagrangianAdvectionKernel(float2* velocityField, float* scal
   int row = index / dim;
   float2 newPos = make_float2(col,row) - velocity * dt;
   tempScalarField[index] = bilinearInterpolation(scalarField, newPos, dim);
+}
+
+__device__ float2 partialDerivativeYFloat2(float2* vField, int2 middleIndex, int dim)
+{
+  int2 upIndex = middleIndex + make_int2(0,1);
+  upIndex.y = upIndex.y % dim;
+  float2 up = vField[upIndex.y*dim+upIndex.x];
+  int2 downIndex = middleIndex + make_int2(0,-1);
+  if (downIndex.y < 0)
+    downIndex.y += dim;
+  float2 down = vField[downIndex.y*dim+downIndex.x];
+  return (up - down) / 2.f;
+}
+
+__device__ float2 partialDerivativeXFloat2(float2* vField, int2 middleIndex, int dim)
+{
+  int2 rightIndex = middleIndex + make_int2(1,0);
+  rightIndex.x = rightIndex.x % dim;
+  float2 right = vField[rightIndex.y*dim+rightIndex.x];
+  int2 leftIndex = middleIndex + make_int2(-1,0);
+  if (leftIndex.y < 0)
+    leftIndex.y += dim;
+  float2 left = vField[leftIndex.y*dim+leftIndex.x];
+  return (right - left) / 2.f;
+}
+
+__global__ void calculatePhi(float2* vField, float* phi, float* turbulenceField, float vorticityTerm, int numElements, int dim)
+{
+  int index = blockDim.x * blockIdx.x + threadIdx.x;
+  if (index >= numElements)
+    return;
+  int row = index / dim;
+  int col = index % dim;
+  float2 Vx = partialDerivativeXFloat2(vField, make_int2(col,row), dim);
+  float2 Vy = partialDerivativeYFloat2(vField, make_int2(col,row), dim);
+  float psi = Vy.x - Vx.y;
+  phi[index] = turbulenceField[index] + (psi * vorticityTerm);
+}
+
+__device__ float partialDerivativeYFloat(float* field, int2 middleIndex, int dim)
+{
+  int2 upIndex = middleIndex + make_int2(0,1);
+  upIndex.y = upIndex.y % dim;
+  float up = field[upIndex.y*dim+upIndex.x];
+  int2 downIndex = middleIndex + make_int2(0,-1);
+  if (downIndex.y < 0)
+    downIndex.y += dim;
+  float down = field[downIndex.y*dim+downIndex.x];
+  return (up - down) / 2.f;
+}
+
+__device__ float partialDerivativeXFloat(float* field, int2 middleIndex, int dim)
+{
+  int2 rightIndex = middleIndex + make_int2(1,0);
+  rightIndex.x = rightIndex.x % dim;
+  float right = field[rightIndex.y*dim+rightIndex.x];
+  int2 leftIndex = middleIndex + make_int2(-1,0);
+  if (leftIndex.y < 0)
+    leftIndex.y += dim;
+  float left = field[leftIndex.y*dim+leftIndex.x];
+  return (right - left) / 2.f;
+}
+
+__global__ void vorticityConfinementTurbulence(float2* vField,float* phi,float dt,int numElements,int dim)
+{
+  int index = blockDim.x * blockIdx.x + threadIdx.x;
+  if (index >= numElements)
+    return;
+  int row = index / dim;
+  int col = index % dim;
+  float2 velocityTerm = make_float2(partialDerivativeYFloat(phi,make_int2(col,row),dim),
+    -partialDerivativeXFloat(phi,make_int2(col,row),dim));
+  vField[index] += dt * velocityTerm;
 }
 
 // OLD FFT SOLVER KERNELS:
