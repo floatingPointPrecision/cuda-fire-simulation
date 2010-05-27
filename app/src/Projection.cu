@@ -88,17 +88,18 @@ __device__ float particleWeight(float projectionDistance, float sliceSpacing)
 __device__ int worldToPixelIndex(float4 position, float2 xyLowerBound, float2 xyUpperBound, int2 imageDims)
 {
   int pixelIndex;
-  if (position.x < xyLowerBound.x || position.x > xyUpperBound.x ||
-      position.y < xyLowerBound.y || position.y > xyUpperBound.y)
-    pixelIndex = -1;
-  else
-  {
-    float xRatio = (position.x - xyLowerBound.x) / (xyUpperBound.x-xyLowerBound.x);
-    float yRatio = 1.f + (position.y - xyUpperBound.y) / (xyUpperBound.y-xyLowerBound.y);
-    int xVal = xRatio * imageDims.x;
-    int yVal = yRatio * imageDims.y;
-    pixelIndex = yVal*imageDims.x+xVal;
-  }
+  if (position.x < xyLowerBound.x) position.x = xyLowerBound.x;
+  else if (position.x >= xyUpperBound.x) position.x = xyUpperBound.x -1;
+
+  if (position.y < xyLowerBound.y) position.y = xyLowerBound.y;
+  else if (position.y >= xyUpperBound.y) position.y = xyUpperBound.y -1;
+
+  float xRatio = (position.x - xyLowerBound.x) / (xyUpperBound.x-xyLowerBound.x);
+  float yRatio = 1.f + (position.y - xyUpperBound.y) / (xyUpperBound.y-xyLowerBound.y);
+  int xVal = xRatio * imageDims.x;
+  int yVal = yRatio * imageDims.y;
+  pixelIndex = yVal*imageDims.x+xVal;
+
   return pixelIndex;
 
 }
@@ -119,7 +120,7 @@ __global__ void generateKeys(ParticleItrStruct particles, int* keys, int* partic
     // write out the current particle index and the bin index
     keys[index + numParticles*i] = pixelIndex;
     particleIndices[index + numParticles*i] = index;
-    particlePosition += particleVelocity * 0.001f;
+    particlePosition += particleVelocity * 0.005f;
   }
 }
 

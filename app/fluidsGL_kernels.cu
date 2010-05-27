@@ -57,7 +57,7 @@ __global__ void replaceWithInvertedVField(float2* vField, float2* newVField, int
   //int verticalInverseIndex = blockDim.x * (dim-blockIdx.x-1) + (dim-threadIdx.x-1);
   if (index > num_particles)
     return;
-  vField[index] += newVField[index];
+  vField[index] = newVField[index];
 
 }
 
@@ -115,13 +115,29 @@ __global__ void addFuelFromSlice(float* fuelField,float* fuel,float combustionTe
   fuelField[index] = temperature;
 }
 
+// inclusive clamp
+__device__ int clampToRange(int input, int lowerBound, int upperBound)
+{
+  if (input < lowerBound)
+    input = lowerBound;
+  else if (input >= upperBound)
+    input = upperBound-1;
+  return input;
+}
+
+__device__ int wrapInRange(int input, int lowerBound, int upperBound)
+{
+  int range = upperBound-lowerBound;
+  return lowerBound + (input % range);
+}
+
 __device__ float bilinearInterpolation(float* field, float2 position, int dim)
 {
   int x1 = floor(position.x); int x2 = ceil(position.x);
   int y1 = floor(position.y); int y2 = ceil(position.y);
   // periodic boundary conditions
-  if (x1 < 0) x1 += dim; if (y1 < 0) y1 += dim;
-  if (x1 >= dim) x1 -= dim; if (y1 >= dim) y1 -= dim;
+  x1=clampToRange(x1,0,dim); x2=clampToRange(x2,0,dim);
+  y1=clampToRange(y1,0,dim); y2=clampToRange(y2,0,dim);
   float q11 = field[y1*dim+x1]; float q12 = field[y1*dim+x2];
   float q21 = field[y2*dim+x1]; float q22 = field[y2*dim+x2];
   // taken from wikipedia http://en.wikipedia.org/wiki/Bilinear_interpolation
@@ -139,8 +155,8 @@ __global__ void semiLagrangianAdvectionKernel(float2* velocityField, float* scal
   if (index >= numElements)
     return;
   float2 velocity = velocityField[index];
-  int row = index / dim;
   int col = index % dim;
+  int row = index / dim;
   float2 newPos = make_float2(col,row) - velocity * dt;
   tempScalarField[index] = bilinearInterpolation(scalarField, newPos, dim);
 }

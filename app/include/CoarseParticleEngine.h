@@ -134,6 +134,10 @@ namespace cufire
     * resets particles. removes all particles and will eventually restart the system
     */
     void resetParticles();
+    /**
+    * remove old particles and collapses the arrays to allow new particles to be added to the end
+    */
+    void adjustAgeAndParticles(float dt);
 
     unsigned int m_maxNumParticles; ///< max number of particles in the system.
     unsigned int m_numParticles; ///< current number of particles in the system.
@@ -153,33 +157,13 @@ namespace cufire
     GLuint m_positionsAgeVBO; ///< OpenGL vertex buffer object of the positionAge float4 array
     cudaGraphicsResource* m_positionsVBO_CUDA;
     float4* m_devicePositionAge; ///< particle device copy of position x, y, z, age
+    int* m_particlesToRemove; ///< boolean array saying whether the current particle is dead
     float4* m_deviceFuelRadiusMassImpulse; ///< particle device copy of fuel, radius, mass, impulse
     float* m_deviceXVelocities; ///< particle x velocities device copy
     float* m_deviceYVelocities; ///< particle y velocities device copy
     float* m_deviceZVelocities; ///< particle z velocities device copy
 
     ParticleItrStruct m_particleStructItrBegin; ///< beginning of particle tuple of iterators
-
-    /*thrust::host_vector<float4> m_hostPositionAge; ///< particle host copy of position x, y, z, age
-    thrust::host_vector<float4> m_hostFuelRadiusMassImpulse; ///< particle host copy of fuel, radius, mass, impulse
-    thrust::host_vector<float> m_hostXVelocities; ///< particle x velocities host copy
-    thrust::host_vector<float> m_hostYVelocities; ///< particle y velocities host copy
-    thrust::host_vector<float> m_hostZVelocities; ///< particle z velocities host copy
-
-    GLuint m_positionsAgeVBO; ///< OpenGL vertex buffer object of the positionAge float4 array
-    DevPtrFloat4 m_positionsAgeRaw; ///< temporary raw float4 pointer to OpenGL positionsAge VBO
-    thrust::device_vector<float4> m_devicePositionAge; ///< particle device copy of position x, y, z, age
-    thrust::device_vector<float4> m_deviceFuelRadiusMassImpulse; ///< particle device copy of fuel, radius, mass, impulse
-    thrust::device_vector<float> m_deviceXVelocities; ///< particle x velocities device copy
-    thrust::device_vector<float> m_deviceYVelocities; ///< particle y velocities device copy
-    thrust::device_vector<float> m_deviceZVelocities; ///< particle z velocities device copy
-
-    ParticleItrStruct m_particleStructItrBegin; ///< beginning of particle tuple of iterators
-    ParticleItrStruct m_particleStructItrEnd; ///< end of particle tuple of iterators
-    ParticleZipItr m_particleItrBegin; ///< beginning of particle zip_iterator
-    ParticleZipItr m_particleItrEnd; ///< end of particle zip_iterator*/
-
-    //NavierStokes3D m_ns3DSolver;
   };
 
 }

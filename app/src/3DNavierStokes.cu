@@ -41,50 +41,158 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace ocu;
 
-IncompressibleCustomSolver::IncompressibleCustomSolver() : Eqn_IncompressibleNS3DF()
-{}
+IncompressibleCustomSolver::IncompressibleCustomSolver() 
+: Eqn_IncompressibleNS3DF(), m_simplexNoiseField(0), m_currentTime(0.f), m_simplexNoiseFieldSize(512)
+{
+  initializeSimplexNoise();
+}
 
 IncompressibleCustomSolver::~IncompressibleCustomSolver()
 {}
 
-// not working right now
-bool IncompressibleCustomSolver::init_derivs(int nx, int ny, int nz)
+void IncompressibleCustomSolver::initializeSimplexNoise()
 {
-  Grid3DHost<float> deriv_udt_host,deriv_vdt_host,deriv_wdt_host;
-  if (!deriv_udt_host.init_congruent(_deriv_udt,false) ||
-      !deriv_vdt_host.init_congruent(_deriv_vdt,false) ||
-      !deriv_wdt_host.init_congruent(_deriv_wdt,false))
-  {
-    printf("force grid failed\n");
-    exit(-1);
-  }
-  int i,j,k;
-  float weight = 0.1f;
-  for (i=0; i < nx; i++)
-  {
-    float xRatio = fabs(0.5*nx-i) / (0.5*nx);
-    for (j=0; j < ny; j++)
-    {
-      float yRatio = fabs(0.5*ny-j) / (0.5*ny);
-      for (k=0; k < nz; k++) {
-        float zRatio = fabs(0.5*nz-k) / (0.5*nz);
-        deriv_udt_host.at(i,j,k) = xRatio * weight;
-        deriv_vdt_host.at(i,j,k) = weight;//(j < ny / 2) ? 10 : -10;
-        deriv_wdt_host.at(i,j,k) = zRatio * weight;
-      }
-    }
-  }
-  _deriv_udt.copy_all_data(deriv_udt_host);
-  _deriv_vdt.copy_all_data(deriv_udt_host);
-  _deriv_wdt.copy_all_data(deriv_udt_host);
-  return true;
+  cudaMalloc((void**)&m_simplexNoiseField,sizeof(float)*m_simplexNoiseFieldSize*m_simplexNoiseFieldSize);
 }
 
+
+__global__ void addZForce(float *dwdt, float coefficient, float* noise, int2 noiseSize,
+                          int xstride, int ystride, int nbr_stride, 
+                          int nx, int ny, int nz, int blocksInY, float invBlocksInY)
+{
+  int blockIdxz = truncf(blockIdx.y * invBlocksInY);
+  int blockIdxy = blockIdx.y - __mul24(blockIdxz,blocksInY);
+
+  // transpose for coalescing since k is the fastest changing index 
+  int k     = __mul24(blockIdx.x,blockDim.x) + threadIdx.x;
+  int j     = __mul24(blockIdxy ,blockDim.y) + threadIdx.y;
+  int i     = __mul24(blockIdxz ,blockDim.z) + threadIdx.z;
+
+  // shift so we will get maximum coalescing.  This means that we will need to test if k>0 below.
+  int idx = __mul24(i, xstride) + __mul24(j,ystride) + k;
+
+  // use gaussian spreading out from middle
+  if (i < nx && j < ny && k < nz) {
+    float noiseValue = noise[idx];
+    noiseValue *= 0.25f;
+    noiseValue += 0.15f;
+
+    float yRatio = -3.f*(1.f-j/ny)+2.f; // 2 at bottom, -1 at top
+    yRatio *= 0.5f;
+    float output = noiseValue*yRatio*coefficient;
+    if (k > nx / 2)
+      output *= -1.f;
+    dwdt[idx] += output;
+  }
+}
+
+__global__ void addXForce(float *dudt, float coefficient, float* noise, int2 noiseSize,
+                          int xstride, int ystride, int nbr_stride, 
+                          int nx, int ny, int nz, int blocksInY, float invBlocksInY)
+{
+  int blockIdxz = truncf(blockIdx.y * invBlocksInY);
+  int blockIdxy = blockIdx.y - __mul24(blockIdxz,blocksInY);
+
+  // transpose for coalescing since k is the fastest changing index 
+  int k     = __mul24(blockIdx.x,blockDim.x) + threadIdx.x;
+  int j     = __mul24(blockIdxy ,blockDim.y) + threadIdx.y;
+  int i     = __mul24(blockIdxz ,blockDim.z) + threadIdx.z;
+
+  // shift so we will get maximum coalescing.  This means that we will need to test if k>0 below.
+  int idx = __mul24(i, xstride) + __mul24(j,ystride) + k;
+
+  // use gaussian spreading out from middle
+  if (i < nx && j < ny && k < nz) {
+    float noiseValue = noise[idx];
+    noiseValue *= 0.25f;
+    noiseValue += 0.15f;
+
+    float xRatio = 2.f*fabs(nx*0.5f-i)/nx; // 0 to 1 moving away from center
+    xRatio *= 5.f;
+    float yRatio = -3.f*(1.f-j/ny)+2.f; // 2 at bottom, -1 at top
+    yRatio *= 0.5f;
+    float output = noiseValue*yRatio*coefficient;
+    if (i > nx / 2)
+      output *= -1.f;
+    dudt[idx] += output;
+  }
+}
+
+__global__ void addVerticalForce(float *dvdt, float coefficient, float* noise, int2 noiseSize,
+                                 int xstride, int ystride, int nbr_stride, 
+                                 int nx, int ny, int nz, int blocksInY, float invBlocksInY)
+{
+  int blockIdxz = truncf(blockIdx.y * invBlocksInY);
+  int blockIdxy = blockIdx.y - __mul24(blockIdxz,blocksInY);
+
+  // transpose for coalescing since k is the fastest changing index 
+  int k     = __mul24(blockIdx.x,blockDim.x) + threadIdx.x;
+  int j     = __mul24(blockIdxy ,blockDim.y) + threadIdx.y;
+  int i     = __mul24(blockIdxz ,blockDim.z) + threadIdx.z;
+
+  // shift so we will get maximum coalescing.  This means that we will need to test if k>0 below.
+  int idx = __mul24(i, xstride) + __mul24(j,ystride) + k;
+
+
+  // use gaussian spreading out from middle
+  if (i < nx && j < ny && k < nz) {
+    float noiseValue = noise[idx];
+    noiseValue *= 0.75f;
+    noiseValue += 1.0f;
+
+    float xRatio = powf(1-(2.f*fabs(nx*0.5f - i)/nx),2);
+    float zRatio = powf(1-(2.f*fabs(nz*0.5f - k)/nz),2);
+    float yRatio = (0.5f-(j/ny))*10.f;
+    dvdt[idx] += noiseValue*yRatio*xRatio*zRatio*coefficient;//((float).5) * coefficient * (temperature[idx] + temperature[idx-nbr_stride]);
+  }
+}
+
+void IncompressibleCustomSolver::add_external_forces(double dt)
+{
+  // apply thermal force by adding -gkT to dvdt (let g = -1, k = 1, so this is just dvdt += T)
+  //_advection_solver.deriv_vdt.linear_combination((T)1.0, _advection_solver.deriv_vdt, (T)1.0, _thermal_solver.phi);
+
+  int tnx = nz();
+  int tny = ny();
+  int tnz = nx();
+
+  int threadsInX = 16;
+  int threadsInY = 2;
+  int threadsInZ = 2;
+
+  int blocksInX = (tnx+threadsInX-1)/threadsInX;
+  int blocksInY = (tny+threadsInY-1)/threadsInY;
+  int blocksInZ = (tnz+threadsInZ-1)/threadsInZ;
+
+  dim3 Dg = dim3(blocksInX, blocksInY*blocksInZ);
+  dim3 Db = dim3(threadsInX, threadsInY, threadsInZ);
+
+  float *v = &_deriv_vdt.at(0,0,0);
+  float *u = &_deriv_udt.at(0,0,0);
+  float *w = &_deriv_wdt.at(0,0,0);
+
+  int2 noiseSize = make_int2(m_simplexNoiseFieldSize,m_simplexNoiseFieldSize);
+
+  float coefficient = 20.f;
+  addVerticalForce<<<Dg, Db>>>(v, coefficient,m_simplexNoiseField, noiseSize,
+    _temp.xstride(), _temp.ystride(), _temp.stride(DIR_YAXIS_FLAG), nx(), ny(), nz(), 
+    blocksInY, 1.0f / (float)blocksInY);
+  coefficient = 20.f;
+  addXForce<<<Dg, Db>>>(u, coefficient,m_simplexNoiseField, noiseSize,
+  _temp.xstride(), _temp.ystride(), _temp.stride(DIR_XAXIS_FLAG), nx(), ny(), nz(), 
+  blocksInY, 1.0f / (float)blocksInY);
+  coefficient = 20.f;
+  addZForce<<<Dg, Db>>>(w, coefficient,m_simplexNoiseField, noiseSize,
+  _temp.xstride(), _temp.ystride(), _temp.stride(DIR_ZAXIS_FLAG), nx(), ny(), nz(), 
+  blocksInY, 1.0f / (float)blocksInY);
+
+}
 // custom update method
 bool IncompressibleCustomSolver::advance_one_step(double dt)
 {
   clear_error();
   num_steps++;
+  m_currentTime += dt;
 
   // update dudt
   check_ok(_advection_solver.solve()); // updates dudt, dvdt, dwdt, overwrites whatever is there
@@ -95,28 +203,11 @@ bool IncompressibleCustomSolver::advance_one_step(double dt)
     check_ok(_w_diffusion.solve()); // dwdt += \nu \nabla^2 w
   }
 
+  m_simplexNoise.updateNoise(m_simplexNoiseField, 0.0f, m_currentTime, 0.1, m_simplexNoiseFieldSize*m_simplexNoiseFieldSize, m_simplexNoiseFieldSize);
   // eventually this will be replaced with a grid-wide operation.
-  add_thermal_force();
-
-  // update dTdt
-
-  check_ok(_thermal_solver.solve());   // updates dTdt, overwrites whatever is there
-  if (thermal_diffusion_coefficient() > 0) {
-    check_ok(_thermal_diffusion.solve()); // dTdt += k \nabla^2 T
-  }
+  add_external_forces(dt);
 
   float ab_coeff = -dt*dt / (2 * _lastdt);
-
-  // advance T 
-  if (_time_step == TS_ADAMS_BASHFORD2 && _lastdt > 0) {
-    check_ok(_temp.linear_combination((float)1.0, _temp, (float)(dt - ab_coeff), _deriv_tempdt));
-    check_ok(_temp.linear_combination((float)1.0, _temp, (float)ab_coeff, _last_deriv_tempdt));
-  } 
-  else {
-    check_ok(_temp.linear_combination((float)1.0, _temp, (float)dt, _deriv_tempdt));
-  }
-
-  check_ok(apply_3d_boundary_conditions_level1_nocorners(_temp, _thermalbc, _hx, _hy, _hz));
 
   // advance u,v,w
   if (_time_step == TS_ADAMS_BASHFORD2 && _lastdt > 0) {
@@ -208,7 +299,6 @@ NavierStokes3D::NavierStokes3D()
 void NavierStokes3D::setupParams()
 {
   params.init_grids(nx, ny, nz);
-  //eqn.init_derivs(nx,ny,nz);
   params.hx = 1;
   params.hy = 1;
   params.hz = 1;
@@ -227,9 +317,6 @@ void NavierStokes3D::setupParams()
     {
       for (k=0; k < nz; k++) {
         float temp = fabs(0.2*nz-k) / (0.2*nz) * 1.f;
-        params.init_u.at(i,j,k) = 0;//(i < nx / 2) ? 5 : -5;
-        params.init_v.at(i,j,k) = 0;//(j < ny / 2) ? 10 : -10;
-        params.init_w.at(i,j,k) = 0;//(k < nx / 2) ? 5 : -5;
         params.init_temp.at(i,j,k) = (i < nx/2) ? -temp : temp;
       }
     }
@@ -240,9 +327,7 @@ void NavierStokes3D::setupParams()
     printf("OpenCurrent parameters not properly set\n");
     exit(1);
   }
-  allocate_particles(hposx, hposy, hposz, hvx, hvy, hvz, posx, posy, posz, vx, vy, vz, nx, ny, nz);
-  //eqn.init_derivs(nx,ny,nz);
-  
+  allocate_particles(hposx, hposy, hposz, hvx, hvy, hvz, posx, posy, posz, vx, vy, vz, nx, ny, nz);  
 }
 
 void NavierStokes3D::run(double dt)

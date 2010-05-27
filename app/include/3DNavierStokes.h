@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ocustorage/grid3dboundary.h"
 #include "ocustorage/grid3dsample.h"
 #include "ocuutil/timer.h"
+#include "SimplexNoise.h"
 
 using namespace ocu;
 
@@ -47,7 +48,13 @@ public:
   virtual ~IncompressibleCustomSolver();
 
   bool advance_one_step(double dt);
-  bool init_derivs(int nx, int ny, int nz);
+protected:
+  void initializeSimplexNoise();
+  void add_external_forces(double dt);
+  SimplexNoise4D m_simplexNoise;
+  float* m_simplexNoiseField;
+  int m_simplexNoiseFieldSize;
+  float m_currentTime;
 
 };
 

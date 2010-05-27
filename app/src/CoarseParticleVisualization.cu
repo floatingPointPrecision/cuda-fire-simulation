@@ -67,10 +67,24 @@ using namespace cufire;
 
 int enableCoarseVisualization;
 
+int numRenderTargets = 6;
+enum RenderTarget
+{
+  RenderTexture = 0,
+  RenderDensity,
+  RenderFuel,
+  RenderTemperature,
+  RenderVelocity,
+  RenderCoarseEngine
+};
+std::string currentRenderTargetString = "Coarse Engine";
+
+int currentRenderTarget = RenderCoarseEngine;
 CoarseParticleEngine* pEngine;
 OrthographicProjection* pProjection;
-//SliceRefiner* pSliceRefiner;
+
 float sTimestep;
+float currentTime = 0;
 
 float* d_sliceMassOutput;
 float* d_sliceFuelOutput;
@@ -108,6 +122,7 @@ float randomFloatInRange(float minVal, float maxVal)
 
 void updateSimulation(float dt)
 {
+  currentTime += dt;
   printf("\n\n     NEW TIME STEP\n");
   // move VBO from OpenGL context to CUDA context
   pEngine->enableCUDAVbo();
@@ -125,46 +140,16 @@ void updateSimulation(float dt)
 
   for (int i = 0; i < 1; i++)
   {
+    float zIntercept = 32.f;
     cutilSafeCall(cudaMemset(d_sliceMassOutput,0,numSliceBytes));
     cutilSafeCall(cudaMemset(d_sliceFuelOutput,0,numSliceBytes));
     cutilSafeCall(cudaMemset(d_sliceVelocityOutput,0,numSliceVelocityBytes));
-    // perform actual projection for s lice # i
-    pProjection->execute(32.f, d_sliceMassOutput, d_sliceFuelOutput, d_sliceVelocityOutput);
+    // perform actual projection for slice # i
+    pProjection->execute(zIntercept, d_sliceMassOutput, d_sliceFuelOutput, d_sliceVelocityOutput);
     // copy output as image
     cutilSafeCall(cudaMemcpy(h_sliceMassOutput, d_sliceMassOutput, numSliceBytes, cudaMemcpyDeviceToHost));
     cutilSafeCall(cudaMemcpy(h_sliceFuelOutput, d_sliceFuelOutput, numSliceBytes, cudaMemcpyDeviceToHost));
     cutilSafeCall(cudaMemcpy(h_sliceVelocityOutput, d_sliceVelocityOutput, numSliceVelocityBytes, cudaMemcpyDeviceToHost));
-
-    int x,y,width=slicePixelDims.x,height=slicePixelDims.y;
-    for(x=0;x<width;++x)
-    {
-      for(y=0;y<height;++y)
-      {
-        float currentMass = h_sliceMassOutput[y*width+x] * 255.f;
-        float currentFuel = h_sliceFuelOutput[y*width+x] * 255.f;
-        float2 currentVelocity = h_sliceVelocityOutput[y*width+x] * 255.f;
-
-        //if (currentMass > 0 || currentFuel > 0)
-        //  printf("lol%f,%f\n",currentMass,currentFuel);
-        currentVelocity.x = fabs(currentVelocity.x);
-        currentVelocity.y = fabs(currentVelocity.y);
-
-        massImage.setValue(x,y,char(currentMass),char(currentMass),char(currentMass));
-        fuelImage.setValue(x,y,char(currentFuel),char(currentFuel),char(currentFuel));
-        velocityImage.setValue(x,y,char(currentVelocity.x),char(currentVelocity.y),0);
-      }
-    }
-    char strMass[64];
-    sprintf(strMass, "MassProjection%i.bmp", i);
-    massImage.flush(strMass);
-
-    char strFuel[64];
-    sprintf(strFuel, "FuelProjection%i.bmp", i);
-    fuelImage.flush(strFuel);
-
-    char strVel[64];
-    sprintf(strVel, "VelocityProjection%i.bmp", i);
-    velocityImage.flush(strVel);
 
     CPUTimer fluid2DTimer;
     fluid2DTimer.start();
@@ -173,27 +158,9 @@ void updateSimulation(float dt)
     dissipateFuel(dt);
     coolTemperature(dt);
     contributeSlices(d_sliceMassOutput, d_sliceFuelOutput);
-
-    float* d_densityField = getDensityField();//getDensityField();
-    cudaMemcpy(h_sliceMassOutput,d_densityField,numSliceBytes,cudaMemcpyDeviceToHost);
-    float averageDensity = 0.f;
-    int densityPixels = 0;
-    for(x=0;x<width;++x)
-    {
-      for(y=0;y<height;++y)
-      {
-        float currentDensity = h_sliceMassOutput[y*width+x]*10.f;
-        if (currentDensity > 0.f)
-        {
-          densityPixels++;
-          averageDensity += currentDensity;
-        }
-        massImage.setValue(x,y,char(currentDensity),char(currentDensity),char(currentDensity));
-      }
-    }
-    massImage.flush("SliceMass.bmp");
     simulateFluids(dt);
-
+    addTextureDetail(currentTime, zIntercept);
+    enforveVelocityIncompressibility(dt);
     fluid2DTimer.stop();
     printf("fluid 2D time: %f\n", fluid2DTimer.elapsed_sec());
   }
@@ -247,6 +214,34 @@ void drawCube(float3 lowerLeftFront, float3 upperRightBack)
   glEnd();
 }
 
+// found at http://www-course.cs.york.ac.uk/cgv/OpenGL/L23b.html
+void DrawText(GLint x, GLint y, char* s, GLfloat r, GLfloat g, GLfloat b)
+{
+  int lines;
+  char* p;
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0.0, glutGet(GLUT_WINDOW_WIDTH), 
+    0.0, glutGet(GLUT_WINDOW_HEIGHT), -1.0, 1.0);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+  glColor3f(r,g,b);
+  glRasterPos2i(x, y);
+  for(p = s, lines = 0; *p; p++) {
+    if (*p == '\n') {
+      lines++;
+      glRasterPos2i(x, y-(lines*18));
+    }
+    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *p);
+  }
+  glPopMatrix();
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+}
+
 #define M_PI 3.14159265f
 void display()
 {
@@ -265,12 +260,11 @@ void display()
   // draw bounding box
   drawCube(make_float3(0,0,0), make_float3(64,64,64));
   pEngine->render();
-
-  glutSwapBuffers();
 }
 
 void reshape(int w, int h)
 {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   window_width = w;
   window_height = h;
   // viewport
@@ -286,31 +280,71 @@ void reshape(int w, int h)
 
 void timer2(int value)
 {
-
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   // update coarse particle simulation
   updateSimulation(sTimestep);
-  // display either the coarse particle engine or the slices
-  if (enableCoarseVisualization)
+  //  RenderTexture = 0,
+  //RenderDensity,
+  //RenderFuel,
+  //RenderTemperature,
+  //RenderVelocity,
+  //RenderCoarseEngine
+  switch(currentRenderTarget)
   {
+  case RenderTexture:
+  case RenderFuel:
+  case RenderDensity:
+  case RenderTemperature:
+  case RenderVelocity:
+    displaySlice(currentRenderTarget);
+    break;
+  case RenderCoarseEngine:
     display();
-  }
-  else
-  {
-    sliceDisplay();
+    break;
   }
 
+  char drawTime[128];
+  sprintf(drawTime, "Time: %f",currentTime);
+  char drawVisualization[128];
+  sprintf(drawVisualization, "Visualization: %s",currentRenderTargetString.c_str());
+  DrawText(10,10,drawTime,1,0,0);
+  DrawText(10,30,drawVisualization,1,0,0);
+
+  glutSwapBuffers();
   glutTimerFunc(0.0001f,timer2,value);
 }
 
 // based on OpenGL Camera Tutorial at http://www.swiftless.com/tutorials/opengl/camera.html
 void keyboard (unsigned char key, int x, int y) {
+  if (key == 'z' || key == 'x')
+  {
+    if (key=='z')
+    {
+      currentRenderTarget--;
+      if (currentRenderTarget == -1)
+        currentRenderTarget = numRenderTargets - 1;
+    }
+    if (key=='x')
+    {
+      currentRenderTarget = (currentRenderTarget + 1) % numRenderTargets;
+    }
+    switch(currentRenderTarget)
+    {
+    case RenderTexture: currentRenderTargetString = "Slice Texture"; break;
+    case RenderFuel: currentRenderTargetString = "Slice Fuel"; break;
+    case RenderDensity: currentRenderTargetString = "Slice Density"; break;
+    case RenderTemperature: currentRenderTargetString = "Slice Temperature"; break;
+    case RenderVelocity: currentRenderTargetString = "Slice Velocity"; break;
+    case RenderCoarseEngine: currentRenderTargetString = "Coarse Engine"; break;
+    }
+  }
   if (key=='q')
   {
     phi += 10;
     if (phi >360) phi -= 360;
   }
 
-  if (key=='z')
+  if (key=='e')
   {
     phi -= 10;
     if (phi < -360) phi += 360;
