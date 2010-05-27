@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <time.h>
 #include <math.h>
@@ -77,14 +78,15 @@ enum RenderTarget
   RenderVelocity,
   RenderCoarseEngine
 };
-std::string currentRenderTargetString = "Coarse Engine";
+std::string currentRenderTargetString = "Slice Texture";
 
-int currentRenderTarget = RenderCoarseEngine;
+int currentRenderTarget = RenderTexture;
 CoarseParticleEngine* pEngine;
 OrthographicProjection* pProjection;
 
 float sTimestep;
 float currentTime = 0;
+bool pauseSimulation = false;
 
 float* d_sliceMassOutput;
 float* d_sliceFuelOutput;
@@ -123,37 +125,46 @@ float randomFloatInRange(float minVal, float maxVal)
 void updateSimulation(float dt)
 {
   currentTime += dt;
-  printf("\n\n     NEW TIME STEP\n");
+  printf("\n\n");
   // move VBO from OpenGL context to CUDA context
   pEngine->enableCUDAVbo();
+
   // update coarse simulation particles
+  static float coarseSum = 0.f;
+  CPUTimer coarseTimer;
+  cudaThreadSynchronize();
+  coarseTimer.start();
   pEngine->advanceSimulation(dt);
+  cudaThreadSynchronize();
+  coarseTimer.stop();
+  coarseSum += coarseTimer.elapsed_sec();
+  printf("average coarse simulation time: %f\n",coarseSum / (currentTime/dt));
 
   // project coarse particles onto slices
-  CPUTimer projectionTimer;
-  projectionTimer.start();
   pProjection->setParticles(pEngine->getParticleBegins(), pEngine->getNumParticles());
-
-  BitmapWriter massImage(slicePixelDims.x,slicePixelDims.y);
-  BitmapWriter fuelImage(slicePixelDims.x,slicePixelDims.y);
-  BitmapWriter velocityImage(slicePixelDims.x,slicePixelDims.y);
-
   for (int i = 0; i < 1; i++)
   {
     float zIntercept = 32.f;
+
+    static float projectionSum = 0.f;
+    CPUTimer projectionTimer;
+    cudaThreadSynchronize();
+    projectionTimer.start();  
     cutilSafeCall(cudaMemset(d_sliceMassOutput,0,numSliceBytes));
     cutilSafeCall(cudaMemset(d_sliceFuelOutput,0,numSliceBytes));
     cutilSafeCall(cudaMemset(d_sliceVelocityOutput,0,numSliceVelocityBytes));
     // perform actual projection for slice # i
     pProjection->execute(zIntercept, d_sliceMassOutput, d_sliceFuelOutput, d_sliceVelocityOutput);
-    // copy output as image
-    cutilSafeCall(cudaMemcpy(h_sliceMassOutput, d_sliceMassOutput, numSliceBytes, cudaMemcpyDeviceToHost));
-    cutilSafeCall(cudaMemcpy(h_sliceFuelOutput, d_sliceFuelOutput, numSliceBytes, cudaMemcpyDeviceToHost));
-    cutilSafeCall(cudaMemcpy(h_sliceVelocityOutput, d_sliceVelocityOutput, numSliceVelocityBytes, cudaMemcpyDeviceToHost));
+    cudaThreadSynchronize();
+    projectionTimer.stop();
+    projectionSum += projectionTimer.elapsed_sec();
+    printf("average coarse to slice projection time: %f\n",projectionSum / (currentTime/dt));
 
-    CPUTimer fluid2DTimer;
-    fluid2DTimer.start();
-    replaceVelocityField(d_sliceVelocityOutput);
+    static float refinementSum = 0.f;
+    CPUTimer refinementTimer;
+    cudaThreadSynchronize();
+    refinementTimer.start();
+    addVelocity(d_sliceVelocityOutput);
     dissipateDensity(dt);
     dissipateFuel(dt);
     coolTemperature(dt);
@@ -161,13 +172,11 @@ void updateSimulation(float dt)
     simulateFluids(dt);
     addTextureDetail(currentTime, zIntercept);
     enforveVelocityIncompressibility(dt);
-    fluid2DTimer.stop();
-    printf("fluid 2D time: %f\n", fluid2DTimer.elapsed_sec());
+    cudaThreadSynchronize();
+    refinementTimer.stop();
+    refinementSum += refinementTimer.elapsed_sec();
+    printf("average refinement simulation time: %f\n",refinementSum / (currentTime/dt));
   }
-
-  projectionTimer.stop();
-  printf("Projection time: %f\n", projectionTimer.elapsed_sec());
-
   // move VBO back to OpenGL
   pEngine->disableCUDAVbo();
 }
@@ -281,14 +290,10 @@ void reshape(int w, int h)
 void timer2(int value)
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  // update coarse particle simulation
-  updateSimulation(sTimestep);
-  //  RenderTexture = 0,
-  //RenderDensity,
-  //RenderFuel,
-  //RenderTemperature,
-  //RenderVelocity,
-  //RenderCoarseEngine
+
+  if (!pauseSimulation)
+    updateSimulation(sTimestep);
+
   switch(currentRenderTarget)
   {
   case RenderTexture:
@@ -337,6 +342,10 @@ void keyboard (unsigned char key, int x, int y) {
     case RenderVelocity: currentRenderTargetString = "Slice Velocity"; break;
     case RenderCoarseEngine: currentRenderTargetString = "Coarse Engine"; break;
     }
+  }
+  if (key=='c')
+  {
+    pauseSimulation = !pauseSimulation;
   }
   if (key=='q')
   {

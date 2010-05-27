@@ -33,6 +33,7 @@
 #endif
 
 #include "fluidsGL_kernels.cu"
+#include "ocuutil/timer.h"
 
 #define MAX_EPSILON_ERROR 1.0f
 
@@ -97,11 +98,15 @@ float* textureField = NULL;
 float* fuelField = NULL;
 float* tempScalarField = NULL;
 
+float* phiField = NULL;
+float* turbulenceField = NULL;
+
 float* h_tempScalarField = NULL;
 float2* h_tempVelocityField = NULL;
 int* h_frameBuffer = NULL;
 
 SimplexNoise4D* simplexField = NULL;
+SimplexNoise4D* simplexFieldTurbulence = NULL;
 float* coarseMassPlane = NULL;
 float* coarseFuelPlane = NULL;
 
@@ -222,17 +227,18 @@ void advectParticles(GLuint vbo, cData *v, int dx, int dy, float dt)
 }
 
 
-void replaceVelocityField(float2* velocityField)
+void addVelocity(float2* velocityField)
 {
   int blockSize = 512;
   int gridSize = (DS + blockSize - 1) / blockSize;
-  replaceWithInvertedVField<<<gridSize,blockSize>>>(dvfield, velocityField, DIM, DS);
-  //dvfield = velocityField;
+  addVelocityContribution<<<gridSize,blockSize>>>(dvfield, velocityField, DIM, DS, true);
+  // clamp velocities
+  clampVelocities<<<gridSize,blockSize>>>(dvfield, 25.f, DS);
 }
 
 void dissipateDensity(float dt)
 {
-  float dissipationFactor = 1.f;
+  float dissipationFactor = 0.25f;
   int blockSize = 512;
   int gridSize = (DS + blockSize - 1) / blockSize;
   dissipateDenistyKernel<<<gridSize,blockSize>>>(densityField,dissipationFactor,dt,DS);
@@ -250,7 +256,7 @@ void dissipateFuel(float dt)
 
 void coolTemperature(float dt)
 {
-  float coolingCoefficient = 3000.f;
+  float coolingCoefficient = 300000.f;
   float maxTemperature = 4000;
   int blockSize = 512;
   int gridSize = (DS + blockSize - 1) / blockSize;
@@ -260,16 +266,17 @@ void coolTemperature(float dt)
 
 void contributeSlices(float* mass, float* fuel)
 {
-  float densityFactor = 20.f;
+  float densityFactor = 10.f;
   float combustionTemperature = 1700.f;
   coarseMassPlane = mass;
   coarseFuelPlane = fuel;
   int blockSize = 512;
   int gridSize = (DS + blockSize - 1) / blockSize;
-  addMassFromSlice<<<gridSize,blockSize>>>(densityField, mass, densityFactor, DS, DIM);
+  addMassFromSlice<<<gridSize,blockSize>>>(densityField, mass, densityFactor, DS);
   cutilCheckMsg("adding density from slice mass failed");
-  addFuelFromSlice<<<gridSize,blockSize>>>(fuelField,fuel,combustionTemperature, DS, DIM);
+  addFuelFromSlice<<<gridSize,blockSize>>>(fuelField,fuel,combustionTemperature, DS);
   cutilCheckMsg("adding temperature from fuel slice failed");
+  addTemperatureFromFuel<<<gridSize,blockSize>>>(temperatureField,fuelField,combustionTemperature,DS);
 
 }
 
@@ -285,16 +292,20 @@ void semiLagrangianAdvection(float2* velocityField, float* scalarField, float* t
 void addTextureDetail(float time, float zVal)
 {
   time *= 10.f;
-  simplexField->updateNoise(textureField, zVal, time, 1.f, DS, DIM);
-  simplexField->updateNoise(textureField, zVal, time, .4f, DS, DIM);
-  //simplexField->updateNoise(textureField, zVal, time*.1f, .01f, DS, DIM);
+  simplexField->updateNoise(textureField, zVal, time, 2.3f, DS, DIM);
+  simplexField->updateNoise(textureField, zVal, time, 1.1f, DS, DIM);
+  simplexField->updateNoise(textureField, zVal, time, .75f, DS, DIM);
   cutilCheckMsg("texture synthesis");
 }
 
-void addTurbulenceVorticityConfinement()
+void addTurbulenceVorticityConfinement(float time, float zVal, float dt)
 {
+  simplexFieldTurbulence->updateNoise(turbulenceField, time, zVal, 1.f, DS, DIM);
   int blockSize = 512;
   int gridSize = (DS + blockSize - 1) / blockSize;
+  float vorticityTerm = 150.f;
+  calculatePhi<<<gridSize,blockSize>>>(dvfield,phiField,turbulenceField, vorticityTerm,DS,DIM);
+  vorticityConfinementTurbulence<<<gridSize,blockSize>>>(dvfield,phiField,dt,DS,DIM);
 }
 
 void simulateFluids(float dt)//float2* newVelocityField)
@@ -321,62 +332,81 @@ void displaySlice(int slice)
     cudaMemcpy(h_tempVelocityField,dvfield,sizeof(float2)*DS,cudaMemcpyDeviceToHost);
     float output;
     float2 velocity;
+    float xTotal = 0.f, yTotal = 0.f;
+    int numNonEmpty = 0;
     for (int i = 0; i < DIM; i++)
     {
       for (int j = 0; j < DIM; j++)
       {
         velocity = h_tempVelocityField[j*DIM+i];
+        velocity.x = fabs(velocity.x);
+        velocity.y = fabs(velocity.y);
+        if (velocity.x != 0.f || velocity.y != 0.f)
+        {
+          numNonEmpty++;
+          if (velocity.x != 0.f)
+            xTotal += velocity.x;
+          if (velocity.y != 0.f)
+            yTotal += velocity.y;
+        }
         output = sqrtf(velocity.x*velocity.x+velocity.y*velocity.y);
-        h_tempScalarField[j*DIM+i] = float(i) / DIM;//output*10.f;
+        output /= 20.f;
+        h_tempScalarField[j*DIM+i] = output;
       }
     }
+    printf("x average: %f\n", xTotal / numNonEmpty);
+    printf("y average: %f\n", yTotal / numNonEmpty);
     glWindowPos2i(0,0);
-    glDrawPixels(DIM,DIM,GL_FLOAT,GL_LUMINANCE,h_tempScalarField);
+    glDrawPixels(DIM,DIM,GL_LUMINANCE,GL_FLOAT,h_tempScalarField);
     return;
   }
-  else if (slice == SliceTexture)
+  else
   {
-    pixelAddition = 1.f;
-    pixelScale = 0.5f;
-    field = textureField;
-  }
-  else if (slice == SliceFuel)
-  {
-    pixelAddition = 0.f;
-    pixelScale = 1 / 2000.f;
-    field = fuelField;
-  }
-  else if (slice == SliceDensity)
-  {
-    pixelAddition = 0.f;
-    pixelScale = 1.f / 15.f;
-    field = densityField;
-  }
-  else if (slice == SliceTemperature)
-  {
-    pixelAddition = 0.f;
-    pixelScale = 1.f;
-    field = temperatureField;
-  }
-  cudaMemcpy(h_tempScalarField,field,sizeof(float)*DS,cudaMemcpyDeviceToHost);
-  float total = 0.f;
-  int numNonEmpty = 0;
-  for (int i = 0; i < DIM; i++)
-  {
-    for (int j = 0; j < DIM; j++)
+    if (slice == SliceTexture)
     {
-      float output = h_tempScalarField[j*DIM+i]*pixelScale+pixelAddition;
-      if (output != 0.f)
-      {
-        numNonEmpty++;
-        total += output;
-      }
-      h_tempScalarField[j*DIM+i] = output;
+      pixelAddition = 0.5f;
+      pixelScale = 0.5f;
+      field = textureField;
     }
+    else if (slice == SliceFuel)
+    {
+      pixelAddition = 0.f;
+      pixelScale = 1 / 2000.f;
+      field = fuelField;
+    }
+    else if (slice == SliceDensity)
+    {
+      pixelAddition = 0.f;
+      pixelScale = 1.f / 15.f;
+      field = densityField;
+    }
+    else if (slice == SliceTemperature)
+    {
+      pixelAddition = 0.f;
+      pixelScale = 1700.f;
+      field = temperatureField;
+    }
+    cudaMemcpy(h_tempScalarField,field,sizeof(float)*DS,cudaMemcpyDeviceToHost);
+    float total = 0.f;
+    int numNonEmpty = 0;
+    for (int i = 0; i < DIM; i++)
+    {
+      for (int j = 0; j < DIM; j++)
+      {
+        float output = h_tempScalarField[j*DIM+i]*pixelScale+pixelAddition;
+        if (output != 0.f)
+        {
+          numNonEmpty++;
+          total += output;
+        }
+        h_tempScalarField[j*DIM+i] = output;
+      }
+    }
+    printf("average scalar field value: %f\n",total / numNonEmpty);
   }
-  printf("average scalar field value: %f\n",total / numNonEmpty);
   glWindowPos2i(0,0);
   glDrawPixels(DIM,DIM,GL_LUMINANCE,GL_FLOAT,h_tempScalarField);
+  
 }
 
 void sliceDisplay(void) {  
@@ -638,6 +668,9 @@ void setupSliceSimulation()
   cudaMalloc((void**)&textureField, sizeof(float) * DS);
   cudaMalloc((void**)&fuelField, sizeof(float) * DS);
   cudaMalloc((void**)&tempScalarField, sizeof(float) * DS);
+  cudaMalloc((void**)&turbulenceField, sizeof(float) * DS);
+  cudaMalloc((void**)&phiField, sizeof(float) * DS);
+
   cudaMemset(densityField,0,sizeof(float)*DS);
   cudaMemset(temperatureField,0,sizeof(float)*DS);
   cudaMemset(textureField,0,sizeof(float)*DS);
@@ -647,6 +680,7 @@ void setupSliceSimulation()
   h_tempVelocityField = (float2*)malloc(sizeof(float2)*DS);
   h_frameBuffer = (int*)malloc(sizeof(int)*DS);
   simplexField = new SimplexNoise4D();
+  simplexFieldTurbulence = new SimplexNoise4D();
   setupTexture(DIM, DIM);
   bindTexture();
 

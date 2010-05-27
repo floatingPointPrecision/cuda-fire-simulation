@@ -34,6 +34,6 @@
   <maxNumberParticles>65536</maxNumberParticles>
   <numStartingParticles>20000</numStartingParticles>
   <timestep>0.016</timestep>
-  <projectionJitterAmount>10</projectionJitterAmount>
+  <projectionJitterAmount>25</projectionJitterAmount>
 
 </root>

@@ -120,7 +120,7 @@ __global__ void generateKeys(ParticleItrStruct particles, int* keys, int* partic
     // write out the current particle index and the bin index
     keys[index + numParticles*i] = pixelIndex;
     particleIndices[index + numParticles*i] = index;
-    particlePosition += particleVelocity * 0.005f;
+    particlePosition += particleVelocity * 0.0006f;
   }
 }
 

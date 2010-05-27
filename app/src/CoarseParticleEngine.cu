@@ -72,29 +72,20 @@ void CoarseParticleEngine::advanceSimulation(float timestep)
     m_firstTime = false;
   }
 
-  //adjustAgeAndParticles(timestep);
+  // adjustAgeAndParticles(timestep);
   // copy from device to host
-  CPUTimer timer;
-  timer.start();
   cutilSafeCall(cudaMemcpy(m_hostPositionAge,m_devicePositionAge,sizeof(float4)*m_numParticles,cudaMemcpyDeviceToHost));
   cutilSafeCall(cudaMemcpy(m_hostXVelocities,m_deviceXVelocities,sizeof(float)*m_numParticles,cudaMemcpyDeviceToHost));
   cutilSafeCall(cudaMemcpy(m_hostYVelocities,m_deviceYVelocities,sizeof(float)*m_numParticles,cudaMemcpyDeviceToHost));
   cutilSafeCall(cudaMemcpy(m_hostZVelocities,m_deviceZVelocities,sizeof(float)*m_numParticles,cudaMemcpyDeviceToHost));
   // run solver
-  CPUTimer timer2;
-  timer2.start();
   m_nsSolver->setParticles(m_hostPositionAge,m_hostXVelocities,m_hostYVelocities,m_hostZVelocities,m_numParticles);
   m_nsSolver->run(timestep);
-  timer2.stop();
-  printf("3D NS solver: %f\n", timer2.elapsed_sec());
   // copy back to device
   cutilSafeCall(cudaMemcpy(m_devicePositionAge,m_hostPositionAge,sizeof(float4)*m_numParticles,cudaMemcpyHostToDevice));
   cutilSafeCall(cudaMemcpy(m_deviceXVelocities,m_hostXVelocities,sizeof(float)*m_numParticles,cudaMemcpyHostToDevice));
   cutilSafeCall(cudaMemcpy(m_deviceYVelocities,m_hostYVelocities,sizeof(float)*m_numParticles,cudaMemcpyHostToDevice));
   cutilSafeCall(cudaMemcpy(m_deviceZVelocities,m_hostZVelocities,sizeof(float)*m_numParticles,cudaMemcpyHostToDevice));
-
-  timer.stop();
-  printf("3D NS complete: %f\n", timer.elapsed_sec());
 }
 
 __global__ void adjustAgeAndMarkForRemoval(float4* posAge, int* forRemoval, int numElements, float dt)

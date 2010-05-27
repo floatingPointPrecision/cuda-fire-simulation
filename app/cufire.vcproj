@@ -673,6 +673,10 @@
 				RelativePath=".\fluidsGL_kernels.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="Simplex Noise"
+			>
 			<File
 				RelativePath=".\src\SimplexNoise.cu"
 				>
