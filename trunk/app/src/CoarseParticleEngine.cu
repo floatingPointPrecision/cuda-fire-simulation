@@ -65,15 +65,14 @@ CoarseParticleEngine::~CoarseParticleEngine()
 void CoarseParticleEngine::advanceSimulation(float timestep)
 {
   m_currentTime += timestep;
-
   if (m_firstTime)
   {
     m_nsSolver = new NavierStokes3D;
     m_nsSolver->setGridDimensions(64,64,64);
-    m_nsSolver->setParticles(m_hostPositionAge,m_hostXVelocities,m_hostYVelocities,m_hostZVelocities,m_numParticles);
     m_firstTime = false;
   }
-  // test ns solver
+
+  //adjustAgeAndParticles(timestep);
   // copy from device to host
   CPUTimer timer;
   timer.start();
@@ -84,6 +83,7 @@ void CoarseParticleEngine::advanceSimulation(float timestep)
   // run solver
   CPUTimer timer2;
   timer2.start();
+  m_nsSolver->setParticles(m_hostPositionAge,m_hostXVelocities,m_hostYVelocities,m_hostZVelocities,m_numParticles);
   m_nsSolver->run(timestep);
   timer2.stop();
   printf("3D NS solver: %f\n", timer2.elapsed_sec());
@@ -96,6 +96,26 @@ void CoarseParticleEngine::advanceSimulation(float timestep)
   timer.stop();
   printf("3D NS complete: %f\n", timer.elapsed_sec());
 }
+
+__global__ void adjustAgeAndMarkForRemoval(float4* posAge, int* forRemoval, int numElements, float dt)
+{
+  int index = blockDim.x*blockIdx.x+threadIdx.x;
+  if (index >= numElements)
+    return;
+  float4 val = posAge[index];
+  val.w -= dt;
+  int remove = (val.w < 0.f);
+  posAge[index] = val;
+  forRemoval[index] = remove;
+}
+
+
+void CoarseParticleEngine::adjustAgeAndParticles(float dt)
+{
+  int blockSize = 512;
+  int gridSize = (m_numParticles + blockSize - 1) / blockSize;
+  adjustAgeAndMarkForRemoval<<<gridSize,blockSize>>>(m_devicePositionAge, m_particlesToRemove, m_numParticles, dt);
+} 
 
 static GLfloat quad[3] = { 1.0, 0.0, 1/60.0 };
 void CoarseParticleEngine::render()
@@ -143,6 +163,7 @@ void CoarseParticleEngine::initializeParticles()
   cutilSafeCall(cudaMalloc((void**)&m_deviceXVelocities,sizeof(float)*m_maxNumParticles));
   cutilSafeCall(cudaMalloc((void**)&m_deviceYVelocities,sizeof(float)*m_maxNumParticles));
   cutilSafeCall(cudaMalloc((void**)&m_deviceZVelocities,sizeof(float)*m_maxNumParticles));
+  cutilSafeCall(cudaMalloc((void**)&m_particlesToRemove,sizeof(int)*m_maxNumParticles));
 
   // Create buffer object for position array and register it with CUDA
   glGenBuffers(1, &m_positionsAgeVBO);

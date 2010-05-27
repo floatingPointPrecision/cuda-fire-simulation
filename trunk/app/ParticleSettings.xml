@@ -11,8 +11,8 @@
       <y>20.0</y>
     </yRange>
     <zRange>
-      <x>30.0</x>
-      <y>34.0</y>
+      <x>20.0</x>
+      <y>44.0</y>
     </zRange>
   </startingParticleRange>
   <boundingBox>
@@ -32,7 +32,7 @@
   <cameraDistance>100</cameraDistance>
   <imageSize>512</imageSize>
   <maxNumberParticles>65536</maxNumberParticles>
-  <numStartingParticles>40000</numStartingParticles>
+  <numStartingParticles>20000</numStartingParticles>
   <timestep>0.016</timestep>
   <projectionJitterAmount>10</projectionJitterAmount>
 
