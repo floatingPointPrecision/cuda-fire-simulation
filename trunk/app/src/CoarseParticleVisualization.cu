@@ -57,7 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Projection.h"
 #include "3DNavierStokes.h"
 #include "Bitmap.h"
-#include "fluidsGL.h"
+#include "SliceManager.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // constants / global variables
@@ -81,8 +81,10 @@ enum RenderTarget
 std::string currentRenderTargetString = "Slice Texture";
 
 int currentRenderTarget = RenderTexture;
+int currentSliceToDisplay;
 CoarseParticleEngine* pEngine;
 OrthographicProjection* pProjection;
+SliceManager* pSliceManager;
 
 float sTimestep;
 float currentTime = 0;
@@ -98,10 +100,14 @@ float2* h_sliceVelocityOutput;
 int numSliceBytes, numSliceVelocityBytes;
 int2 slicePixelDims;
 float imageSize;
+float2 zBBox;
+int numSlices;
 //angle of rotation
 float xpos = 32, ypos = 32, zpos = 90, xrot = 0, yrot = 0, angle=0.0;
 float3 cameraTarget, cameraUp;
 float theta, phi, cameraDistance;
+
+//SliceRefinement* sliceRefinementTest;
 
 
 // rendering callbacks
@@ -138,44 +144,22 @@ void updateSimulation(float dt)
   cudaThreadSynchronize();
   coarseTimer.stop();
   coarseSum += coarseTimer.elapsed_sec();
-  printf("average coarse simulation time: %f\n",coarseSum / (currentTime/dt));
+  //printf("average coarse simulation time: %f\n",coarseSum / (currentTime/dt));
 
   // project coarse particles onto slices
   pProjection->setParticles(pEngine->getParticleBegins(), pEngine->getNumParticles());
-  for (int i = 0; i < 1; i++)
+  pSliceManager->startUpdateSeries();
+  for (int i = 0; i < numSlices; i++)
   {
-    float zIntercept = 32.f;
+    float zIntercept = zBBox.x + ((zBBox.y-zBBox.x)/numSlices)*i;
 
-    static float projectionSum = 0.f;
-    CPUTimer projectionTimer;
-    cudaThreadSynchronize();
-    projectionTimer.start();  
     cutilSafeCall(cudaMemset(d_sliceMassOutput,0,numSliceBytes));
     cutilSafeCall(cudaMemset(d_sliceFuelOutput,0,numSliceBytes));
     cutilSafeCall(cudaMemset(d_sliceVelocityOutput,0,numSliceVelocityBytes));
-    // perform actual projection for slice # i
-    pProjection->execute(zIntercept, d_sliceMassOutput, d_sliceFuelOutput, d_sliceVelocityOutput);
-    cudaThreadSynchronize();
-    projectionTimer.stop();
-    projectionSum += projectionTimer.elapsed_sec();
-    printf("average coarse to slice projection time: %f\n",projectionSum / (currentTime/dt));
 
-    static float refinementSum = 0.f;
-    CPUTimer refinementTimer;
-    cudaThreadSynchronize();
-    refinementTimer.start();
-    addVelocity(d_sliceVelocityOutput);
-    dissipateDensity(dt);
-    dissipateFuel(dt);
-    coolTemperature(dt);
-    contributeSlices(d_sliceMassOutput, d_sliceFuelOutput);
-    simulateFluids(dt);
-    addTextureDetail(currentTime, zIntercept);
-    enforveVelocityIncompressibility(dt);
-    cudaThreadSynchronize();
-    refinementTimer.stop();
-    refinementSum += refinementTimer.elapsed_sec();
-    printf("average refinement simulation time: %f\n",refinementSum / (currentTime/dt));
+    pProjection->execute(zIntercept, d_sliceMassOutput, d_sliceFuelOutput, d_sliceVelocityOutput);
+
+    pSliceManager->updateIndividualSlice(i, d_sliceVelocityOutput, d_sliceMassOutput, d_sliceFuelOutput);
   }
   // move VBO back to OpenGL
   pEngine->disableCUDAVbo();
@@ -183,8 +167,6 @@ void updateSimulation(float dt)
 
 void drawCube(float3 lowerLeftFront, float3 upperRightBack)
 {
-  glEnable(GL_BLEND);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glBegin(GL_QUADS);
   // front face
   glColor4f(1,0,0,0.1f);
@@ -223,6 +205,26 @@ void drawCube(float3 lowerLeftFront, float3 upperRightBack)
   glEnd();
 }
 
+#define M_PI 3.14159265f
+void display()
+{
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  float radianTheta = theta * M_PI / 180.f;
+  float radianPhi = phi * M_PI / 180.f;
+  float x = cameraTarget.x + cameraDistance * sinf(radianTheta) * cosf(radianPhi);
+  float y = cameraTarget.y + cameraDistance * sinf(radianTheta) * sinf(radianPhi);
+  float z = cameraTarget.z + cameraDistance * cosf(radianTheta);
+  gluLookAt(x,y,z, 
+    cameraTarget.x,cameraTarget.y,cameraTarget.z, 
+    cameraUp.x,cameraUp.y,cameraUp.z);
+
+  // draw bounding box
+  drawCube(make_float3(0,0,0), make_float3(64,64,64));
+  pEngine->render();
+}
+
 // found at http://www-course.cs.york.ac.uk/cgv/OpenGL/L23b.html
 void DrawText(GLint x, GLint y, char* s, GLfloat r, GLfloat g, GLfloat b)
 {
@@ -251,48 +253,45 @@ void DrawText(GLint x, GLint y, char* s, GLfloat r, GLfloat g, GLfloat b)
   glMatrixMode(GL_MODELVIEW);
 }
 
-#define M_PI 3.14159265f
-void display()
+void DrawTextBackground(int left,int right,int bottom,int top,float r,float g,float b,float a)
 {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0.0, glutGet(GLUT_WINDOW_WIDTH), 
+    0.0, glutGet(GLUT_WINDOW_HEIGHT), -1.0, 1.0);
   glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
   glLoadIdentity();
-  float radianTheta = theta * M_PI / 180.f;
-  float radianPhi = phi * M_PI / 180.f;
-  float x = cameraTarget.x + cameraDistance * sinf(radianTheta) * cosf(radianPhi);
-  float y = cameraTarget.y + cameraDistance * sinf(radianTheta) * sinf(radianPhi);
-  float z = cameraTarget.z + cameraDistance * cosf(radianTheta);
-  gluLookAt(x,y,z, 
-    cameraTarget.x,cameraTarget.y,cameraTarget.z, 
-    cameraUp.x,cameraUp.y,cameraUp.z);
-
-  // draw bounding box
-  drawCube(make_float3(0,0,0), make_float3(64,64,64));
-  pEngine->render();
+  glColor4f(r,g,b,a);
+  glBegin(GL_QUADS);
+  glVertex2i(left, bottom);
+  glVertex2i(right, bottom);
+  glVertex2i(right, top);
+  glVertex2i(left, top);
+  glEnd();
+  glPopMatrix();
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
 }
 
-void reshape(int w, int h)
+void update(int value)
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  window_width = w;
-  window_height = h;
-  // viewport
-  glMatrixMode(GL_PROJECTION);
-  glViewport(0, 0, window_width, window_height);
-  // projection
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  //glOrtho(-40, 40, -40, 40, 1, 80);
 
-  gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 15.0, 200.0);
-}
-
-void timer2(int value)
-{
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  static float simulationTimerSum = 0.f;
+  CPUTimer simulationTimer;
+  simulationTimer.start();
 
   if (!pauseSimulation)
+  {
     updateSimulation(sTimestep);
+    cudaThreadSynchronize();
+    simulationTimer.stop();
+    simulationTimerSum += simulationTimer.elapsed_sec();
+    printf("average simulation time: %f\n",simulationTimerSum / (currentTime/sTimestep));
+  }
 
   switch(currentRenderTarget)
   {
@@ -301,7 +300,7 @@ void timer2(int value)
   case RenderDensity:
   case RenderTemperature:
   case RenderVelocity:
-    displaySlice(currentRenderTarget);
+    pSliceManager->displaySlice(currentSliceToDisplay, currentRenderTarget);
     break;
   case RenderCoarseEngine:
     display();
@@ -312,15 +311,21 @@ void timer2(int value)
   sprintf(drawTime, "Time: %f",currentTime);
   char drawVisualization[128];
   sprintf(drawVisualization, "Visualization: %s",currentRenderTargetString.c_str());
+  float zIntercept = zBBox.x + ((zBBox.y-zBBox.x)/numSlices)*currentSliceToDisplay;
+  char drawZIntercept[128];
+  sprintf(drawZIntercept, "Z intercept: %f",zIntercept);
+
+  DrawTextBackground(0,240,0,80,1,1,1,0.5);
   DrawText(10,10,drawTime,1,0,0);
   DrawText(10,30,drawVisualization,1,0,0);
+  DrawText(10,50,drawZIntercept,1,0,0);
 
   glutSwapBuffers();
-  glutTimerFunc(0.0001f,timer2,value);
+  glutTimerFunc(0.0001f,update,value);
 }
 
-// based on OpenGL Camera Tutorial at http://www.swiftless.com/tutorials/opengl/camera.html
 void keyboard (unsigned char key, int x, int y) {
+  // x and z move forward and backward through the different visualizations (coarse particles, slice texture, slice density, etc.)
   if (key == 'z' || key == 'x')
   {
     if (key=='z')
@@ -343,47 +348,46 @@ void keyboard (unsigned char key, int x, int y) {
     case RenderCoarseEngine: currentRenderTargetString = "Coarse Engine"; break;
     }
   }
+  // pause simulation
   if (key=='c')
   {
     pauseSimulation = !pauseSimulation;
+    pSliceManager->setPauseState(pauseSimulation);
   }
+  // rotate up in coarse visualization, nothing in slice visualization
   if (key=='q')
-  {
     phi += 10;
-    if (phi >360) phi -= 360;
-  }
-
+  // rotate down in coarse visualization, nothing in slice visualization
   if (key=='e')
-  {
     phi -= 10;
-    if (phi < -360) phi += 360;
-  }
-
+  // move forward in coarse visualization, nothing in slice visualization
   if (key=='w')
-  {
     cameraDistance -= 10;
-  }
-
+  // move backward in coarse visualization, nothing in slice visualization
   if (key=='s')
-  {
     cameraDistance += 10;
-  }
-
+  // rotate right in coarse visualization, nothing in slice visualization
   if (key=='d')
-  {
     theta += 10;
-    if (theta >360) theta -= 360;
-  }
-
+  // rotate left in coarse visualization, nothing in slice visualization
   if (key=='a')
-  {
     theta -= 10;
-    if (theta < -360) theta += 360;
-  }
-  if (key==27)
+  // change the active slice to visualize forward
+  if (key=='r')
+    currentSliceToDisplay = (currentSliceToDisplay + 1) % numSlices;
+  // change the active slice to visualize backward
+  if (key=='f')
   {
-    exit(0);
+    if (--currentSliceToDisplay < 0) currentSliceToDisplay += numSlices;
   }
+  // exit
+  if (key==27)
+    exit(0);
+
+  if (theta < -360) theta += 360;
+  if (theta > 360) theta -= 360;
+  if (phi < -360) phi += 360;
+  if (phi >360) phi -= 360;
 }
 
 void setupProjection(int2 slicePixelDims)
@@ -403,12 +407,29 @@ void setupProjection(int2 slicePixelDims)
   cudaMemset(d_sliceVelocityOutput, 0, numSliceVelocityBytes);
 }
 
+void reshape(int w, int h)
+{
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  window_width = w;
+  window_height = h;
+  // viewport
+  glMatrixMode(GL_PROJECTION);
+  glViewport(0, 0, window_width, window_height);
+  // projection
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  //glOrtho(-40, 40, -40, 40, 1, 80);
+  glEnable(GL_BLEND);
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 15.0, 200.0);
+}
+
 int main(int argc, char* argv[])
 {
   srand ( time(NULL) );
   // LOAD SIMULATION SETTINGS
-  XMLParser settingsFile("ParticleSettings.xml");
-  settingsFile.getInt("coarseVisualization",&enableCoarseVisualization);
+  XMLParser settingsFile("cufire.xml");
   // location of starting particles
   settingsFile.setNewRoot("startingParticleRange");
   float range[2];
@@ -432,6 +453,8 @@ int main(int argc, char* argv[])
   settingsFile.getInt("maxNumberParticles",&maxNumParticles);
   settingsFile.getFloat("timestep",&sTimestep);
   settingsFile.getFloat("imageSize",&imageSize);
+  settingsFile.getInt("numSlices",&numSlices);
+  currentSliceToDisplay = numSlices / 2;
   int jitterAmount;
   settingsFile.getFloat("cameraDistance",&cameraDistance);
   settingsFile.getInt("projectionJitterAmount",&jitterAmount);
@@ -447,7 +470,7 @@ int main(int argc, char* argv[])
   ypos = range[0] + ((range[1]-range[0])/ 2.f);
   // z range
   settingsFile.getFloat2("zRange",range);
-  float2 zBBox = make_float2(range[0],range[1]);
+  zBBox = make_float2(range[0],range[1]);
   zpos = range[0] + ((range[1]-range[0])/ 2.f);
   settingsFile.resetRoot();
   // utility values
@@ -466,29 +489,22 @@ int main(int argc, char* argv[])
   float2 sliceWorldDims = make_float2(xBBox.y-xBBox.x,
     yBBox.y-yBBox.x);
 
-  // enable either coarse particle visualization or slice simulation
-  if (enableCoarseVisualization)
-  {
-    // First initialize OpenGL context, so we can properly set the GL for CUDA.
-    // This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGBA | GLUT_ALPHA | GLUT_DOUBLE);
-    glutInitWindowSize(window_width, window_height);
-    //register callbacks
-    glutCreateWindow("CUDA Fire Simulation (Coarse Particle Visualization)");
-    glutDisplayFunc(display);
-    glutReshapeFunc(reshape);
-    glutKeyboardFunc(keyboard);
-    glewInit();
-    glClearColor(0.5, 0.5, 0.5, 1.0);
-    //set CUDA device
-    cudaGLSetGLDevice(0);
-  }
-  else
-  {
-    setupSliceVisualization(argc,argv);
-  }
-  glutTimerFunc(0.0001f, timer2, 1);
+  // First initialize OpenGL context, so we can properly set the GL for CUDA.
+  // This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
+  glutInit(&argc, argv);
+  glutInitDisplayMode(GLUT_RGBA | GLUT_ALPHA | GLUT_DOUBLE);
+  glutInitWindowSize(window_width, window_height);
+  //register callbacks
+  glutCreateWindow("CUDA Fire Simulation (Coarse Particle Visualization)");
+  glutDisplayFunc(display);
+  glutReshapeFunc(reshape);
+  glutKeyboardFunc(keyboard);
+  glewInit();
+  glClearColor(0.5, 0.5, 0.5, 1.0);
+  //set CUDA device
+  cudaGLSetGLDevice(0);
+
+  glutTimerFunc(0.0001f, update, 1);
 
   // add some random particles
   // first get area for random particles
@@ -500,10 +516,9 @@ int main(int argc, char* argv[])
   pEngine->addRandomParticle(xRange,yRange,zRange,numStartingParticles);
   pEngine->flushParticles();
 
-  setupSliceSimulation();
-  //pSliceRefiner = new SliceRefiner(imageSize, argc, argv);
-  // start rendering mainloop
-
+  //setupSliceSimulation();
+  
+  pSliceManager = new SliceManager("cufire.xml");
   glutMainLoop();
 
   return 0;

@@ -80,6 +80,19 @@ bool XMLParser::getInt(const char* attributeName, int* result)
   return false;
 }
 
+bool XMLParser::getUnsignedInt(const char* attributeName, unsigned int* result)
+{
+  if (m_root == 0)
+    return false;
+  TiXmlElement* currentAttribute = m_root->FirstChild(attributeName)->ToElement();
+  if (currentAttribute)
+  {
+    *result = (unsigned int) atoi(currentAttribute->GetText());
+    return true;
+  }
+  return false;
+}
+
 bool XMLParser::getFloat(const char* attributeName, float* result)
 {
   if (m_root == 0)

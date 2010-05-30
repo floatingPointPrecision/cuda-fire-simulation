@@ -122,7 +122,6 @@ void CoarseParticleEngine::render()
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-
 void CoarseParticleEngine::binParticles()
 {
 }

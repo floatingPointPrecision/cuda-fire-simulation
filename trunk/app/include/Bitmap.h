@@ -80,6 +80,11 @@ public:
 
   /**
   * sets the internal data at pixel position x, y equal to value
+  * @param x x value in the image to write to
+  * @param y y value in the image to write to
+  * @param red red component of the pixel
+  * @param green green component of the pixel
+  * @param blue blue component of the pixel
   */
   void setValue(int x, int y, char red, char green, char blue);
 
