@@ -376,11 +376,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\DoxyMainPage.h"
+				RelativePath=".\cufire.xml"
 				>
 			</File>
 			<File
-				RelativePath=".\ParticleSettings.xml"
+				RelativePath=".\include\DoxyMainPage.h"
 				>
 			</File>
 		</Filter>
@@ -586,92 +586,39 @@
 			Name="Slice Refinement"
 			>
 			<File
-				RelativePath=".\fluidsGL.cu"
+				RelativePath=".\src\SliceManager.cu"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="CUDA Build Rule"
-						Debug="true"
-						ExtraNvccOptions="-m32"
-						Optimization="0"
-						Runtime="1"
-					/>
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\include\SliceManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\SliceSimulation.cu"
+				>
+			</File>
+			<File
+				RelativePath=".\include\SliceSimulation.h"
+				>
 				<FileConfiguration
 					Name="Debug|x64"
-					>
-					<Tool
-						Name="CUDA Build Rule"
-						Debug="true"
-						ExtraNvccOptions="-m64"
-						Optimization="0"
-						Runtime="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="CUDA Build Rule"
-						ExtraNvccOptions="-m32"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="CUDA Build Rule"
-						ExtraNvccOptions="-m64"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\include\fluidsGL.h"
-				>
-			</File>
-			<File
-				RelativePath=".\fluidsGL_kernels.cu"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\SliceSimulation_Kernels.cu"
+				>
 				<FileConfiguration
 					Name="Debug|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
-						Name="VCCustomBuildTool"
+						Name="CUDA Build Rule"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						AdditionalDependencies="fluidsGL_kernels.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						AdditionalDependencies="fluidsGL_kernels.h"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\fluidsGL_kernels.h"
-				>
 			</File>
 		</Filter>
 		<Filter

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <VisualStudioToolFile
 	Name="CUDA Build Rule v3.0.14"
 	Version="8.00"
@@ -7,7 +7,7 @@
 		<CustomBuildRule
 			Name="CUDA Build Rule"
 			DisplayName="CUDA Build Rule v3.0.14"
-			CommandLine="echo [CompilerPath] [Keep] [CInterleavedPTX] [ExtraNvccOptions] -ccbin &quot;$(VCInstallDir)bin&quot; [Emulation] [Debug] [FastMath] [Defines] -I&quot;$(CUDA_INC_PATH)&quot; -I&quot;./&quot; -I&quot;../../common/inc&quot; -I&quot;../../../shared/inc&quot; [Include] -Xcompiler &quot;/EHsc [Warning] /nologo [Optimization] /Zi [RuntimeChecks] [Runtime] [TypeInfo] [ExtraCppOptions]&quot; [MaxRegCount] [PtxAsOptionV] [Arch1] [Arch2] [Arch3] [NvccCompilation] &quot;$(InputPath)&quot; &#x0D;&#x0A; [CompilerPath] [Keep] [CInterleavedPTX] [ExtraNvccOptions] [Arch1] [Arch2] [Arch3]  -ccbin &quot;$(VCInstallDir)bin&quot; [Emulation] [Debug] [FastMath] [Defines] -I&quot;$(CUDA_INC_PATH)&quot; -I&quot;./&quot; -I&quot;../../common/inc&quot; -I&quot;../../../shared/inc&quot; [Include] -Xcompiler &quot;/EHsc [Warning] /nologo [Optimization] /Zi [RuntimeChecks] [Runtime] [TypeInfo] [ExtraCppOptions]&quot; [Include] [MaxRegCount] [ptxasoptionv] [Arch1] [Arch2] [Arch3] [NvccCompilation] &quot;$(InputPath)&quot;"
+			CommandLine="echo [CompilerPath] [Keep] [CInterleavedPTX] [ExtraNvccOptions] -ccbin &quot;$(VCInstallDir)bin&quot; [Emulation] [Debug] [FastMath] [Defines] [Include] -Xcompiler &quot;/EHsc [Warning] /nologo [Optimization] /Zi [RuntimeChecks] [Runtime] [TypeInfo] [ExtraCppOptions]&quot; [MaxRegCount] [PtxAsOptionV] [Arch1] [Arch2] [Arch3] [NvccCompilation] &quot;$(InputPath)&quot; &#x0D;&#x0A; [CompilerPath] [Keep] [CInterleavedPTX] [ExtraNvccOptions] [Arch1] [Arch2] [Arch3]  -ccbin &quot;$(VCInstallDir)bin&quot; [Emulation] [Debug] [FastMath] [Defines] -I&quot;$(CUDA_INC_PATH)&quot; -I&quot;./&quot; -I&quot;../../common/inc&quot; -I&quot;../../../shared/inc&quot; [Include] -Xcompiler &quot;/EHsc [Warning] /nologo [Optimization] /Zi [RuntimeChecks] [Runtime] [TypeInfo] [ExtraCppOptions]&quot; [Include] [MaxRegCount] [ptxasoptionv] [Arch1] [Arch2] [Arch3] [NvccCompilation] &quot;$(InputPath)&quot;"
 			Outputs="[compileout]"
 			AdditionalDependencies="[AddedDependencies]"
 			FileExtensions="*.cu"

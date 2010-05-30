@@ -63,12 +63,19 @@ public:
   */
   bool setNewRoot(const char* rootName);
   /**
-  * sets the result float value to the value found in the attribute name node
+  * sets the result int value to the value found in the attribute name node
   * @param attributeName name of the node to find the int. Node must be a child of the current root node 
   * @param result pointer to the location to store the attribute's value
   * @return true if successful, false otherwise
   */
   bool getInt(const char* attributeName, int* result);
+  /**
+  * sets the result unsigned int value to the value found in the attribute name node
+  * @param attributeName name of the node to find the unsigned int. Node must be a child of the current root node 
+  * @param result pointer to the location to store the attribute's value
+  * @return true if successful, false otherwise
+  */
+  bool getUnsignedInt(const char* attributeName, unsigned int* result);
   /**
   * sets the result float value to the value found in the attribute name node
   * @param attributeName name of the node to find the float. Node must be a child of the current root node

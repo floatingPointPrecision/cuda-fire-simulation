@@ -1,3 +1,35 @@
+/*******************************************************************************
+Copyright (c) 2010, Steve Lesser
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1) Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+2)Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+
+3) The name of contributors may not be used to endorse or promote products
+derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL STEVE LESSER BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*******************************************************************************/
+
+/**
+@file SliceSimulation_Kernels.cu
+@note This file implements the kernels and texture used in SliceSimulation
+*/
+
 /*
  * Copyright 1993-2010 NVIDIA Corporation.  All rights reserved.
  *
@@ -14,13 +46,15 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include "fluidsGL_kernels.h"
+#include <cutil_inline.h>
+#include <cutil_math.h>
+//#include "SliceSimulation.h"
 
 // Texture reference for reading velocity field
 texture<float2, 2> texref;
 static cudaArray *array = NULL;
 
-void setupTexture(int x, int y) {
+void SliceSimulation::setupTexture(int x, int y) {
     // Wrap mode appears to be the new default
     texref.filterMode = cudaFilterModeLinear;
     cudaChannelFormatDesc desc = cudaCreateChannelDesc<float2>();
@@ -29,39 +63,37 @@ void setupTexture(int x, int y) {
     cutilCheckMsg("cudaMalloc failed");
 }
 
-void bindTexture(void) {
+void SliceSimulation::bindTexture(void) {
     cudaBindTextureToArray(texref, array);
     cutilCheckMsg("cudaBindTexture failed");
 }
 
-void unbindTexture(void) {
+void SliceSimulation::unbindTexture(void) {
     cudaUnbindTexture(texref);
     cutilCheckMsg("cudaUnbindTexture failed");
 }
     
-void updateTexture(cData *data, size_t wib, size_t h, size_t pitch) {
+void SliceSimulation::updateTexture(float2 *data, size_t wib, size_t h, size_t pitch) {
     cudaMemcpy2DToArray(array, 0, 0, data, pitch, wib, h, cudaMemcpyDeviceToDevice);
     cutilCheckMsg("cudaMemcpy failed"); 
 }
 
-void deleteTexture(void) {
+void SliceSimulation::deleteTexture(void) {
     cudaFreeArray(array);
     cutilCheckMsg("cudaFreeArray failed");
 }
 
 // CUDA FIRE KERNELS:
 
-__global__ void addVelocityContribution(float2* vField, float2* newVField, int dim, int num_particles, bool replace)
+__global__ void addVelocityContributionKernel(float2* oldVField, const float2* newVField, int dim, int num_particles, float amountVelocityToRetain)
 {
   int index = blockDim.x * blockIdx.x + threadIdx.x;
   if (index > num_particles)
     return;
   float2 velocity = newVField[index];
-  if (!replace)
-    velocity += vField[index];
-  else
-    velocity += (vField[index]*0.001f);
-  vField[index] = velocity;
+  if (amountVelocityToRetain != 0.f)
+    velocity += (oldVField[index]*amountVelocityToRetain);
+  oldVField[index] = velocity;
 }
 
 __global__ void clampVelocities(float2* vField, float maxLength, int numElements)
@@ -109,7 +141,7 @@ __global__ void coolTemperatureKernel(float* temperatureField,float coolingCoeff
   temperatureField[index] = temperature;
 }
 
-__global__ void addMassFromSlice(float* densityField, float* mass, float densityFactor, int fieldSize)
+__global__ void addMassFromSlice(float* densityField, const float* mass, float densityFactor, int fieldSize)
 {
   int index = blockDim.x*blockIdx.x+threadIdx.x;
   if (index >= fieldSize)
@@ -120,7 +152,7 @@ __global__ void addMassFromSlice(float* densityField, float* mass, float density
   densityField[index] = density;
 }
 
-__global__ void addFuelFromSlice(float* fuelField,float* fuel,float combustionTemperature, int fieldSize)
+__global__ void addFuelFromSlice(float* fuelField, const float* fuel, float combustionTemperature, int fieldSize)
 {
   int index = blockDim.x*blockIdx.x+threadIdx.x;
   if (index >= fieldSize)
@@ -131,14 +163,14 @@ __global__ void addFuelFromSlice(float* fuelField,float* fuel,float combustionTe
   fuelField[index] = temperature;
 }
 
-__global__ void addTemperatureFromFuel(float* temperatureField,float* fuelField,float combustionTemperature,int numElements)
+__global__ void addTemperatureFromFuel(float* temperatureField, const float* fuelField, float combustionTemperature,int numElements)
 {
   int index = blockDim.x*blockIdx.x+threadIdx.x;
   if (index >= numElements)
     return;
   float temp = temperatureField[index];
   float fuel = min(fuelField[index], 1.f);
-  temperatureField[index] = 1400.f;//max(temp, fuel*combustionTemperature);
+  temperatureField[index] = max(temp, fuel*combustionTemperature);
 }
 
 // inclusive clamp
@@ -175,7 +207,7 @@ __device__ float bilinearInterpolation(float* field, float2 position, int dim)
           
 }
 
-__global__ void semiLagrangianAdvectionKernel(float2* velocityField, float* scalarField, float* tempScalarField, float dt, int numElements, int dim)
+__global__ void semiLagrangianAdvectionKernel(const float2* velocityField, float* scalarField, float* m_utilityScalarField, float dt, int numElements, int dim)
 {
   int index = blockDim.x * blockIdx.x + threadIdx.x;
   if (index >= numElements)
@@ -184,10 +216,10 @@ __global__ void semiLagrangianAdvectionKernel(float2* velocityField, float* scal
   int col = index % dim;
   int row = index / dim;
   float2 newPos = make_float2(col,row) - velocity * dt;
-  tempScalarField[index] = bilinearInterpolation(scalarField, newPos, dim);
+  m_utilityScalarField[index] = bilinearInterpolation(scalarField, newPos, dim);
 }
 
-__device__ float2 partialDerivativeYFloat2(float2* vField, int2 middleIndex, int dim)
+__device__ float2 partialDerivativeYFloat2(const float2* vField, int2 middleIndex, int dim)
 {
   int2 upIndex = middleIndex + make_int2(0,1);
   upIndex.y = upIndex.y % dim;
@@ -199,7 +231,7 @@ __device__ float2 partialDerivativeYFloat2(float2* vField, int2 middleIndex, int
   return (up - down) / 2.f;
 }
 
-__device__ float2 partialDerivativeXFloat2(float2* vField, int2 middleIndex, int dim)
+__device__ float2 partialDerivativeXFloat2(const float2* vField, int2 middleIndex, int dim)
 {
   int2 rightIndex = middleIndex + make_int2(1,0);
   rightIndex.x = rightIndex.x % dim;
@@ -211,7 +243,7 @@ __device__ float2 partialDerivativeXFloat2(float2* vField, int2 middleIndex, int
   return (right - left) / 2.f;
 }
 
-__global__ void calculatePhi(float2* vField, float* phi, float* turbulenceField, float vorticityTerm, int numElements, int dim)
+__global__ void calculatePhi(const float2* vField, float* phi, const float* turbulenceField, float vorticityTerm, int numElements, int dim)
 {
   int index = blockDim.x * blockIdx.x + threadIdx.x;
   if (index >= numElements)
@@ -224,7 +256,7 @@ __global__ void calculatePhi(float2* vField, float* phi, float* turbulenceField,
   phi[index] = turbulenceField[index] + (psi * vorticityTerm);
 }
 
-__device__ float partialDerivativeYFloat(float* field, int2 middleIndex, int dim)
+__device__ float partialDerivativeYFloat(const float* field, int2 middleIndex, int dim)
 {
   int2 upIndex = middleIndex + make_int2(0,1);
   upIndex.y = upIndex.y % dim;
@@ -236,7 +268,7 @@ __device__ float partialDerivativeYFloat(float* field, int2 middleIndex, int dim
   return (up - down) / 2.f;
 }
 
-__device__ float partialDerivativeXFloat(float* field, int2 middleIndex, int dim)
+__device__ float partialDerivativeXFloat(const float* field, int2 middleIndex, int dim)
 {
   int2 rightIndex = middleIndex + make_int2(1,0);
   rightIndex.x = rightIndex.x % dim;
@@ -248,7 +280,7 @@ __device__ float partialDerivativeXFloat(float* field, int2 middleIndex, int dim
   return (right - left) / 2.f;
 }
 
-__global__ void vorticityConfinementTurbulence(float2* vField,float* phi,float dt,int numElements,int dim)
+__global__ void vorticityConfinementTurbulence(float2* vField, const float* phi, float dt, int numElements,int dim)
 {
   int index = blockDim.x * blockIdx.x + threadIdx.x;
   if (index >= numElements)
@@ -271,36 +303,19 @@ __global__ void vorticityConfinementTurbulence(float2* vField,float* phi,float d
 // mapping between threads in X and the tile size in X.
 // Nolan Goodnight 9/22/06
 
-// This method adds constant force vectors to the velocity field 
-// stored in 'v' according to v(x,t+1) = v(x,t) + dt * f.
-__global__ void 
-addForces_k(cData *v, int dx, int dy, int spx, int spy, float fx, float fy, int r, size_t pitch) {
-
-    int tx = threadIdx.x;
-    int ty = threadIdx.y;
-    cData *fj = (cData*)((char*)v + (ty + spy) * pitch) + tx + spx;
-
-    cData vterm = *fj;
-    tx -= r; ty -= r;
-    float s = 1.f / (1.f + tx*tx*tx*tx + ty*ty*ty*ty);
-    vterm.x += s * fx;
-    vterm.y += s * fy;
-    *fj = vterm;
-}
-
 // This method performs the velocity advection step, where we
 // trace velocity vectors back in time to update each grid cell.
 // That is, v(x,t+1) = v(p(x,-dt),t). Here we perform bilinear
 // interpolation in the velocity space.
 __global__ void 
-advectVelocity_k(cData *v, float *vx, float *vy,
+advectVelocity_k(float2 *v, float *vx, float *vy,
                  int dx, int pdx, int dy, float dt, int lb) {
 
     int gtidx = blockIdx.x * blockDim.x + threadIdx.x;
     int gtidy = blockIdx.y * (lb * blockDim.y) + threadIdx.y * lb;
     int p;
 
-    cData vterm, ploc;
+    float2 vterm, ploc;
     float vxterm, vyterm;
     // gtidx is the domain location in x for this thread
     if (gtidx < dx) {
@@ -330,14 +345,14 @@ advectVelocity_k(cData *v, float *vx, float *vy,
 // velocity vectors to be orthogonal to the vectors for each
 // wavenumber: v(k,t) = v(k,t) - ((k dot v(k,t) * k) / k^2.
 __global__ void 
-diffuseProject_k(cData *vx, cData *vy, int dx, int dy, float dt, 
+diffuseProject_k(float2 *vx, float2 *vy, int dx, int dy, float dt, 
                  float visc, int lb) {
 
     int gtidx = blockIdx.x * blockDim.x + threadIdx.x;
     int gtidy = blockIdx.y * (lb * blockDim.y) + threadIdx.y * lb;
     int p;
 
-    cData xterm, yterm;
+    float2 xterm, yterm;
     // gtidx is the domain location in x for this thread
     if (gtidx < dx) {
         for (p = 0; p < lb; p++) {
@@ -383,7 +398,7 @@ diffuseProject_k(cData *vx, cData *vy, int dx, int dy, float dt,
 // arrays from the previous step: 'vx' and 'vy'. Here we scale the 
 // real components by 1/(dx*dy) to account for an unnormalized FFT. 
 __global__ void 
-updateVelocity_k(cData *v, float *vx, float *vy, 
+updateVelocity_k(float2 *v, float *vx, float *vy, 
                  int dx, int pdx, int dy, int lb, size_t pitch) {
 
     int gtidx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -391,7 +406,7 @@ updateVelocity_k(cData *v, float *vx, float *vy,
     int p;
 
     float vxterm, vyterm;
-    cData nvterm;
+    float2 nvterm;
     // gtidx is the domain location in x for this thread
     if (gtidx < dx) {
         for (p = 0; p < lb; p++) {
@@ -407,48 +422,8 @@ updateVelocity_k(cData *v, float *vx, float *vy,
                 nvterm.x = vxterm * scale;
                 nvterm.y = vyterm * scale;
                
-                cData *fj = (cData*)((char*)v + fi * pitch) + gtidx;
+                float2 *fj = (float2*)((char*)v + fi * pitch) + gtidx;
                 *fj = nvterm;
-            }
-        } // If this thread is inside the domain in Y
-    } // If this thread is inside the domain in X
-}
-
-// This method updates the particles by moving particle positions
-// according to the velocity field and time step. That is, for each
-// particle: p(t+1) = p(t) + dt * v(p(t)).  
-__global__ void 
-advectParticles_k(cData *part, cData *v, int dx, int dy, 
-                  float dt, int lb, size_t pitch) {
-
-    int gtidx = blockIdx.x * blockDim.x + threadIdx.x;
-    int gtidy = blockIdx.y * (lb * blockDim.y) + threadIdx.y * lb;
-    int p;
-
-    // gtidx is the domain location in x for this thread
-    cData pterm, vterm;
-    if (gtidx < dx) {
-        for (p = 0; p < lb; p++) {
-            // fi is the domain location in y for this thread
-            int fi = gtidy + p;
-            if (fi < dy) {
-                int fj = fi * dx + gtidx;
-                pterm = part[fj];
-                
-                int xvi = ((int)(pterm.x * dx));
-                int yvi = ((int)(pterm.y * dy));
-                vterm = *((cData*)((char*)v + yvi * pitch) + xvi);   
- 
-                pterm.x += dt * vterm.x;
-                pterm.x = pterm.x - (int)pterm.x;            
-                pterm.x += 1.f; 
-                pterm.x = pterm.x - (int)pterm.x;              
-                pterm.y += dt * vterm.y;
-                pterm.y = pterm.y - (int)pterm.y;            
-                pterm.y += 1.f; 
-                pterm.y = pterm.y - (int)pterm.y;                  
-
-                part[fj] = pterm;
             }
         } // If this thread is inside the domain in Y
     } // If this thread is inside the domain in X
