@@ -633,6 +633,18 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="Renderer"
+			>
+			<File
+				RelativePath=".\src\Renderer.cu"
+				>
+			</File>
+			<File
+				RelativePath=".\include\Renderer.h"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

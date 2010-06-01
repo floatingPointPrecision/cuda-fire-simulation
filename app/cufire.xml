@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <numSlices>3</numSlices>
+  <numSlices>16</numSlices>
   <startingParticleRange>
     <xRange>
-      <x>20.0</x>
-      <y>44.0</y>
+      <x>4.0</x>
+      <y>60.0</y>
     </xRange>
     <yRange>
-      <x>4.0</x>
-      <y>20.0</y>
+      <x>8.0</x>
+      <y>12.0</y>
     </yRange>
     <zRange>
-      <x>20.0</x>
-      <y>44.0</y>
+      <x>4.0</x>
+      <y>60.0</y>
     </zRange>
   </startingParticleRange>
   <boundingBox>
@@ -32,20 +32,23 @@
   <cameraDistance>100</cameraDistance>
   <imageSize>512</imageSize>
   <maxNumberParticles>65536</maxNumberParticles>
-  <numStartingParticles>25000</numStartingParticles>
+  <numStartingParticles>35000</numStartingParticles>
   <timestep>0.016</timestep>
   <projectionJitterAmount>10</projectionJitterAmount>
   <viscosityCoefficient>0.00025</viscosityCoefficient>
   <massDissipationFactor>0.25</massDissipationFactor>
   <fuelDissipationFactor>1.0</fuelDissipationFactor>
   <coolingCoefficient>3000</coolingCoefficient>
-  <maxTemperature>1700</maxTemperature>
+  <maxTemperature>2100</maxTemperature>
   <densityFactor>20.0</densityFactor>
-  <combustionTemperature>1700</combustionTemperature>
   <velocityRetention>0.4</velocityRetention>
-  <textureScale1>0.15</textureScale1>
-  <textureScale2>0</textureScale2>
+  <textureScale1>0.25</textureScale1>
+  <textureScale2>0.55</textureScale2>
   <textureScale3>0</textureScale3>
   <textureScale4>0</textureScale4>
   <textureTimeScale>1.0</textureTimeScale>
+  <textureDensityInfluence>0.025</textureDensityInfluence>
+  <textureTemperatureInfluence>0.05</textureTemperatureInfluence>
+  <densityAlphaExponent>3.3</densityAlphaExponent>
+  <densityInvFactor>7.5</densityInvFactor>
 </root>

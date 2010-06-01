@@ -78,6 +78,33 @@ public:
   */
   void setPauseState(bool pauseSimulation) {m_pauseSimulation = pauseSimulation;}
   /**
+  * gets a pointer to the start of the density slab for a given slice
+  * @param sliceIndex index of slice to retrieve the density slab from
+  */
+  float* getDensitySlab(int sliceIndex);
+  /**
+  * gets a pointer to the start of the temperature slab for a given slice
+  * @param sliceIndex index of slice to retrieve the temperature slab from
+  */
+  float* getTemperatureSlab(int sliceIndex);
+  /**
+  * gets a pointer to the start of the texture slab for a given slice
+  * @param sliceIndex index of slice to retrieve the texture slab from
+  */
+  float* getTextureSlab(int sliceIndex);
+  /**
+  * gets a pointer to the start of the fuel slab for a given slice
+  * @param sliceIndex index of slice to retrieve the fuel slab from
+  */
+  float* getFuelSlab(int sliceIndex);
+  /**
+  * @return number of slice simulations
+  */
+  int getNumSlices()
+  {
+    return m_numSliceSimulations;
+  }
+  /**
   * @return pointer to the SimplexNoise4D used for texture slabs
   */
   SimplexNoise4D* getSimplexTexture() { return m_simplexFieldTexture;}
@@ -137,10 +164,6 @@ public:
   * @return density factor
   */
   float getDensityFactor() {return m_densityFactor;}
-  /**
-  * @return combustion temperature
-  */
-  float getCombustionTemperature() {return m_combustionTemperature;}
   /**
   * @return amount of previous simulation steps velocity to retain
   */

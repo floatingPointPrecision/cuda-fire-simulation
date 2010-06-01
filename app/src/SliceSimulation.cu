@@ -72,19 +72,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TIDSX 64 // Tids in X
 #define TIDSY 4  // Tids in Y
 
-const float* SliceSimulation::getDensityField()
+float* SliceSimulation::getDensityField()
 {
   return densityField;
 }
-const float* SliceSimulation::getTemperatureField()
+float* SliceSimulation::getTemperatureField()
 {
   return temperatureField;
 }
-const float* SliceSimulation::getTextureField()
+float* SliceSimulation::getTextureField()
 {
   return textureField;
 }
-const float* SliceSimulation::getFuelField()
+float* SliceSimulation::getFuelField()
 {
   return fuelField;
 }
@@ -101,6 +101,7 @@ void SliceSimulation::performSliceSimulation(const float2* newVelocityField, con
   contributeSlices(newMassField, newFuelField);
   simulateFluids(dt);
   addTextureDetail(currentTime, zIntercept);
+  addTurbulenceVorticityConfinement(currentTime, zIntercept, dt);
   enforveVelocityIncompressibility(dt);
   unbindTexture();
 }
@@ -182,9 +183,9 @@ void SliceSimulation::contributeSlices(const float* mass, const float* fuel)
   int gridSize = (m_sliceManager->getDomainSize()+ blockSize - 1) / blockSize;
   addMassFromSlice<<<gridSize,blockSize>>>(densityField, mass, m_sliceManager->getDensityFactor(), m_sliceManager->getDomainSize());
   cutilCheckMsg("adding density from slice mass failed");
-  addFuelFromSlice<<<gridSize,blockSize>>>(fuelField,fuel, m_sliceManager->getCombustionTemperature(), m_sliceManager->getDomainSize());
+  addFuelFromSlice<<<gridSize,blockSize>>>(fuelField,fuel, m_sliceManager->getMaxTemperature(), m_sliceManager->getDomainSize());
   cutilCheckMsg("adding temperature from fuel slice failed");
-  addTemperatureFromFuel<<<gridSize,blockSize>>>(temperatureField, fuelField, m_sliceManager->getCombustionTemperature(), m_sliceManager->getDomainSize());
+  addTemperatureFromFuel<<<gridSize,blockSize>>>(temperatureField, fuelField, m_sliceManager->getMaxTemperature(), m_sliceManager->getDomainSize());
 }
 
 void SliceSimulation::semiLagrangianAdvection(const float2* velocityField, float* scalarField, float* m_utilityScalarField, float dt)
@@ -308,7 +309,7 @@ void SliceSimulation::displaySlice(int slice, bool pauseSimulation)
     else if (slice == SliceTemperature)
     {
       pixelAddition = 0.f;
-      pixelScale = 1 / m_sliceManager->getMaxTemperature();
+      pixelScale = 1.f / m_sliceManager->getMaxTemperature();
       field = temperatureField;
     }
     cudaMemcpy(h_scalarField,field,sizeof(float)*m_sliceManager->getDomainSize(),cudaMemcpyDeviceToHost);
@@ -318,12 +319,13 @@ void SliceSimulation::displaySlice(int slice, bool pauseSimulation)
     {
       for (int j = 0; j < m_sliceManager->getImageDim(); j++)
       {
-        float output = h_scalarField[j*m_sliceManager->getImageDim()+i]*pixelScale+pixelAddition;
+        float output = h_scalarField[j*m_sliceManager->getImageDim()+i];
         if (output != 0.f)
         {
           numNonEmpty++;
           total += output;
         }
+        output = output*pixelScale+pixelAddition;
         h_scalarField[j*m_sliceManager->getImageDim()+i] = output;
       }
     }

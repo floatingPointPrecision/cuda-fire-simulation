@@ -75,14 +75,15 @@ __global__ void addZForce(float *dwdt, float coefficient, float* noise, int2 noi
   if (i < nx && j < ny && k < nz) {
     float noiseValue = noise[idx];
     noiseValue *= 0.25f;
-    noiseValue += 0.15f;
+    noiseValue += 0.25f;
+    dwdt[idx] += noiseValue * coefficient;
 
-    float yRatio = -3.f*(1.f-j/ny)+2.f; // 2 at bottom, -1 at top
-    yRatio *= 0.5f;
-    float output = noiseValue*yRatio*coefficient;
-    if (k > nx / 2)
-      output *= -1.f;
-    dwdt[idx] += output;
+    //float yRatio = -3.f*(1.f-j/ny)+2.f; // 2 at bottom, -1 at top
+    //yRatio *= 0.5f;
+    //float output = noiseValue*yRatio*coefficient;
+    //if (k > nx / 2)
+    //  output *= -1.f;
+    //dwdt[idx] += output;
   }
 }
 
@@ -105,16 +106,17 @@ __global__ void addXForce(float *dudt, float coefficient, float* noise, int2 noi
   if (i < nx && j < ny && k < nz) {
     float noiseValue = noise[idx];
     noiseValue *= 0.25f;
-    noiseValue += 0.15f;
+    noiseValue += 0.25f;
+    dudt[idx] += noiseValue*coefficient;
 
-    float xRatio = 2.f*fabs(nx*0.5f-i)/nx; // 0 to 1 moving away from center
-    xRatio *= 5.f;
-    float yRatio = -3.f*(1.f-j/ny)+2.f; // 2 at bottom, -1 at top
-    yRatio *= 0.5f;
-    float output = noiseValue*yRatio*coefficient;
-    if (i > nx / 2)
-      output *= -1.f;
-    dudt[idx] += output;
+    //float xRatio = 2.f*fabs(nx*0.5f-i)/nx; // 0 to 1 moving away from center
+    //xRatio *= 5.f;
+    //float yRatio = -3.f*(1.f-j/ny)+2.f; // 2 at bottom, -1 at top
+    //yRatio *= 0.5f;
+    //float output = noiseValue*yRatio*coefficient;
+    //if (i > nx / 2)
+    //  output *= -1.f;
+    //dudt[idx] += output;
   }
 }
 
@@ -140,10 +142,10 @@ __global__ void addVerticalForce(float *dvdt, float coefficient, float* noise, i
     noiseValue *= 0.75f;
     noiseValue += 1.0f;
 
-    float xRatio = powf(1-(2.f*fabs(nx*0.5f - i)/nx),2);
-    float zRatio = powf(1-(2.f*fabs(nz*0.5f - k)/nz),2);
+    //float xRatio = powf(1-(2.f*fabs(nx*0.5f - i)/nx),2);
+    //float zRatio = powf(1-(2.f*fabs(nz*0.5f - k)/nz),2);
     float yRatio = (0.5f-(j/ny))*10.f;
-    dvdt[idx] += noiseValue*yRatio*xRatio*zRatio*coefficient;//((float).5) * coefficient * (temperature[idx] + temperature[idx-nbr_stride]);
+    dvdt[idx] += noiseValue*yRatio*coefficient;//xRatio*zRatio
   }
 }
 

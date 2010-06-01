@@ -52,8 +52,8 @@ SliceManager::SliceManager(const char* settingsFileName)
   settingsFile.getFloat("fuelDissipationFactor",&m_fuelDissipationFactor);
   settingsFile.getFloat("coolingCoefficient",&m_coolingCoefficient);
   settingsFile.getFloat("maxTemperature",&m_maxTemperature);
+  settingsFile.getFloat("maxTemperature",&m_combustionTemperature);
   settingsFile.getFloat("densityFactor",&m_densityFactor);
-  settingsFile.getFloat("combustionTemperature",&m_combustionTemperature);
   settingsFile.getFloat("velocityRetention",&m_velocityRetention);
   settingsFile.getFloat("textureScale1",&m_textureScale.x);
   settingsFile.getFloat("textureScale2",&m_textureScale.y);
@@ -132,4 +132,32 @@ void SliceManager::displaySlice(int sliceIndex, int sliceType)
 void SliceManager::startUpdateSeries()
 {
   m_time += m_dt;
+}
+
+float* SliceManager::getDensitySlab(int sliceIndex)
+{
+  if (sliceIndex >= m_numSliceSimulations || sliceIndex < 0)
+    return 0;
+  return m_sliceSimulations[sliceIndex]->getDensityField();
+}
+
+float* SliceManager::getTemperatureSlab(int sliceIndex)
+{
+  if (sliceIndex >= m_numSliceSimulations || sliceIndex < 0)
+    return 0;
+  return m_sliceSimulations[sliceIndex]->getTemperatureField();
+}
+
+float* SliceManager::getTextureSlab(int sliceIndex)
+{
+  if (sliceIndex >= m_numSliceSimulations || sliceIndex < 0)
+    return 0;
+  return m_sliceSimulations[sliceIndex]->getTextureField();
+}
+
+float* SliceManager::getFuelSlab(int sliceIndex)
+{
+  if (sliceIndex >= m_numSliceSimulations || sliceIndex < 0)
+    return 0;
+  return m_sliceSimulations[sliceIndex]->getFuelField();
 }

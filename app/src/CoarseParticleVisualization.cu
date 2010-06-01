@@ -58,6 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "3DNavierStokes.h"
 #include "Bitmap.h"
 #include "SliceManager.h"
+#include "Renderer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // constants / global variables
@@ -68,7 +69,7 @@ using namespace cufire;
 
 int enableCoarseVisualization;
 
-int numRenderTargets = 6;
+int numRenderTargets = 8;
 enum RenderTarget
 {
   RenderTexture = 0,
@@ -76,7 +77,9 @@ enum RenderTarget
   RenderFuel,
   RenderTemperature,
   RenderVelocity,
-  RenderCoarseEngine
+  RenderCoarseEngine,
+  RenderSingleSlice,
+  RenderComposite
 };
 std::string currentRenderTargetString = "Slice Texture";
 
@@ -85,6 +88,7 @@ int currentSliceToDisplay;
 CoarseParticleEngine* pEngine;
 OrthographicProjection* pProjection;
 SliceManager* pSliceManager;
+Renderer* pRenderer;
 
 float sTimestep;
 float currentTime = 0;
@@ -208,7 +212,7 @@ void drawCube(float3 lowerLeftFront, float3 upperRightBack)
 #define M_PI 3.14159265f
 void display()
 {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   float radianTheta = theta * M_PI / 180.f;
@@ -278,7 +282,7 @@ void DrawTextBackground(int left,int right,int bottom,int top,float r,float g,fl
 
 void update(int value)
 {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
 
   static float simulationTimerSum = 0.f;
   CPUTimer simulationTimer;
@@ -305,6 +309,12 @@ void update(int value)
   case RenderCoarseEngine:
     display();
     break;
+  case RenderSingleSlice:
+    pRenderer->renderSingleSlice(currentSliceToDisplay);
+    break;
+  case RenderComposite:
+    pRenderer->renderComposite();
+    break;
   }
 
   char drawTime[128];
@@ -329,15 +339,10 @@ void keyboard (unsigned char key, int x, int y) {
   if (key == 'z' || key == 'x')
   {
     if (key=='z')
-    {
-      currentRenderTarget--;
-      if (currentRenderTarget == -1)
-        currentRenderTarget = numRenderTargets - 1;
-    }
+      if (--currentRenderTarget < 0)
+        currentRenderTarget += numRenderTargets;
     if (key=='x')
-    {
       currentRenderTarget = (currentRenderTarget + 1) % numRenderTargets;
-    }
     switch(currentRenderTarget)
     {
     case RenderTexture: currentRenderTargetString = "Slice Texture"; break;
@@ -346,6 +351,8 @@ void keyboard (unsigned char key, int x, int y) {
     case RenderTemperature: currentRenderTargetString = "Slice Temperature"; break;
     case RenderVelocity: currentRenderTargetString = "Slice Velocity"; break;
     case RenderCoarseEngine: currentRenderTargetString = "Coarse Engine"; break;
+    case RenderSingleSlice: currentRenderTargetString = "Single Slice"; break;
+    case RenderComposite: currentRenderTargetString = "Full Composite"; break;
     }
   }
   // pause simulation
@@ -377,12 +384,31 @@ void keyboard (unsigned char key, int x, int y) {
     currentSliceToDisplay = (currentSliceToDisplay + 1) % numSlices;
   // change the active slice to visualize backward
   if (key=='f')
-  {
     if (--currentSliceToDisplay < 0) currentSliceToDisplay += numSlices;
-  }
   // exit
   if (key==27)
     exit(0);
+
+  // RENDERING ADJUSTMENTS
+  // print constant values for renderer
+  if (key=='p')
+    pRenderer->printConstants();
+  if (key =='1')
+    pRenderer->decreaseTexDensInfluence();
+  if (key =='2')
+    pRenderer->increaseTexDensInfluence();
+  if (key =='3')
+    pRenderer->decreaseTexTempInfluence();
+  if (key =='4')
+    pRenderer->increaseTexTempInfluence();
+  if (key =='5')
+    pRenderer->decreaseDensityAlphaExp();
+  if (key =='6')
+    pRenderer->increaseDensityAlphaExp();
+  if (key =='7')
+    pRenderer->increaseDensityInv();
+  if (key =='8')
+    pRenderer->decreaseDensityInv();
 
   if (theta < -360) theta += 360;
   if (theta > 360) theta -= 360;
@@ -409,7 +435,7 @@ void setupProjection(int2 slicePixelDims)
 
 void reshape(int w, int h)
 {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
   window_width = w;
   window_height = h;
   // viewport
@@ -418,10 +444,6 @@ void reshape(int w, int h)
   // projection
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  //glOrtho(-40, 40, -40, 40, 1, 80);
-  glEnable(GL_BLEND);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
   gluPerspective(60.0, (GLfloat)window_width / (GLfloat) window_height, 15.0, 200.0);
 }
 
@@ -484,7 +506,9 @@ int main(int argc, char* argv[])
   float3 gridDims = make_float3(xBBox.y-xBBox.x,
     yBBox.y-yBBox.x,
     zBBox.y-zBBox.x);
-  float projectionDepth = 2.0f;
+  float numSlices;
+  settingsFile.getFloat("numSlices",&numSlices);
+  float projectionDepth = (zBBox.y - zBBox.x ) / (numSlices-1);
   slicePixelDims = make_int2(imageSize,imageSize);
   float2 sliceWorldDims = make_float2(xBBox.y-xBBox.x,
     yBBox.y-yBBox.x);
@@ -492,7 +516,7 @@ int main(int argc, char* argv[])
   // First initialize OpenGL context, so we can properly set the GL for CUDA.
   // This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
   glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGBA | GLUT_ALPHA | GLUT_DOUBLE);
+  glutInitDisplayMode(GLUT_RGBA | GLUT_ALPHA | GLUT_ACCUM | GLUT_DOUBLE);
   glutInitWindowSize(window_width, window_height);
   //register callbacks
   glutCreateWindow("CUDA Fire Simulation (Coarse Particle Visualization)");
@@ -500,7 +524,7 @@ int main(int argc, char* argv[])
   glutReshapeFunc(reshape);
   glutKeyboardFunc(keyboard);
   glewInit();
-  glClearColor(0.5, 0.5, 0.5, 1.0);
+  glClearColor(0.1, 0.1, 0.1, 1.0);
   //set CUDA device
   cudaGLSetGLDevice(0);
 
@@ -511,14 +535,15 @@ int main(int argc, char* argv[])
   setupProjection(slicePixelDims);
 
   pProjection = new OrthographicProjection(gridCenter,gridDims,projectionDepth,slicePixelDims,sliceWorldDims,maxNumParticles,jitterAmount);
-  // create particle engine
+  // create particle engine and add particles
   pEngine = new CoarseParticleEngine(maxNumParticles,xBBox,yBBox,zBBox);
   pEngine->addRandomParticle(xRange,yRange,zRange,numStartingParticles);
   pEngine->flushParticles();
-
-  //setupSliceSimulation();
+  
   
   pSliceManager = new SliceManager("cufire.xml");
+  pRenderer = new Renderer(pSliceManager, "cufire.xml");
+  
   glutMainLoop();
 
   return 0;

@@ -55,10 +55,10 @@ public:
   SliceSimulation(SliceManager* sliceManager);
   ~SliceSimulation();
 
-  const float* getDensityField();
-  const float* getTemperatureField();
-  const float* getTextureField();
-  const float* getFuelField();
+  float* getDensityField();
+  float* getTemperatureField();
+  float* getTextureField();
+  float* getFuelField();
 
   void performSliceSimulation(const float2* newVelocityField, const float* newMassField, const float* newFuelField, float zIntercept);
   void displaySlice(int slice, bool pauseSimulation);
