@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // includes, CUDA
 #include <cutil_inline.h>
+#include <cutil_math.h>
 #include <cuda_gl_interop.h>
 #include <cutil_gl_inline.h>
 
@@ -72,7 +73,7 @@ void CoarseParticleEngine::advanceSimulation(float timestep)
     m_firstTime = false;
   }
 
-  // adjustAgeAndParticles(timestep);
+  adjustAgeAndParticles(timestep);
   // copy from device to host
   cutilSafeCall(cudaMemcpy(m_hostPositionAge,m_devicePositionAge,sizeof(float4)*m_numParticles,cudaMemcpyDeviceToHost));
   cutilSafeCall(cudaMemcpy(m_hostXVelocities,m_deviceXVelocities,sizeof(float)*m_numParticles,cudaMemcpyDeviceToHost));
@@ -88,25 +89,27 @@ void CoarseParticleEngine::advanceSimulation(float timestep)
   cutilSafeCall(cudaMemcpy(m_deviceZVelocities,m_hostZVelocities,sizeof(float)*m_numParticles,cudaMemcpyHostToDevice));
 }
 
-__global__ void adjustAgeAndMarkForRemoval(float4* posAge, int* forRemoval, int numElements, float dt)
+__global__ void adjustAgeAndMarkForRemoval(float4* atts, int* forRemoval, int numElements, float dt)
 {
   int index = blockDim.x*blockIdx.x+threadIdx.x;
   if (index >= numElements)
     return;
-  float4 val = posAge[index];
-  val.w -= dt;
-  int remove = (val.w < 0.f);
-  posAge[index] = val;
-  forRemoval[index] = remove;
+  float4 val = atts[index];
+  val = val - make_float4(dt,dt,dt,dt);
+  val.x = max(val.x, 0.f); val.y = max(val.x, 0.f);
+  val.z = max(val.x, 0.f); val.w = max(val.x, 0.f);
+  atts[index] = val;
 }
-
 
 void CoarseParticleEngine::adjustAgeAndParticles(float dt)
 {
   int blockSize = 512;
   int gridSize = (m_numParticles + blockSize - 1) / blockSize;
-  adjustAgeAndMarkForRemoval<<<gridSize,blockSize>>>(m_devicePositionAge, m_particlesToRemove, m_numParticles, dt);
+  float timeFactor = 0.03f;
+  adjustAgeAndMarkForRemoval<<<gridSize,blockSize>>>(m_deviceFuelRadiusMassImpulse, m_particlesToRemove, m_numParticles, dt*timeFactor);
 } 
+
+
 
 static GLfloat quad[3] = { 1.0, 0.0, 1/60.0 };
 void CoarseParticleEngine::render()
@@ -206,9 +209,9 @@ void CoarseParticleEngine::addRandomParticle(float2 xBounds, float2 yBounds, flo
     //            randomVal, randomVal);
 
     // pos, vel, fuel, rad, lifetime, mass, impulse
-    addParticle(newPosition, newVelocity, randomFloatInRange(0.3,0.6), 
+    addParticle(newPosition, newVelocity, randomFloatInRange(0.4,1.0), 
                 randomFloatInRange(0.0,1.0), randomFloatInRange(1.0, 3.0), 
-                randomFloatInRange(0.3, 0.6), randomFloatInRange(0.5, 0.7));
+                randomFloatInRange(0.0, 0.4), randomFloatInRange(0.5, 0.7));
   }
 }
 

@@ -115,8 +115,7 @@ namespace cufire
 
     // protected members
   protected:
-    void testProjection(float zIntercept, float* outputMassSlice, float* outputFuelSlice, float2* outputVelocitySlice);
-    void naiveProjection();
+    void projection(float zIntercept, float* outputMassSlice, float* outputFuelSlice, float2* outputVelocitySlice);
 
     float m_ZIntercept;
     float2 m_sliceWorldDims; 

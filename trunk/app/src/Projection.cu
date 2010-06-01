@@ -68,16 +68,6 @@ OrthographicProjection::OrthographicProjection(float3 gridCenter, float3 gridDim
 {
 }
 
-//void OrthographicProjection::setSliceInformation(float zIntercept, float* outputMassSlice, float* m_outputFuelSlice, float2* outputVelocitySlice)
-//{
-//  m_ZIntercept = zIntercept;
-//  m_outputMassSlice = outputMassSlice;
-//  m_outputFuelSlice = m_outputFuelSlice;
-//  m_outputVelocitySlice = outputVelocitySlice;
-//}
-
-
-
 #define M_E 2.7182818284590452f
 __device__ float particleWeight(float projectionDistance, float sliceSpacing)
 {
@@ -162,7 +152,7 @@ struct float4Plus
  __host__ __device__ float4 operator()(const float4 &lhs, const float4 &rhs) const {return lhs + rhs;}
 };
 
-void OrthographicProjection::testProjection(float zIntercept, float* outputMassSlice, float* outputFuelSlice, float2* outputVelocitySlice)
+void OrthographicProjection::projection(float zIntercept, float* outputMassSlice, float* outputFuelSlice, float2* outputVelocitySlice)
 {
   if (!outputMassSlice || !outputFuelSlice || !outputVelocitySlice)
     exit(1);
@@ -201,25 +191,10 @@ void OrthographicProjection::testProjection(float zIntercept, float* outputMassS
   writeParticleSumOut<<<gridSize3,blockSize3>>>(m_summedMassFuelVelocity, m_binValue, outputMassSlice, outputFuelSlice, outputVelocitySlice, numBinsUsed);
 }
 
-void OrthographicProjection::naiveProjection()
-{
-  //if (m_outputSlice == 0)
-  //  exit(1);
-  //int blockSize = 512;
-  //int gridSize = (m_numParticles + blockSize - 1) / blockSize;
-  //float2 xyLowerBound = make_float2(m_gridCenter.x - m_gridDims.x/2.f, m_gridCenter.y - m_gridDims.y/2.f);
-  //float2 xyUpperBound = make_float2(m_gridCenter.x + m_gridDims.x/2.f, m_gridCenter.y + m_gridDims.y/2.f);
-
-  //orthProjection<<<gridSize,blockSize>>>(m_particlesBegin,m_outputSlice,m_ZIntercept,m_projectionDepth,
-  //                                       m_numParticles,xyLowerBound,xyUpperBound,m_slicePixelDims);
-  //orthVelocityProjection<<<gridSize,blockSize>>>(m_particlesBegin,m_outputVelocitySlice,m_ZIntercept,m_projectionDepth,
-  //                                       m_numParticles,xyLowerBound,xyUpperBound,m_slicePixelDims);
-}
-
 void OrthographicProjection::execute(float zIntercept, float* outputMassSlice, float* outputFuelSlice, float2* outputVelocitySlice)
 {
   //naiveProjection();
-  testProjection(zIntercept, outputMassSlice, outputFuelSlice, outputVelocitySlice);
+  projection(zIntercept, outputMassSlice, outputFuelSlice, outputVelocitySlice);
 }
 
 
