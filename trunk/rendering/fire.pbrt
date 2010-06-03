@@ -1,0 +1,37 @@
+Film "image" "string filename" "sphere_env.exr"
+     "integer xresolution" [300] "integer yresolution" [300]
+
+LookAt 10 0  0   0 0 0   0 0 1
+Rotate 135 0 0 1
+Rotate -180 0 1 0
+Camera "perspective" "float fov" [45]
+
+Sampler "lowdiscrepancy" "integer pixelsamples" [128]
+
+WorldBegin
+
+AttributeBegin
+
+LightSource "infinitesample" "string mapname" ["textures/grace_latlong.exr"]
+	"integer nsamples" [1] "color L" [10 10 10]
+
+#LightSource "infinitesample" "string mapname" ["textures/galileo_latlong.exr"]
+#	"integer nsamples" [1] "color L" [.1 .1 .1]
+
+AttributeEnd
+
+
+AttributeBegin
+#    Material "plastic" "color Ks" [.5 .5 .5] "color Kd" [.25 .25 .25] "float roughness" [.0005]
+#    Material "plastic" "color Ks" [.5 .5 .5] "color Kd" [.25 .25 .25] "float roughness" [.005]
+#    Material "plastic" "color Ks" [.5 .5 .5] "color Kd" [.25 .25 .25] "float roughness" [.05]
+# velvet materials (sigma value in equation is actually 1/roughness value)
+#     Material "plastic" "color Ks" [.5 .5 .5] "color Kd" [.25 .25 .25] "float roughness" [1]
+#     Material "plastic" "color Ks" [.5 .5 .5] "color Kd" [.25 .25 .25] "float roughness" [4]
+     Material "plastic" "color Ks" [.5 .5 .5] "color Kd" [.25 .25 .25] "float roughness" [400]
+
+
+    Shape "sphere" "float radius" [2]
+AttributeEnd
+
+WorldEnd
