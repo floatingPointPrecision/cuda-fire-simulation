@@ -524,7 +524,7 @@ int main(int argc, char* argv[])
   glutReshapeFunc(reshape);
   glutKeyboardFunc(keyboard);
   glewInit();
-  glClearColor(0.1, 0.1, 0.1, 1.0);
+  glClearColor(0.0, 0.0, 0.0, 1.0);
   //set CUDA device
   cudaGLSetGLDevice(0);
 

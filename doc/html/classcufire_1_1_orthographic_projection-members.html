@@ -64,11 +64,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <tr bgcolor="#f0f0f0"><td><b>m_sliceWorldDims</b> (defined in <a class="el" href="classcufire_1_1_orthographic_projection.html">cufire::OrthographicProjection</a>)</td><td><a class="el" href="classcufire_1_1_orthographic_projection.html">cufire::OrthographicProjection</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>m_summedMassFuelVelocity</b> (defined in <a class="el" href="classcufire_1_1_projection.html">cufire::Projection</a>)</td><td><a class="el" href="classcufire_1_1_projection.html">cufire::Projection</a></td><td><code> [protected]</code></td></tr>
   <tr bgcolor="#f0f0f0"><td><b>m_ZIntercept</b> (defined in <a class="el" href="classcufire_1_1_orthographic_projection.html">cufire::OrthographicProjection</a>)</td><td><a class="el" href="classcufire_1_1_orthographic_projection.html">cufire::OrthographicProjection</a></td><td><code> [protected]</code></td></tr>
-  <tr bgcolor="#f0f0f0"><td><b>naiveProjection</b>() (defined in <a class="el" href="classcufire_1_1_orthographic_projection.html">cufire::OrthographicProjection</a>)</td><td><a class="el" href="classcufire_1_1_orthographic_projection.html">cufire::OrthographicProjection</a></td><td><code> [protected]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classcufire_1_1_orthographic_projection.html#acde74567138bbf0b8671826b8b7be785">OrthographicProjection</a>(float3 gridCenter, float3 gridDimensions, float projectionDepth, int2 slicePixelDimensions, float2 sliceWorldDimensions, int maxNumParticles, int numJitter)</td><td><a class="el" href="classcufire_1_1_orthographic_projection.html">cufire::OrthographicProjection</a></td><td></td></tr>
   <tr class="memlist"><td><a class="el" href="classcufire_1_1_projection.html#a970ace3140323376374adbf7e2f98e5a">Projection</a>(float3 gridCenter, float3 gridDimensions, float projectionDepth, int2 slicePixelDimensions, int maxNumParticles, int numJitter)</td><td><a class="el" href="classcufire_1_1_projection.html">cufire::Projection</a></td><td></td></tr>
+  <tr class="memlist"><td><a class="el" href="classcufire_1_1_orthographic_projection.html#a71e285ee1a18fc538cf9de96f46d8c02">projection</a>(float zIntercept, float *outputMassSlice, float *outputFuelSlice, float2 *outputVelocitySlice)</td><td><a class="el" href="classcufire_1_1_orthographic_projection.html">cufire::OrthographicProjection</a></td><td><code> [protected]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classcufire_1_1_projection.html#a99eaaa5f0c1190489c429d5d47a36475">setParticles</a>(ParticleItrStruct particlesBegin, int numParticles)</td><td><a class="el" href="classcufire_1_1_projection.html">cufire::Projection</a></td><td></td></tr>
-  <tr class="memlist"><td><a class="el" href="classcufire_1_1_orthographic_projection.html#accaa33d147c83c3847d71157a5dc19ad">testProjection</a>(float zIntercept, float *outputMassSlice, float *outputFuelSlice, float2 *outputVelocitySlice)</td><td><a class="el" href="classcufire_1_1_orthographic_projection.html">cufire::OrthographicProjection</a></td><td><code> [protected]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classcufire_1_1_orthographic_projection.html#a4eee9ea457c6afb514bd7bd5b2f824d9">~OrthographicProjection</a>()</td><td><a class="el" href="classcufire_1_1_orthographic_projection.html">cufire::OrthographicProjection</a></td><td><code> [inline]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classcufire_1_1_projection.html#a2def0a481737dcebd148fab1f57f2abe">~Projection</a>()</td><td><a class="el" href="classcufire_1_1_projection.html">cufire::Projection</a></td><td><code> [inline, virtual]</code></td></tr>
 </table></div>
@@ -86,7 +85,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Sun May 30 03:28:55 2010 for cufire by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Wed Jun 2 20:31:31 2010 for cufire by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

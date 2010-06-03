@@ -39,7 +39,7 @@
   <massDissipationFactor>0.25</massDissipationFactor>
   <fuelDissipationFactor>1.0</fuelDissipationFactor>
   <coolingCoefficient>3000</coolingCoefficient>
-  <maxTemperature>2100</maxTemperature>
+  <maxTemperature>1700</maxTemperature>
   <densityFactor>20.0</densityFactor>
   <velocityRetention>0.4</velocityRetention>
   <textureScale1>0.25</textureScale1>

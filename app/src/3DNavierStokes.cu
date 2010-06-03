@@ -139,7 +139,7 @@ __global__ void addVerticalForce(float *dvdt, float coefficient, float* noise, i
   // use gaussian spreading out from middle
   if (i < nx && j < ny && k < nz) {
     float noiseValue = noise[idx];
-    noiseValue *= 0.75f;
+    noiseValue *= 0.35f;
     noiseValue += 1.0f;
 
     //float xRatio = powf(1-(2.f*fabs(nx*0.5f - i)/nx),2);

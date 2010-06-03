@@ -56,6 +56,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#af9dcd7b5465e2c312c36c701dbb6fdd0">displaySlice</a> (int sliceIndex, int sliceType)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#aa24a07d31463e9a4dc916fbbb937ab75">startUpdateSeries</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#a252da0c321c843ff45fc809825a7957a">setPauseState</a> (bool pauseSimulation)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#a97b8520a325bd5e793ac0e52a3162ae8">getDensitySlab</a> (int sliceIndex)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#ad59bf5799d20ca25412e0f40f7b36a33">getTemperatureSlab</a> (int sliceIndex)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#ae9318ac99a65e622cd1f63169b5c5f9b">getTextureSlab</a> (int sliceIndex)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#a42fb6924a21f386847ae0d8b1fa72dc9">getFuelSlab</a> (int sliceIndex)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#a787e64cf6d49c465adffb8f1b1289158">getNumSlices</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_simplex_noise4_d.html">SimplexNoise4D</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#a86a091aa5ac18578bb3f0e5d2d6cca94">getSimplexTexture</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_simplex_noise4_d.html">SimplexNoise4D</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#a9ff3bc21c3737e837e36d2fc0c469cad">getSimplexTurbulence</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#ade25d125314950c970df68d6a095ee7a">getImageDim</a> ()</td></tr>
@@ -71,7 +76,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr><td class="memItemLeft" align="right" valign="top">float&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#a6aec65b0f6f3d851fdbf40e81660b733">getCoolingCoefficient</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">float&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#a4b3ae2def20a3cbe98b26e80e86bf5d2">getMaxTemperature</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">float&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#a17d1ffd2b0dcb2029a723f864eff403e">getDensityFactor</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">float&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#ab7f8b871a3fa79e412b43e0ed4744a82">getCombustionTemperature</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">float&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#a345df447f5f7ec00e0157a5353892c8f">getVelocityRetention</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">float4&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#a5e4840647271880a4fc16db4217e375d">getTextureScale</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">float&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_slice_manager.html#a4aaf7d68ef0e47e6d4e825f64ad8fec5">getTextureTimeScale</a> ()</td></tr>
@@ -273,26 +277,6 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 
 </div>
 </div>
-<a class="anchor" id="ab7f8b871a3fa79e412b43e0ed4744a82"></a><!-- doxytag: member="SliceManager::getCombustionTemperature" ref="ab7f8b871a3fa79e412b43e0ed4744a82" args="()" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">float SliceManager::getCombustionTemperature </td>
-          <td>(</td>
-          <td class="paramname"></td>
-          <td>&nbsp;)&nbsp;</td>
-          <td><code> [inline]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<dl class="return"><dt><b>Returns:</b></dt><dd>combustion temperature </dd></dl>
-
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00143">143</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
-
-</div>
-</div>
 <a class="anchor" id="a6b8600457a8308077062db272816e212"></a><!-- doxytag: member="SliceManager::getComplexPadWidth" ref="a6b8600457a8308077062db272816e212" args="()" -->
 <div class="memitem">
 <div class="memproto">
@@ -309,7 +293,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>padded width for complex values used in the fft </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00099">99</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00126">126</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -329,7 +313,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>handle to complex to real fft operation </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00197">197</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00220">220</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -349,7 +333,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>cooling coefficient </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00131">131</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00158">158</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -369,7 +353,32 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>density factor </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00139">139</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00166">166</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a97b8520a325bd5e793ac0e52a3162ae8"></a><!-- doxytag: member="SliceManager::getDensitySlab" ref="a97b8520a325bd5e793ac0e52a3162ae8" args="(int sliceIndex)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float* SliceManager::getDensitySlab </td>
+          <td>(</td>
+          <td class="paramtype">int&nbsp;</td>
+          <td class="paramname"> <em>sliceIndex</em></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>gets a pointer to the start of the density slab for a given slice </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>sliceIndex</em>&nbsp;</td><td>index of slice to retrieve the density slab from </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -389,7 +398,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>number of pixels in the slabs </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00095">95</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00122">122</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -409,7 +418,32 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>fuel dissipation amount F* = F * (1-fuel dissipation)^dt </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00127">127</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00154">154</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a42fb6924a21f386847ae0d8b1fa72dc9"></a><!-- doxytag: member="SliceManager::getFuelSlab" ref="a42fb6924a21f386847ae0d8b1fa72dc9" args="(int sliceIndex)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float* SliceManager::getFuelSlab </td>
+          <td>(</td>
+          <td class="paramtype">int&nbsp;</td>
+          <td class="paramname"> <em>sliceIndex</em></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>gets a pointer to the start of the fuel slab for a given slice </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>sliceIndex</em>&nbsp;</td><td>index of slice to retrieve the fuel slab from </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -429,7 +463,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>width of the (square) slabs </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00091">91</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00118">118</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -449,7 +483,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>mass dissipation amount M* = M * (1-mass dissipation)^dt </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00123">123</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00150">150</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -469,7 +503,27 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>maximum temperature of the system </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00135">135</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00162">162</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a787e64cf6d49c465adffb8f1b1289158"></a><!-- doxytag: member="SliceManager::getNumSlices" ref="a787e64cf6d49c465adffb8f1b1289158" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int SliceManager::getNumSlices </td>
+          <td>(</td>
+          <td class="paramname"></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td><code> [inline]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<dl class="return"><dt><b>Returns:</b></dt><dd>number of slice simulations </dd></dl>
+
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00103">103</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -489,7 +543,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>padded width of a row in the image </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00107">107</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00134">134</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -509,7 +563,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>phi field used in vorticity confinement </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00176">176</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00199">199</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -529,7 +583,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>padded width for real values used in the fft </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00103">103</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00130">130</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -549,7 +603,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>handle to real to complex fft operation </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00193">193</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00216">216</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -569,7 +623,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>pointer to the <a class="el" href="class_simplex_noise4_d.html">SimplexNoise4D</a> used for texture slabs </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00083">83</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00110">110</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -589,7 +643,32 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>pointer to the <a class="el" href="class_simplex_noise4_d.html">SimplexNoise4D</a> used for turbulence during vorticity confinement </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00087">87</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00114">114</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ad59bf5799d20ca25412e0f40f7b36a33"></a><!-- doxytag: member="SliceManager::getTemperatureSlab" ref="ad59bf5799d20ca25412e0f40f7b36a33" args="(int sliceIndex)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float* SliceManager::getTemperatureSlab </td>
+          <td>(</td>
+          <td class="paramtype">int&nbsp;</td>
+          <td class="paramname"> <em>sliceIndex</em></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>gets a pointer to the start of the temperature slab for a given slice </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>sliceIndex</em>&nbsp;</td><td>index of slice to retrieve the temperature slab from </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -609,7 +688,32 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>the scales of the four textures, values of 0 are ignored </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00151">151</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00174">174</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ae9318ac99a65e622cd1f63169b5c5f9b"></a><!-- doxytag: member="SliceManager::getTextureSlab" ref="ae9318ac99a65e622cd1f63169b5c5f9b" args="(int sliceIndex)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float* SliceManager::getTextureSlab </td>
+          <td>(</td>
+          <td class="paramtype">int&nbsp;</td>
+          <td class="paramname"> <em>sliceIndex</em></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>gets a pointer to the start of the texture slab for a given slice </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>sliceIndex</em>&nbsp;</td><td>index of slice to retrieve the texture slab from </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -629,7 +733,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>amount to multiply texture time to control animation </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00155">155</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00178">178</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -649,7 +753,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>the current total time in the simulation </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00115">115</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00142">142</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -669,7 +773,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>how far the simulation advances each simulation step </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00111">111</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00138">138</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -689,7 +793,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>turbulence field used in vorticity confinement </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00172">172</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00195">195</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -709,7 +813,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>utility float2 field on the host </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00184">184</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00207">207</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -729,7 +833,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>int field on the host used as a framebuffer </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00188">188</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00211">211</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -749,7 +853,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>general purpose device field the same size as slab fields </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00168">168</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00191">191</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -769,7 +873,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>utility scalar field on the host </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00180">180</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00203">203</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -789,7 +893,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>amount of previous simulation steps velocity to retain </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00147">147</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00170">170</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -809,7 +913,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>viscosity coefficient used to control damping velocity </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00119">119</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00146">146</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -829,7 +933,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>complex velocity field in the x direction </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00160">160</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00183">183</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -849,7 +953,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div class="memdoc">
 <dl class="return"><dt><b>Returns:</b></dt><dd>complex velocity field in the y direction </dd></dl>
 
-<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00164">164</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
+<p>Definition at line <a class="el" href="_slice_manager_8h_source.html#l00187">187</a> of file <a class="el" href="_slice_manager_8h_source.html">SliceManager.h</a>.</p>
 
 </div>
 </div>
@@ -965,7 +1069,7 @@ cufftHandle&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 </iframe>
 </div>
 
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Sun May 30 03:28:55 2010 for cufire by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Wed Jun 2 20:31:31 2010 for cufire by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>
