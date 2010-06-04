@@ -385,6 +385,9 @@ void keyboard (unsigned char key, int x, int y) {
   // change the active slice to visualize backward
   if (key=='f')
     if (--currentSliceToDisplay < 0) currentSliceToDisplay += numSlices;
+  // write out slice data to file
+  if (key=='t')
+    pSliceManager->writeDensityTemperatureToDisk("sliceData.bin");
   // exit
   if (key==27)
     exit(0);
