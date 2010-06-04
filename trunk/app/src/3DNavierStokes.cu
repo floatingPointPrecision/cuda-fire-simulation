@@ -74,9 +74,10 @@ __global__ void addZForce(float *dwdt, float coefficient, float* noise, int2 noi
   // use gaussian spreading out from middle
   if (i < nx && j < ny && k < nz) {
     float noiseValue = noise[idx];
-    noiseValue *= 0.25f;
-    noiseValue += 0.25f;
-    dwdt[idx] += noiseValue * coefficient;
+    noiseValue *= 0.15f;
+    noiseValue += 1.f;
+    float zRatio = nz / 2.f - k;
+    dwdt[idx] += noiseValue * coefficient * zRatio;
 
     //float yRatio = -3.f*(1.f-j/ny)+2.f; // 2 at bottom, -1 at top
     //yRatio *= 0.5f;
@@ -107,8 +108,7 @@ __global__ void addXForce(float *dudt, float coefficient, float* noise, int2 noi
     float noiseValue = noise[idx];
     noiseValue *= 0.25f;
     noiseValue += 0.25f;
-    dudt[idx] += noiseValue*coefficient;
-
+    dudt[idx] += 15.f*i + noiseValue*coefficient;
     //float xRatio = 2.f*fabs(nx*0.5f-i)/nx; // 0 to 1 moving away from center
     //xRatio *= 5.f;
     //float yRatio = -3.f*(1.f-j/ny)+2.f; // 2 at bottom, -1 at top
@@ -139,13 +139,13 @@ __global__ void addVerticalForce(float *dvdt, float coefficient, float* noise, i
   // use gaussian spreading out from middle
   if (i < nx && j < ny && k < nz) {
     float noiseValue = noise[idx];
-    noiseValue *= 0.35f;
+    noiseValue *= 0.15f;
     noiseValue += 1.0f;
 
     //float xRatio = powf(1-(2.f*fabs(nx*0.5f - i)/nx),2);
     //float zRatio = powf(1-(2.f*fabs(nz*0.5f - k)/nz),2);
-    float yRatio = (0.5f-(j/ny))*10.f;
-    dvdt[idx] += noiseValue*yRatio*coefficient;//xRatio*zRatio
+    float yRatio = ny / 2.f - j;
+    dvdt[idx] += noiseValue*coefficient*yRatio;//*coefficient;//xRatio*zRatio
   }
 }
 
@@ -175,15 +175,15 @@ void IncompressibleCustomSolver::add_external_forces(double dt)
 
   int2 noiseSize = make_int2(m_simplexNoiseFieldSize,m_simplexNoiseFieldSize);
 
-  float coefficient = 20.f;
+  float coefficient = 3.f;
   addVerticalForce<<<Dg, Db>>>(v, coefficient,m_simplexNoiseField, noiseSize,
     _temp.xstride(), _temp.ystride(), _temp.stride(DIR_YAXIS_FLAG), nx(), ny(), nz(), 
     blocksInY, 1.0f / (float)blocksInY);
-  coefficient = 20.f;
+  coefficient = 30.f;
   addXForce<<<Dg, Db>>>(u, coefficient,m_simplexNoiseField, noiseSize,
     _temp.xstride(), _temp.ystride(), _temp.stride(DIR_XAXIS_FLAG), nx(), ny(), nz(), 
     blocksInY, 1.0f / (float)blocksInY);
-  coefficient = 20.f;
+  coefficient = 3.f;
   addZForce<<<Dg, Db>>>(w, coefficient,m_simplexNoiseField, noiseSize,
     _temp.xstride(), _temp.ystride(), _temp.stride(DIR_ZAXIS_FLAG), nx(), ny(), nz(), 
     blocksInY, 1.0f / (float)blocksInY);
@@ -312,7 +312,8 @@ void NavierStokes3D::setupParams()
     {
       for (k=0; k < nz; k++) {
         float temp = fabs(0.2f*nz-k) / (0.2f*nz) * 1.f;
-        params.init_temp.at(i,j,k) = (i < nx/2) ? -temp : temp;
+        //params.init_temp.at(i,j,k) = (i < nx/2) ? -temp : temp;
+        params.init_u.at(i,j,k) = i * .1f;
       }
     }
   }
