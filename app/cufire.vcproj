@@ -160,7 +160,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="cudart.lib cutil64D.lib cufft.lib glew64.lib glut64.lib ocuequation_d.lib ocustorage_d.lib ocuutil_d.lib"
-				OutputFile="../../bin/win64/$(ConfigurationName)/fluidsGL.exe"
+				OutputFile="../../bin/win64/$(ConfigurationName)/cufire.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(CUDA_LIB_PATH)/../lib64&quot;;&quot;$(NVSDKCOMPUTE_ROOT)\C\common\lib&quot;;.\lib"
 				IgnoreDefaultLibraryNames="msvcprtd;libcmtd;libcmt;libcpmt"
@@ -327,7 +327,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="cudart.lib cutil64.lib cufft.lib glew64.lib glut64.lib ocuequation.lib ocustorage.lib ocuutil.lib"
-				OutputFile="../../bin/win64/$(ConfigurationName)/fluidsGL.exe"
+				OutputFile="../../bin/win64/$(ConfigurationName)/cufire.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(CUDA_LIB_PATH)/../lib64&quot;;&quot;$(NVSDKCOMPUTE_ROOT)\C\common\lib&quot;;.\lib"
 				IgnoreDefaultLibraryNames="libcmt"
@@ -642,6 +642,18 @@
 			</File>
 			<File
 				RelativePath=".\include\Renderer.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Writer / Readers"
+			>
+			<File
+				RelativePath="..\rendering\pbrt-1.04\fire\DensityTemperatureVolume.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\rendering\pbrt-1.04\fire\DensityTemperatureVolume.h"
 				>
 			</File>
 		</Filter>

@@ -4,15 +4,15 @@
   <startingParticleRange>
     <xRange>
       <x>4.0</x>
-      <y>60.0</y>
+      <y>52.0</y>
     </xRange>
     <yRange>
-      <x>8.0</x>
-      <y>12.0</y>
+      <x>31.0</x>
+      <y>33.0</y>
     </yRange>
     <zRange>
-      <x>4.0</x>
-      <y>60.0</y>
+      <x>31.0</x>
+      <y>33.0</y>
     </zRange>
   </startingParticleRange>
   <boundingBox>
@@ -32,7 +32,7 @@
   <cameraDistance>100</cameraDistance>
   <imageSize>512</imageSize>
   <maxNumberParticles>65536</maxNumberParticles>
-  <numStartingParticles>35000</numStartingParticles>
+  <numStartingParticles>65000</numStartingParticles>
   <timestep>0.016</timestep>
   <projectionJitterAmount>10</projectionJitterAmount>
   <viscosityCoefficient>0.00025</viscosityCoefficient>

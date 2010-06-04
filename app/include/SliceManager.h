@@ -69,6 +69,10 @@ public:
   */
   void displaySlice(int sliceIndex, int sliceType);
   /**
+  * writes out all the density and temperature slabs to disk
+  */
+  void writeDensityTemperatureToDisk(const char* fileName);
+  /**
   * starts a new timestep for all slices, should be called once for each global timestep
   */
   void startUpdateSeries();
@@ -100,10 +104,7 @@ public:
   /**
   * @return number of slice simulations
   */
-  int getNumSlices()
-  {
-    return m_numSliceSimulations;
-  }
+  int getNumSlices() { return m_numSliceSimulations;}
   /**
   * @return pointer to the SimplexNoise4D used for texture slabs
   */

@@ -33,6 +33,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SliceManager.h"
 #include "XMLParser.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <fstream>
+
 using namespace std;
 
 SliceManager::SliceManager(const char* settingsFileName)
@@ -127,6 +131,36 @@ void SliceManager::displaySlice(int sliceIndex, int sliceType)
   if (sliceIndex >= m_numSliceSimulations || sliceIndex < 0)
     return;
   m_sliceSimulations[sliceIndex]->displaySlice(sliceType, m_pauseSimulation);
+}
+
+void SliceManager::writeDensityTemperatureToDisk(const char* fileName)
+{
+  FILE* outFile = fopen(fileName,"w");
+  if (!outFile)
+  {
+    printf("unable to open file %s\n",fileName);
+    return;
+  }
+  // write out the header which includes the image space dimensions
+  int header[3] = {m_imageDim,m_imageDim,m_numSliceSimulations};
+  int headerSize = sizeof(int)*3;
+  fwrite(header,sizeof(int),3,outFile);  
+  int densityStart = headerSize;
+  for (int i = 0; i < m_numSliceSimulations; i++)
+  {
+    fseek(outFile,densityStart + i*sizeof(float)*m_domainSize,SEEK_SET);
+    cudaMemcpy(m_utilityScalarField_h, m_sliceSimulations[i]->getDensityField(), sizeof(float)*m_domainSize, cudaMemcpyDeviceToHost);
+    fwrite(m_utilityScalarField_h,sizeof(float),m_domainSize,outFile);
+  }
+  // write out temperature
+  int temperatureStart = densityStart + sizeof(float)*m_domainSize*m_numSliceSimulations;
+  for (int i = 0; i < m_numSliceSimulations; i++)
+  {
+    fseek(outFile,temperatureStart + i*sizeof(float)*m_domainSize,SEEK_SET);
+    cudaMemcpy(m_utilityScalarField_h, m_sliceSimulations[i]->getTemperatureField(), sizeof(float)*m_domainSize, cudaMemcpyDeviceToHost);
+    fwrite(m_utilityScalarField_h,sizeof(float),m_domainSize,outFile);
+  }
+  fclose(outFile);
 }
 
 void SliceManager::startUpdateSeries()
