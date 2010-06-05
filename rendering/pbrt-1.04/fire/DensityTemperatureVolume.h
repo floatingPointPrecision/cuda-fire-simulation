@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _DENSITY_TEMPERATURE_VOLUME_H_
+#define _DENSITY_TEMPERATURE_VOLUME_H_
 
 class DensityTemperatureVolume
 {
@@ -26,3 +27,5 @@ protected:
   float* m_density;
   float* m_temperature;
 };
+
+#endif
