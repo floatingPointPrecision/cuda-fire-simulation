@@ -13,6 +13,8 @@ public:
   int getSizeInY();
   int getSizeInZ();
 
+  int getRawDensityAt(int x, int y, int z);
+
 protected:
   float trilinearlyInterpolate(const float* field, float x, float y, float z);
   float getRawValueAt(const float* field, int x, int y, int z);
