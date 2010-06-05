@@ -47,6 +47,11 @@ float DensityTemperatureVolume::getTempAt(float x, float y, float z)
   return trilinearlyInterpolate(m_temperature,x,y,z);
 }
 
+int DensityTemperatureVolume::getRawDensityAt(int x, int y, int z)
+{
+  return getRawValueAt(m_density,x,y,z);
+}
+
 int DensityTemperatureVolume::getSizeInX()
 {
   return m_dimX;
@@ -85,5 +90,5 @@ float DensityTemperatureVolume::trilinearlyInterpolate(const float* field, float
 
 float DensityTemperatureVolume::getRawValueAt(const float* field, int x, int y, int z)
 {
-  return field[y*x*z + y*x + x];
+  return field[m_dimY*m_dimX*z + y*m_dimX + x];
 }
