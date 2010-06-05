@@ -4,7 +4,7 @@
 
 DensityTemperatureVolume::DensityTemperatureVolume(const char* fileName)
 {
-  FILE* inFile = fopen(fileName,"r");
+  FILE* inFile = fopen(fileName,"rb");
   if (!inFile)
   {
     printf("unable to open file %s\n",fileName);
