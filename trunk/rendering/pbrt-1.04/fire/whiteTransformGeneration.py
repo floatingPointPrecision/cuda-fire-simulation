@@ -39,10 +39,21 @@ def getRadiance(waveLength, temperature):
     C2 = 1.4388 * (10**(-2))
     numerator = 2 * C1
     exponentValue = C2 / (waveLength*temperature)
-    denominator = pow(wavelength,5) * (exp(exponentValue) - 1)
+    #print 'wavelength:',waveLength
+    #print 'temperature:',temperature
+    #print 'C2:',C2
+    #print 'exponent',exponentValue
+    denominator = pow(waveLength,5) * (exp(exponentValue) - 1)
+    #print 'wavelength to the 5th',pow(waveLength,5)
+    #print 'other denominator part',(exp(exponentValue) - 1)
     radiance = numerator / denominator
+    print 'radiance:',radiance
     return radiance
 
+testRadiance = getRadiance(450*(10**-9), 1668.104)
+'print cooler temperature'
+testRadiance2 = getRadiance(450*(10**-9), 1000)
+print 'testradiance:',testRadiance
 # generate xyz coordinates for white point
 xyz = [0, 0, 0]
 sampleRange = lambdaValues[-1] - lambdaValues[0]
@@ -53,7 +64,8 @@ for sample in range(numSamples):
     xyz[0] += cieX[sample]*radiance
     xyz[1] += cieY[sample]*radiance
     xyz[2] += cieZ[sample]*radiance
-normalizeList(xyz,3)
+print 'raw XYZ:',xyz
+#normalizeList(xyz,3)
 
 # convert white point xyz coordinates to LMS coordinates
 xyzAsMatrix = matrix('0.0; 0; 0')
