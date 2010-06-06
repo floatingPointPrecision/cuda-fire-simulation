@@ -1,5 +1,5 @@
 
-LookAt 3.3 4 -4   1.2 .7 0    0 1 0
+LookAt 1.0 0 -4   1.0 0 1.0    0 1 0
 Camera "perspective" "float fov" [28]
 Film "image" "integer xresolution" [400] "integer yresolution" [400]
     "string filename" "smoke-2-1.exr"
@@ -20,9 +20,9 @@ WorldBegin
 #AttributeEnd
 
 Volume "firevolumegrid"
-"point p0" [ 0.010000 0.010000 0.010000 ] "point p1" [ 1.990000 1.990000 0.790000 ]
-"string simFile" "sliceDataFireWall.bin"
-"color sigma_a" [1 1 1] "color sigma_s" [4 4 4]
+"point p0" [ 0.010000 0.010000 0.010000 ] "point p1" [ 1.990000 1.990000 1.990000 ]
+"string simFile" "sliceData2500k.bin"
+"color sigma_a" [0.1 0.1 0.1] "color sigma_s" [4 4 4]
 
 Material "matte" "color Kd" [.57 .57 .6]
 Translate 0 -1 0

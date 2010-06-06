@@ -2,7 +2,7 @@ import numpy
 from math import *
 from numpy import *
 
-maxTemperature = 1700.0
+maxTemperature = 2500.0
 
 # XYZ to LMS transform matrix from http://en.wikipedia.org/wiki/LMS_color_space
 XYZtoLMS = matrix('0.8951 0.2664 -0.1614; -0.7502 1.7135 0.0367; 0.0389 -0.0685 1.0296')
@@ -50,10 +50,6 @@ def getRadiance(waveLength, temperature):
     print 'radiance:',radiance
     return radiance
 
-testRadiance = getRadiance(450*(10**-9), 1668.104)
-'print cooler temperature'
-testRadiance2 = getRadiance(450*(10**-9), 1000)
-print 'testradiance:',testRadiance
 # generate xyz coordinates for white point
 xyz = [0, 0, 0]
 sampleRange = lambdaValues[-1] - lambdaValues[0]
