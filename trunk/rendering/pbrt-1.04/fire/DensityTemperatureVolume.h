@@ -4,8 +4,9 @@
 class DensityTemperatureVolume
 {
 public:
-  DensityTemperatureVolume(const char* fileName);
+  DensityTemperatureVolume():m_density(0),m_temperature(0){}
   virtual ~DensityTemperatureVolume();
+  bool load(const char* fileName);
 
   virtual float getDensityAt(float x, float y, float z);
   virtual float getTempAt(float x, float y, float z);
