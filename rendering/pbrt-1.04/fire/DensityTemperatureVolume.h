@@ -15,7 +15,12 @@ public:
   int getSizeInY();
   int getSizeInZ();
 
-  int getRawDensityAt(int x, int y, int z);
+    float getRawDensityAt(int x, int y, int z) {
+        return getRawValueAt(m_density, x, y, z);
+    }
+    float getRawTemperatureAt(int x, int y, int z){ 
+        return getRawValueAt(m_temperature, x, y, z);
+    }
 
 protected:
   float trilinearlyInterpolate(const float* field, float x, float y, float z);
