@@ -15,7 +15,11 @@ public:
 	}
 	float Density(const Point &Pobj) const;
     float Temperature(const Point &Pobj) const;
-  Spectrum Lve(const Point &p, const Vector &) const;
+    Spectrum sigma_a(const Point &p, const Vector &) const {
+        printf("%f %f", Density(WorldToVolume(p)), exp(Density(WorldToVolume(p))));
+		return exp(Density(WorldToVolume(p))) * sig_a;
+	}
+    Spectrum Lve(const Point &p, const Vector &) const;
 	float D(int x, int y, int z) const {
 		x = Clamp(x, 0, data->getSizeInX()-1);
 		y = Clamp(y, 0, data->getSizeInY()-1);
@@ -26,7 +30,8 @@ public:
 		x = Clamp(x, 0, data->getSizeInX()-1);
 		y = Clamp(y, 0, data->getSizeInY()-1);
 		z = Clamp(z, 0, data->getSizeInZ()-1);
-		return data->getRawTemperatureAt(x, y, z);
+        float t = data->getRawTemperatureAt(x, y, z);
+		return t;
 	}
     void normalizeXYZ(float xyz[3]) const
     {
@@ -92,18 +97,31 @@ FireVolumeGrid::FireVolumeGrid(const Spectrum &sa,
             printf("%d %f\n", i, CIEWeights[c][i]);
         }
     }
+    test();
 }
 void FireVolumeGrid::test()
 {
-    printf("%d %d %d\n", data->getSizeInX(), data->getSizeInY(), data->getSizeInZ());
-    for (int i = 0;i < data->getSizeInX(); i++)
-        for (int j = 0;j < data->getSizeInY(); j++)
-            for (int k = 0;k < data->getSizeInZ(); k++)
-                printf("%f\n", data->getRawTemperatureAt(i, j, k));
+/*    printf("%d %d %d\n", data->getSizeInX(), data->getSizeInY(), data->getSizeInZ());
+    for (int j = 0;j < data->getSizeInY()/3; j++)
+        for (int i = data->getSizeInX()/3;i < data->getSizeInX()/3*2; i++)
+            for (int k = data->getSizeInZ()/3;k < data->getSizeInZ()/3*2; k++)
+                printf("%d %d %d T: %f D: %f\n", i, j, k, data->getRawTemperatureAt(i, j, k), data->getRawDensityAt(i, j, k));*/
 /*    for (int i = 0;i < data->getSizeInX(); i++)
         for (int j = 0;j < data->getSizeInY(); j++)
             for (int k = 0;k < data->getSizeInZ(); k++)
-                printf("%f\n", data->getDensityAt(i, j, k));*/
+                if (data->getRawDensityAt(i, j, k) > 1.2 || data->getRawDensityAt(i, j, k) < 0.0 || 
+                    data->getRawTemperatureAt(i, j, k) < 0.0f || data->getRawTemperatureAt(i, j, k) > 2600.f)
+                        printf("%f %f\n", data->getRawDensityAt(i, j, k), data->getRawTemperatureAt(i, j, k));*/
+    int count = 0;
+    int count2 = 0;
+    for (int i = 0;i < data->getSizeInX(); i++)
+        for (int j = 0;j < data->getSizeInY(); j++)
+            for (int k = 0;k < data->getSizeInZ(); k++)
+                if (data->getRawTemperatureAt(i, j, k) > 1000.f && data->getRawTemperatureAt(i, j, k) < 2000.f)
+                    count++;
+                else if (data->getRawTemperatureAt(i, j, k) < 1000.f)
+                    count2++;
+    printf("P %f\n", float(count)/(512*512*16-count2));
 }
 float FireVolumeGrid::Density(const Point &Pobj) const {
     if (!extent.Inside(Pobj)) return 0;
@@ -124,7 +142,7 @@ float FireVolumeGrid::Density(const Point &Pobj) const {
 	float d01 = Lerp(dx, D(vx, vy, vz+1),  D(vx+1, vy, vz+1));
 	float d11 = Lerp(dx, D(vx, vy+1, vz+1),D(vx+1, vy+1, vz+1));
 	float d0 = Lerp(dy, d00, d10);
-    float d1 = Lerp(dy, d01, d11); 
+    float d1 = Lerp(dy, d01, d11);
     return Lerp(dz, d0, d1);
 }
 float FireVolumeGrid::Temperature(const Point &Pobj) const {
@@ -170,9 +188,21 @@ Spectrum FireVolumeGrid::Lve(const Point &p, const Vector &) const {
     for (int c = 0;c < 3; c++)
         xyz[c] += CIEWeights[c][i] * radianceAtLambda;
   }
-  
+
   normalizeXYZ(xyz);
-  return FromXYZ(xyz[0], xyz[1], xyz[2]);
+    
+    float rgb[3];
+    float x = xyz[0], y=xyz[1], z = xyz[2];
+    rgb[0] = 2.5623 * x + (-1.1661) * y + (-0.3962) * z;
+    rgb[1] = (-1.0215) * x + 1.9778 * y + 0.0437 * z;
+    rgb[2] = 0.0752 * x + (-0.2562) * y + 1.1810 * z;
+/*    if (temperature > 1000.0f)
+        printf("%f %f %f %f\n", temperature, rgb[0], rgb[1], rgb[2]);*/
+    if (temperature > 2000.0f)
+        rgb[0] = rgb[1] = rgb[2] = 1.0f;
+    return Spectrum(rgb);
+/*    float c[3] = {0.9, 0.45, 0.45};
+    return Spectrum(c)*Density(WorldToVolume(p));*/
 }
 
 extern "C" DLLEXPORT VolumeRegion *CreateVolumeRegion(const Transform &volume2world,
