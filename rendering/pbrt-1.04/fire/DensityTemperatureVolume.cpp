@@ -2,33 +2,40 @@
 #include <stdio.h>
 #include <math.h>
 
-DensityTemperatureVolume::DensityTemperatureVolume(const char* fileName)
+bool DensityTemperatureVolume::load(const char* fileName)
 {
   FILE* inFile = fopen(fileName,"rb");
   if (!inFile)
   {
     printf("unable to open file %s\n",fileName);
-    return;
+    return false;
   }
   // read in the header which includes the image space dimensions
   int header[3];
   int headerSize = sizeof(int)*3;
-  fread(header,sizeof(int),3,inFile);  
+  size_t unused = fread(header,sizeof(int),3,inFile);  
   m_dimX = header[0];
   m_dimY = header[1];
   m_dimZ = header[2];
   int domainSize = m_dimX*m_dimY*m_dimZ;
+    
   // allocate density and temperature accordingly
   m_density = new float[domainSize];
   m_temperature = new float[domainSize];
   // read in density
   fseek(inFile,headerSize,SEEK_SET);
-  fread(m_density,sizeof(float),domainSize,inFile);
+  unused = fread(m_density,sizeof(float),domainSize,inFile);
   // read in temperature
   fseek(inFile,headerSize + sizeof(float)*domainSize,SEEK_SET);
-  fread(m_temperature,sizeof(float),domainSize,inFile);
+  unused = fread(m_temperature,sizeof(float),domainSize,inFile);
 
   fclose(inFile);
+
+    for (int i = 0;i < m_dimX; i++)
+        for (int j = 0;j < m_dimY; j++)
+            for (int k = 0;k < m_dimZ; k++)
+                printf("%f\n", getDensityAt(i, j, k));
+  return true;
 }
 
 DensityTemperatureVolume::~DensityTemperatureVolume()

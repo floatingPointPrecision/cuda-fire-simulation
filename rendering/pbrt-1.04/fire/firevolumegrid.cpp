@@ -23,14 +23,14 @@
 
 // volumegrid.cpp*
 #include "volume.h"
+#include "DensityTemperatureVolume.h"
 // VolumeGrid Declarations
 class FireVolumeGrid : public DensityRegion {
 public:
 	// VolumeGrid Public Methods
 	FireVolumeGrid(const Spectrum &sa, const Spectrum &ss, float gg,
-	 		const Spectrum &emit, const BBox &e, const Transform &v2w,
-			int nx, int ny, int nz, const float *d);
-	~FireVolumeGrid() { delete[] density; }
+	 		const Spectrum &emit, const BBox &e, const Transform &v2w, DensityTemperatureVolume *d);
+	~FireVolumeGrid() { delete data; }
 	BBox WorldBound() const { return WorldToVolume.GetInverse()(extent); }
 	bool IntersectP(const Ray &r, float *t0, float *t1) const {
 		Ray ray = WorldToVolume(r);
@@ -39,21 +39,21 @@ public:
 	float Density(const Point &Pobj) const;
   Spectrum Lve(const Point &p, const Vector &) const;
 	float D(int x, int y, int z) const {
-		x = Clamp(x, 0, nx-1);
-		y = Clamp(y, 0, ny-1);
-		z = Clamp(z, 0, nz-1);
-		return density[z*nx*ny + y*nx + x];
+		x = Clamp(x, 0, data->getSizeInX()-1);
+		y = Clamp(y, 0, data->getSizeInY()-1);
+		z = Clamp(z, 0, data->getSizeInZ()-1);
+		return data->getDensityAt(x, y, z);
 	}
 private:
   float RadianceAtLambda(float lambda, float temperature) const;
+    void test();
 	// VolumeGrid Private Data
-	float *density;
-	const int nx, ny, nz;
 	const BBox extent;
     static const int numLambdaSamples = 5;
     static const float constant1;
     static const float constant2;
     static const float lambdaSamples[numLambdaSamples];
+    DensityTemperatureVolume* data;
 };
 
 const float FireVolumeGrid::constant1 = 7.4836*10e-16;
@@ -65,22 +65,26 @@ const float FireVolumeGrid::lambdaSamples[FireVolumeGrid::numLambdaSamples] = {
 FireVolumeGrid::FireVolumeGrid(const Spectrum &sa,
 		const Spectrum &ss, float gg,
  		const Spectrum &emit, const BBox &e,
-		const Transform &v2w,
-		int x, int y, int z, const float *d)
-	: DensityRegion(sa, ss, gg, emit, v2w),
-	nx(x), ny(y), nz(z), extent(e) {
-	density = new float[nx*ny*nz];
-	memcpy(density, d, nx*ny*nz*sizeof(float));
+		const Transform &v2w, DensityTemperatureVolume *d)
+	: DensityRegion(sa, ss, gg, emit, v2w), extent(e), data(d) {
+}
+void FireVolumeGrid::test()
+{
+    printf("%d %d %d\n", data->getSizeInX(), data->getSizeInY(), data->getSizeInZ());
+    for (int i = 0;i < data->getSizeInX(); i++)
+        for (int j = 0;j < data->getSizeInY(); j++)
+            for (int k = 0;k < data->getSizeInZ(); k++)
+                printf("%f\n", data->getDensityAt(i, j, k));
 }
 float FireVolumeGrid::Density(const Point &Pobj) const {
     if (!extent.Inside(Pobj)) return 0;
 	// Compute voxel coordinates and offsets for _Pobj_
 	float voxx = (Pobj.x - extent.pMin.x) /
-		(extent.pMax.x - extent.pMin.x) * nx - .5f;
+		(extent.pMax.x - extent.pMin.x) * data->getSizeInX() - .5f;
 	float voxy = (Pobj.y - extent.pMin.y) /
-		(extent.pMax.y - extent.pMin.y) * ny - .5f;
+		(extent.pMax.y - extent.pMin.y) * data->getSizeInY() - .5f;
 	float voxz = (Pobj.z - extent.pMin.z) /
-		(extent.pMax.z - extent.pMin.z) * nz - .5f;
+		(extent.pMax.z - extent.pMin.z) * data->getSizeInZ() - .5f;
 	int vx = Floor2Int(voxx);
 	int vy = Floor2Int(voxy);
 	int vz = Floor2Int(voxz);
@@ -127,7 +131,7 @@ extern "C" DLLEXPORT VolumeRegion *CreateVolumeRegion(const Transform &volume2wo
 	Spectrum Le = params.FindOneSpectrum("Le", 0.);
 	Point p0 = params.FindOnePoint("p0", Point(0,0,0));
 	Point p1 = params.FindOnePoint("p1", Point(1,1,1));
-	int nitems;
+/*	int nitems;
 	const float *data = params.FindFloat("density", &nitems);
 	if (!data) {
 		Error("No \"density\" values provided for volume grid?");
@@ -140,7 +144,16 @@ extern "C" DLLEXPORT VolumeRegion *CreateVolumeRegion(const Transform &volume2wo
 		Error("VolumeGrid has %d density values but nx*ny*nz = %d",
 			nitems, nx*ny*nz);
 		return NULL;
-	}
+	}*/
+    string simFileName = params.FindOneString("simFile", "sliceData.bin");
+    DensityTemperatureVolume* data = new DensityTemperatureVolume();
+    if (!data->load(simFileName.c_str()))
+    {
+        Error("FireVolumeGrid failed to load simulation file %s\n", simFileName.c_str());
+        delete data;
+        return NULL;
+    }
+    printf("Loaded %s\n", simFileName.c_str());
 	return new FireVolumeGrid(sigma_a, sigma_s, g, Le, BBox(p0, p1),
-		volume2world, nx, ny, nz, data);
+		volume2world, data);
 }
