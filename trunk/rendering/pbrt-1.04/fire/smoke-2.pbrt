@@ -12,17 +12,17 @@ VolumeIntegrator "emission" "float stepsize" [.025]
 WorldBegin
 
 #LightSource "point" "point from" [0 10 2] "color I" [100 100 100]
-AttributeBegin
-AreaLightSource "area" "color L" [9500 9500 9500 ] "integer nsamples" [4]
-Translate 4 15 -2
-Rotate 80 1 0 0
-Shape "disk" "float radius" [.2]
-AttributeEnd
+#AttributeBegin
+#AreaLightSource "area" "color L" [9500 9500 9500 ] "integer nsamples" [4]
+#Translate 4 15 -2
+#Rotate 80 1 0 0
+#Shape "disk" "float radius" [.2]
+#AttributeEnd
 
 Volume "firevolumegrid"
 "point p0" [ 0.010000 0.010000 0.010000 ] "point p1" [ 1.990000 1.990000 0.790000 ]
 "string simFile" "sliceDataFireWall.bin"
-"color sigma_a" [1 1 1] "color sigma_s" [4 4 4] "color Le" [9 4.5 4.5]
+"color sigma_a" [1 1 1] "color sigma_s" [4 4 4]
 
 Material "matte" "color Kd" [.57 .57 .6]
 Translate 0 -1 0

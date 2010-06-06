@@ -30,11 +30,6 @@ bool DensityTemperatureVolume::load(const char* fileName)
   unused = fread(m_temperature,sizeof(float),domainSize,inFile);
 
   fclose(inFile);
-
-    for (int i = 0;i < m_dimX; i++)
-        for (int j = 0;j < m_dimY; j++)
-            for (int k = 0;k < m_dimZ; k++)
-                printf("%f\n", getDensityAt(i, j, k));
   return true;
 }
 
@@ -52,11 +47,6 @@ float DensityTemperatureVolume::getDensityAt(float x, float y, float z)
 float DensityTemperatureVolume::getTempAt(float x, float y, float z)
 {
   return trilinearlyInterpolate(m_temperature,x,y,z);
-}
-
-int DensityTemperatureVolume::getRawDensityAt(int x, int y, int z)
-{
-  return getRawValueAt(m_density,x,y,z);
 }
 
 int DensityTemperatureVolume::getSizeInX()
