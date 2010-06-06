@@ -28,15 +28,27 @@ public:
 		z = Clamp(z, 0, data->getSizeInZ()-1);
 		return data->getRawTemperatureAt(x, y, z);
 	}
+    void normalizeXYZ(float xyz[3]) const
+    {
+        float newXYZ[3];
+        for (int i = 0; i < 3; i++)
+        {
+            newXYZ[i] = 0.0f;
+            for (int j = 0;j < 3; j++)
+                newXYZ[i] += TnormalizationMat[i*3+j]*xyz[j];
+        }
+        memcpy(&xyz[0], &newXYZ[0], sizeof(float)*3);
+    }
 private:
   float RadianceAtLambda(float lambda, float temperature) const;
     void test();
 	// VolumeGrid Private Data
 	const BBox extent;
-    static const int numLambdaSamples = 6;
+    static const int numLambdaSamples = 10;
     static const float constant1;
     static const float constant2;
     static const float lambdaSamples[numLambdaSamples];
+    static const float TnormalizationMat[9];
     float CIEWeights[3][numLambdaSamples];
     DensityTemperatureVolume* data;
 };
@@ -44,7 +56,15 @@ private:
 const float FireVolumeGrid::constant1 = 7.4836*1e-16;
 const float FireVolumeGrid::constant2 = 1.4388*1e-2;
 const float FireVolumeGrid::lambdaSamples[FireVolumeGrid::numLambdaSamples] = {
-                            450.0f, 500.0f, 550.0f, 600.0f, 650.0f, 700.0f };
+                            360.0f, 410.0f, 460.0f, 510.0f, 560.0f, 610.0f, 660.0f, 710.0f, 760.0f, 810.0f };
+/*const float FireVolumeGrid::TnormalizationMat[9] = { 
+            1.82159986e-10, -7.55589605e-11, 4.14127222e-10, 
+            -6.91496210e-11, 3.05956638e-10, 1.31545684e-10, 
+            8.92502791e-11, -1.54173332e-10, 2.65929718e-09 };*/
+const float FireVolumeGrid::TnormalizationMat[9] = { 
+            1.75352569e-12, -2.74463007e-13, 9.94998057e-13,
+            -3.09319990e-13, 2.33730410e-12, 3.23674602e-13,
+            2.03828596e-13, -3.45956678e-13, 7.67706478e-12 };
 
 // FireVolumeGrid Method Definitions
 FireVolumeGrid::FireVolumeGrid(const Spectrum &sa,
@@ -140,29 +160,19 @@ float FireVolumeGrid::RadianceAtLambda(float lambda, float temperature) const
 }
 
 Spectrum FireVolumeGrid::Lve(const Point &p, const Vector &) const {
-//  float density = Density(WorldToVolume(p));
-//    printf("%f %f %f\n", p.x, p.y, p.z);
   float temperature = Temperature(WorldToVolume(p));
   float xyz[3] = {0.0f, 0.0f, 0.0f};
   for (int i = 0; i < numLambdaSamples; i++)
   {
     float lambda = lambdaSamples[i];
     float radianceAtLambda = RadianceAtLambda(lambda, temperature);
-//    if (radianceAtLambda > 0.0f)
-//    printf("%f\n", radianceAtLambda);
 
     for (int c = 0;c < 3; c++)
-    {
         xyz[c] += CIEWeights[c][i] * radianceAtLambda;
-//        printf("C %f %f\n", CIEWeights[c][CIEindex], xyz[c]);
-    }
   }
   
-  float sum = xyz[0] + xyz[1] + xyz[2];
-  if (sum < 1e-6)
-        sum = 1.0f;
-//    printf("%f %f %f\n", xyz[0]/sum, xyz[1]/sum, xyz[2]/sum);
-  return FromXYZ(xyz[0]/sum, xyz[1]/sum, xyz[2]/sum);
+  normalizeXYZ(xyz);
+  return FromXYZ(xyz[0], xyz[1], xyz[2]);
 }
 
 extern "C" DLLEXPORT VolumeRegion *CreateVolumeRegion(const Transform &volume2world,
