@@ -50,9 +50,17 @@ private:
 	float *density;
 	const int nx, ny, nz;
 	const BBox extent;
-  static const int numLambdaSamples = 3;
-  float lambdaSamples[numLambdaSamples];
+    static const int numLambdaSamples = 5;
+    static const float constant1;
+    static const float constant2;
+    static const float lambdaSamples[numLambdaSamples];
 };
+
+const float FireVolumeGrid::constant1 = 7.4836*10e-16;
+const float FireVolumeGrid::constant2 = 1.4388*10e-2;
+const float FireVolumeGrid::lambdaSamples[FireVolumeGrid::numLambdaSamples] = {
+                            400.0f, 500.0f, 600.0f, 700.0f, 800.0f };
+
 // VolumeGrid Method Definitions
 FireVolumeGrid::FireVolumeGrid(const Spectrum &sa,
 		const Spectrum &ss, float gg,
@@ -65,7 +73,7 @@ FireVolumeGrid::FireVolumeGrid(const Spectrum &sa,
 	memcpy(density, d, nx*ny*nz*sizeof(float));
 }
 float FireVolumeGrid::Density(const Point &Pobj) const {
-	if (!extent.Inside(Pobj)) return 0;
+    if (!extent.Inside(Pobj)) return 0;
 	// Compute voxel coordinates and offsets for _Pobj_
 	float voxx = (Pobj.x - extent.pMin.x) /
 		(extent.pMax.x - extent.pMin.x) * nx - .5f;
@@ -83,36 +91,31 @@ float FireVolumeGrid::Density(const Point &Pobj) const {
 	float d01 = Lerp(dx, D(vx, vy, vz+1),  D(vx+1, vy, vz+1));
 	float d11 = Lerp(dx, D(vx, vy+1, vz+1),D(vx+1, vy+1, vz+1));
 	float d0 = Lerp(dy, d00, d10);
-  float d1 = Lerp(dy, d01, d11);
-  return Lerp(dz, d0, d1);
+    float d1 = Lerp(dy, d01, d11);
+    return Lerp(dz, d0, d1);
 }
 
 float FireVolumeGrid::RadianceAtLambda(float lambda, float temperature) const
 {
-  return 1.f;
+    return constant1/(pow(lambda,5)*(exp(constant2/(lambda*temperature))-1));
 }
 
 Spectrum FireVolumeGrid::Lve(const Point &p, const Vector &) const {
-  float density = Density(WorldToVolume(p));
+//  float density = Density(WorldToVolume(p));
   float temperature = 1700.f;
-  float xyz[3];
-  xyz[0]=xyz[1]=xyz[2]=0.f;
+  float xyz[3] = {0.0f, 0.0f, 0.0f};
   for (int i = 0; i < numLambdaSamples; i++)
   {
     float lambda = lambdaSamples[i];
     float radianceAtLambda = RadianceAtLambda(lambda, temperature);
 
     int CIEindex = int(lambda) - Spectrum::CIEstart;
-    for (int j = 0; j < 3; j++)
-      xyz[j] += Spectrum::CIE_X[CIEindex] * radianceAtLambda;
+    xyz[0] += Spectrum::CIE_X[CIEindex] * radianceAtLambda;    
+    xyz[1] += Spectrum::CIE_Y[CIEindex] * radianceAtLambda;    
+    xyz[2] += Spectrum::CIE_Z[CIEindex] * radianceAtLambda;
   }
   
-  float x=xyz[0], y=xyz[1], z=xyz[2];
-  float c[3];
-	c[0] =  3.240479f * x + -1.537150f * y + -0.498535f * z;
-	c[1] = -0.969256f * x +  1.875991f * y +  0.041556f * z;
-	c[2] =  0.055648f * x + -0.204043f * y +  1.057311f * z;
-	return Spectrum(c);
+  return FromXYZ(xyz[0], xyz[1], xyz[2]);
 }
 
 extern "C" DLLEXPORT VolumeRegion *CreateVolumeRegion(const Transform &volume2world,

@@ -1,7 +1,7 @@
 #
 # Makefile for fire
 #
-PBRT_BASEDIR=/home/yulou/pbrt-1.04
+PBRT_BASEDIR=/home/yulou/cs348b/FinalProj/pbrt-1.04
 
 ARCH = $(shell uname)
 
@@ -47,9 +47,9 @@ endif
 
 
 
-FILES     = DensityTemperatureVolume main
+FILES     = DensityTemperatureVolume firevolumegrid
 OBJS      = $(FILES:=.o)
-TARGET    = fire.so
+TARGET    = firevolumegrid.so
 
 OTHER_HEADERS := DensityTemperatureVolume.h
 
