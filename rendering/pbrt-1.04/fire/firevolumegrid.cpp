@@ -15,10 +15,6 @@ public:
 	}
 	float Density(const Point &Pobj) const;
     float Temperature(const Point &Pobj) const;
-    Spectrum sigma_a(const Point &p, const Vector &) const {
-        printf("%f %f", Density(WorldToVolume(p)), exp(Density(WorldToVolume(p))));
-		return exp(Density(WorldToVolume(p))) * sig_a;
-	}
     Spectrum Lve(const Point &p, const Vector &) const;
 	float D(int x, int y, int z) const {
 		x = Clamp(x, 0, data->getSizeInX()-1);
@@ -97,13 +93,11 @@ FireVolumeGrid::FireVolumeGrid(const Spectrum &sa,
             int CIEindex = int(lambda) - Spectrum::CIEstart;
             sum += CIEs[c][CIEindex];
         }
-//        printf("%d\n", c);
         for (int i = 0; i < numLambdaSamples; i++)
         {
             float lambda = lambdaSamples[i];
             int CIEindex = int(lambda) - Spectrum::CIEstart;
             CIEWeights[c][i] = CIEs[c][CIEindex]/sum;
-            printf("%d %f\n", i, CIEWeights[c][i]);
         }
     }
     test();
@@ -236,7 +230,6 @@ Spectrum FireVolumeGrid::Lve(const Point &p, const Vector &) const {
   
     float prevXYZ[3] = {xyz[0], xyz[1], xyz[2]};
     normalizeVec3(prevXYZ);
-//    normalizeVec3(xyz);
     normalizeXYZ(xyz);
     
     if (prevXYZ[0] > 1e-6)
@@ -247,11 +240,9 @@ Spectrum FireVolumeGrid::Lve(const Point &p, const Vector &) const {
         printf("%f %f %f\n", prevXYZ[0], prevXYZ[1], prevXYZ[2]);
         printf("%f %f %f\n", xyz[0], xyz[1], xyz[2]);
 #endif
-//        Spectrum c = RGBFromXYZ(prevXYZ);
-//        Spectrum c2 = RGBFromXYZ(xyz);
         float ratioYX = prevXYZ[0]/prevXYZ[1];
         float ratioZX = prevXYZ[0]/prevXYZ[2];
-        float lnYX = log(ratioYX+1.718)*1.2;
+        float lnYX = log(ratioYX+1.718)*1.25;
         float lnZX = log(ratioZX+1.718)*2;
         xyz[1] /= lnYX;
         xyz[2] /= lnZX;
