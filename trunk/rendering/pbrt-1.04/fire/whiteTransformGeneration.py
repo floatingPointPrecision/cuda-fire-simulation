@@ -5,8 +5,16 @@ from numpy import *
 maxTemperature = 1800.0
 
 # XYZ to LMS transform matrix from http://en.wikipedia.org/wiki/LMS_color_space
-XYZtoLMS = matrix('0.8951 0.2664 -0.1614; -0.7502 1.7135 0.0367; 0.0389 -0.0685 1.0296')
+#XYZtoLMS = matrix('0.8951 0.2664 -0.1614; -0.7502 1.7135 0.0367; 0.0389 -0.0685 1.0296')
+XYZtoLMS = matrix('0.3897 0.6890 -0.0787; -0.2298 1.1834 0.0464; 0.0 0.0 1.0000')
 XYZtoLMSinv = XYZtoLMS.getI()
+XYZtoRGB = matrix('3.240479, -1.537150, -0.498535; -0.969256, 1.875991, 0.041556; 0.055648, -0.204043, 1.057311')
+RGBtoXYZ = XYZtoRGB.getI()
+print RGBtoXYZ
+white = matrix('1.0; 1.0; 0.7')
+print XYZtoLMS * RGBtoXYZ * white
+
+
 print 'XYZ to LMS transform matrix'
 print XYZtoLMS
 print ''
@@ -26,6 +34,8 @@ def normalizeList(v, length):
     listSum = 0
     for i in range(length):
         listSum += v[i]
+    if listSum < 1e-9:
+        listSum = 1.0
     for i in range(length):
         v[i] /= listSum
 normalizeList(cieX,numSamples)
@@ -91,13 +101,13 @@ print finalTransformMatrix
 
 def XYZtoRGB(x,y,z):
     xyz = [x,y,z]
-    normalizeList(xyz,3)
+#    normalizeList(xyz,3)
     x=xyz[0]
     y=xyz[1]
     z=xyz[2]
-    r = 2.5623 * x + (-1.1661) * y + (-0.3962) * z
-    g = (-1.0215) * x + 1.9778 * y + 0.0437 * z
-    b = 0.0752 * x + (-0.2562) * y + 1.1810 * z
+    r = 3.240479 * x + (-1.537150) * y + (-0.498535) * z
+    g = (-0.969256) * x + 1.875991 * y + 0.041556 * z
+    b = 0.055648 * x + (-0.204043) * y + 1.057311 * z
     return [r,g,b]
 
 def generateRGBfromTemp(temp):
@@ -136,7 +146,7 @@ print ''
 print 'RGB values'
 for t in range(50):
     temp = (t+1) * 50
-    rgb = generateRGBfromTemp(temp)
+    rgb = generateRGBfromTempWithWhiteNormalization(temp)
     rgb[0]=min(max(rgb[0],0),1)
     rgb[1]=min(max(rgb[1],0),1)
     rgb[2]=min(max(rgb[2],0),1)
