@@ -45,7 +45,8 @@ public:
         memcpy(&xyz[0], &newXYZ[0], sizeof(float)*3);
     }
 private:
-  float RadianceAtLambda(float lambda, float temperature) const;
+    float RadianceAtLambda(float lambda, float temperature) const;
+    void CalcXYZ(float temperature, float xyz[3]) const;
     void test();
 	// VolumeGrid Private Data
 	const BBox extent;
@@ -66,10 +67,18 @@ const float FireVolumeGrid::lambdaSamples[FireVolumeGrid::numLambdaSamples] = {
             1.82159986e-10, -7.55589605e-11, 4.14127222e-10, 
             -6.91496210e-11, 3.05956638e-10, 1.31545684e-10, 
             8.92502791e-11, -1.54173332e-10, 2.65929718e-09 };*/
+/*const float FireVolumeGrid::TnormalizationMat[9] = { 
+            8.10306604e-11, -2.91192204e-11, 1.48607220e-10,
+            -2.79038251e-11, 1.31633769e-10, 4.73688255e-11,
+            3.17980423e-11, -5.47962386e-11, 9.69330402e-10 };*/
+/*const float FireVolumeGrid::TnormalizationMat[9] = { 
+            2.2493871, -1.04837468, 3.96512291,
+            -0.11514529, 2.63877031, 0.02335136,
+            0., 0., 21.88440292 };*/
 const float FireVolumeGrid::TnormalizationMat[9] = { 
-            1.75352569e-12, -2.74463007e-13, 9.94998057e-13,
-            -3.09319990e-13, 2.33730410e-12, 3.23674602e-13,
-            2.03828596e-13, -3.45956678e-13, 7.67706478e-12 };
+            8.94637901e-11, -4.16965012e-11, 1.57702924e-10,
+            -4.57961804e-12, 1.04950541e-10, 9.28742452e-13,
+            0., 0., 8.70397820e-10 };
 
 // FireVolumeGrid Method Definitions
 FireVolumeGrid::FireVolumeGrid(const Spectrum &sa,
@@ -177,32 +186,83 @@ float FireVolumeGrid::RadianceAtLambda(float lambda, float temperature) const
     return constant1/(pow(lambda,5)*(exp(constant2/(lambda*temperature))-1));
 }
 
-Spectrum FireVolumeGrid::Lve(const Point &p, const Vector &) const {
-  float temperature = Temperature(WorldToVolume(p));
-  float xyz[3] = {0.0f, 0.0f, 0.0f};
-  for (int i = 0; i < numLambdaSamples; i++)
-  {
-    float lambda = lambdaSamples[i];
-    float radianceAtLambda = RadianceAtLambda(lambda, temperature);
+inline void normalizeVec3(float vec[3])
+{
+    float sum = vec[0] + vec[1] + vec[2];
+    if (sum > 1e-9)
+    {
+        for (int i = 0;i < 3; i++)
+            vec[i] /= sum;
+    }
+}
 
-    for (int c = 0;c < 3; c++)
-        xyz[c] += CIEWeights[c][i] * radianceAtLambda;
-  }
-
-  normalizeXYZ(xyz);
-    
+Spectrum RGBFromXYZ(float xyz[3])
+{
     float rgb[3];
-    float x = xyz[0], y=xyz[1], z = xyz[2];
-    rgb[0] = 2.5623 * x + (-1.1661) * y + (-0.3962) * z;
-    rgb[1] = (-1.0215) * x + 1.9778 * y + 0.0437 * z;
-    rgb[2] = 0.0752 * x + (-0.2562) * y + 1.1810 * z;
-/*    if (temperature > 1000.0f)
-        printf("%f %f %f %f\n", temperature, rgb[0], rgb[1], rgb[2]);*/
-    if (temperature > 2000.0f)
-        rgb[0] = rgb[1] = rgb[2] = 1.0f;
+    rgb[0] = 3.240479*xyz[0] - 1.537150*xyz[1] - 0.498535*xyz[2];
+    rgb[1] = -0.969256*xyz[0] + 1.875991*xyz[1] + 0.041556*xyz[2]; 
+    rgb[2] = 0.055648*xyz[0] -0.204043*xyz[1] + 1.057311*xyz[2];
     return Spectrum(rgb);
-/*    float c[3] = {0.9, 0.45, 0.45};
-    return Spectrum(c)*Density(WorldToVolume(p));*/
+}
+
+void FireVolumeGrid::CalcXYZ(float temperature, float xyz[3]) const
+{
+    memset(&xyz[0], 0, sizeof(float)*3);
+/*    if (temperature >= 1666)
+    {
+        float temperatureSqr = temperature*temperature;
+        float temperatureCub = temperatureSqr*temperature;
+        xyz[0] = -0.2661239*1e9/temperatureCub - 0.2343580*1e6/temperatureSqr + 0.8776956*1e3/temperature + 0.179910;
+        float xcSqr = xyz[0]*xyz[0];
+        float xcCub = xcSqr*xyz[0];
+        xyz[1] = -1.1063814*xcCub -1.34811020*xcSqr + 2.18555832*xyz[0] - 0.20219683;
+        xyz[2] = 1.0f-xyz[1]-xyz[0];
+        return;
+    }*/
+    for (int i = 0; i < numLambdaSamples; i++)
+    {
+        float lambda = lambdaSamples[i];
+        float radianceAtLambda = RadianceAtLambda(lambda, temperature);
+
+        for (int c = 0;c < 3; c++)
+            xyz[c] += CIEWeights[c][i] * radianceAtLambda;
+    }
+}
+
+Spectrum FireVolumeGrid::Lve(const Point &p, const Vector &) const {
+    float temperature = Temperature(WorldToVolume(p));
+    float xyz[3];
+    CalcXYZ(temperature, xyz);
+  
+    float prevXYZ[3] = {xyz[0], xyz[1], xyz[2]};
+    normalizeVec3(prevXYZ);
+//    normalizeVec3(xyz);
+    normalizeXYZ(xyz);
+    
+    if (prevXYZ[0] > 1e-6)
+    {
+#define DIS 0
+#if DIS
+        printf("Temp %f \n", temperature);
+        printf("%f %f %f\n", prevXYZ[0], prevXYZ[1], prevXYZ[2]);
+        printf("%f %f %f\n", xyz[0], xyz[1], xyz[2]);
+#endif
+//        Spectrum c = RGBFromXYZ(prevXYZ);
+//        Spectrum c2 = RGBFromXYZ(xyz);
+        float ratioYX = prevXYZ[0]/prevXYZ[1];
+        float ratioZX = prevXYZ[0]/prevXYZ[2];
+        float lnYX = log(ratioYX+1.718)*1.2;
+        float lnZX = log(ratioZX+1.718)*2;
+        xyz[1] /= lnYX;
+        xyz[2] /= lnZX;
+        
+#if DIS
+//        printf("%f %f %f %f\n", ratioYX, ratioZX, lnYX, lnZX);
+        printf("%f %f %f\n", xyz[0], xyz[1], xyz[2]);
+#endif
+    }
+    Spectrum c = RGBFromXYZ(xyz);
+    return c*15;
 }
 
 extern "C" DLLEXPORT VolumeRegion *CreateVolumeRegion(const Transform &volume2world,
