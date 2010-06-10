@@ -1,4 +1,4 @@
-// firevolumegrid.cpp*
+// firevolumegrid.cpp
 #include "volume.h"
 #include "DensityTemperatureVolume.h"
 // FireVolumeGrid Declarations
@@ -100,32 +100,8 @@ FireVolumeGrid::FireVolumeGrid(const Spectrum &sa,
             CIEWeights[c][i] = CIEs[c][CIEindex]/sum;
         }
     }
-    test();
 }
-void FireVolumeGrid::test()
-{
-/*    printf("%d %d %d\n", data->getSizeInX(), data->getSizeInY(), data->getSizeInZ());
-    for (int j = 0;j < data->getSizeInY()/3; j++)
-        for (int i = data->getSizeInX()/3;i < data->getSizeInX()/3*2; i++)
-            for (int k = data->getSizeInZ()/3;k < data->getSizeInZ()/3*2; k++)
-                printf("%d %d %d T: %f D: %f\n", i, j, k, data->getRawTemperatureAt(i, j, k), data->getRawDensityAt(i, j, k));*/
-/*    for (int i = 0;i < data->getSizeInX(); i++)
-        for (int j = 0;j < data->getSizeInY(); j++)
-            for (int k = 0;k < data->getSizeInZ(); k++)
-                if (data->getRawDensityAt(i, j, k) > 1.2 || data->getRawDensityAt(i, j, k) < 0.0 || 
-                    data->getRawTemperatureAt(i, j, k) < 0.0f || data->getRawTemperatureAt(i, j, k) > 2600.f)
-                        printf("%f %f\n", data->getRawDensityAt(i, j, k), data->getRawTemperatureAt(i, j, k));*/
-    int count = 0;
-    int count2 = 0;
-    for (int i = 0;i < data->getSizeInX(); i++)
-        for (int j = 0;j < data->getSizeInY(); j++)
-            for (int k = 0;k < data->getSizeInZ(); k++)
-                if (data->getRawTemperatureAt(i, j, k) > 1000.f && data->getRawTemperatureAt(i, j, k) < 2000.f)
-                    count++;
-                else if (data->getRawTemperatureAt(i, j, k) < 1000.f)
-                    count2++;
-    printf("P %f\n", float(count)/(512*512*16-count2));
-}
+
 float FireVolumeGrid::Density(const Point &Pobj) const {
     if (!extent.Inside(Pobj)) return 0;
 	// Compute voxel coordinates and offsets for _Pobj_
@@ -171,6 +147,7 @@ float FireVolumeGrid::Temperature(const Point &Pobj) const {
     return Lerp(tz, t0, t1);
 }
 
+// Calculate emitted specular radiance given wavelength and temperature
 float FireVolumeGrid::RadianceAtLambda(float lambda, float temperature) const
 {
     if (temperature < 1e-6)
@@ -190,6 +167,7 @@ inline void normalizeVec3(float vec[3])
     }
 }
 
+// Transform from XYZ space to RGB space
 Spectrum RGBFromXYZ(float xyz[3])
 {
     float rgb[3];
@@ -199,20 +177,10 @@ Spectrum RGBFromXYZ(float xyz[3])
     return Spectrum(rgb);
 }
 
+// Calculate tristimulus values
 void FireVolumeGrid::CalcXYZ(float temperature, float xyz[3]) const
 {
     memset(&xyz[0], 0, sizeof(float)*3);
-/*    if (temperature >= 1666)
-    {
-        float temperatureSqr = temperature*temperature;
-        float temperatureCub = temperatureSqr*temperature;
-        xyz[0] = -0.2661239*1e9/temperatureCub - 0.2343580*1e6/temperatureSqr + 0.8776956*1e3/temperature + 0.179910;
-        float xcSqr = xyz[0]*xyz[0];
-        float xcCub = xcSqr*xyz[0];
-        xyz[1] = -1.1063814*xcCub -1.34811020*xcSqr + 2.18555832*xyz[0] - 0.20219683;
-        xyz[2] = 1.0f-xyz[1]-xyz[0];
-        return;
-    }*/
     for (int i = 0; i < numLambdaSamples; i++)
     {
         float lambda = lambdaSamples[i];
@@ -265,6 +233,7 @@ extern "C" DLLEXPORT VolumeRegion *CreateVolumeRegion(const Transform &volume2wo
 	Spectrum Le = params.FindOneSpectrum("Le", 0.);
 	Point p0 = params.FindOnePoint("p0", Point(0,0,0));
 	Point p1 = params.FindOnePoint("p1", Point(1,1,1));
+    // Load simulation data specified by the name
     string simFileName = params.FindOneString("simFile", "sliceData.bin");
     DensityTemperatureVolume* data = new DensityTemperatureVolume();
     if (!data->load(simFileName.c_str()))

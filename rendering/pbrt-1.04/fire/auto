@@ -1,0 +1,4 @@
+for i in {62..89}
+do
+	./a.out $i && ./../bin/pbrt test.pbrt
+done
